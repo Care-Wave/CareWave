@@ -867,12 +867,12 @@ body.cursor-text #cursor-ring { opacity: 0; }
   border-radius: var(--r2) var(--r2) 0 0;
   width: 100%; max-width: 640px; height: 88dvh;
   display: flex; flex-direction: column;
-  /* animation applied via .is-opening class only, not permanently */
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.16,1,.3,1);
 }
-.chat-modal.is-opening {
-  animation: slide-up .35s var(--t-smooth) forwards;
+.modal-overlay.open .chat-modal {
+  transform: translateY(0);
 }
-@keyframes slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .chat-header {
   display: flex; align-items: center; gap: 11px;
   padding: 16px 18px; border-bottom: 1px solid var(--border);
@@ -963,8 +963,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
   width: 100%; max-width: 640px; max-height: 88dvh;
   display: flex; flex-direction: column; overflow: hidden;
   border-top: 1px solid var(--border2);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
-.members-sheet.is-opening { animation: slide-up .3s var(--t-smooth) forwards; }
+.members-modal.open .members-sheet { transform: translateY(0); }
 .sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .sheet-title { font-family: 'Clash Display', sans-serif; font-size: .98rem; font-weight: 700; letter-spacing: -.02em; }
 .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: .82rem; color: var(--text2); cursor: none; transition: all var(--t); }
@@ -1015,17 +1017,31 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .zone-btn.warning:hover { opacity: .88; }
 
 /* ══ EDIT MODALS ══ */
-.centered-modal { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 18px; }
-.centered-modal.open { display: flex; }
+.centered-modal {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0); backdrop-filter: blur(0px);
+  display: none; align-items: center; justify-content: center; padding: 18px;
+  transition: background .25s, backdrop-filter .25s;
+}
+.centered-modal.open {
+  display: flex;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(8px);
+}
 .modal-card {
   background: var(--c1); border: 1px solid var(--border2);
   border-radius: var(--r2); padding: 28px; width: 100%; max-width: 420px;
   box-shadow: var(--shadow-lg);
   max-height: 90dvh; overflow-y: auto;
   display: flex; flex-direction: column;
+  /* Transition only — no animation, no keyframes that can replay */
+  opacity: 0;
+  transform: scale(.95) translateY(8px);
+  transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
 }
-.modal-card.is-opening { animation: modal-pop .3s var(--t-spring) forwards; }
-@keyframes modal-pop { from { transform: scale(.93) translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+.centered-modal.open .modal-card {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
 .modal-title { font-family: 'Clash Display', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 18px; }
 .modal-footer { display: flex; flex-direction: row; gap: 9px; margin-top: 16px; flex-shrink: 0; }
 @media (max-width: 360px) { .modal-footer { flex-direction: column; } }
@@ -1064,8 +1080,13 @@ body.cursor-text #cursor-ring { opacity: 0; }
 /* ══ MEMBER PROFILE MODAL ══ */
 .member-profile-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; }
 .member-profile-modal.open { display: flex; }
-.member-sheet { background: var(--c1); border-radius: var(--r2) var(--r2) 0 0; width: 100%; max-width: 640px; overflow: hidden; border-top: 1px solid var(--border2); }
-.member-sheet.is-opening { animation: slide-up .3s var(--t-smooth) forwards; }
+.member-sheet {
+  background: var(--c1); border-radius: var(--r2) var(--r2) 0 0;
+  width: 100%; max-width: 640px; overflow: hidden; border-top: 1px solid var(--border2);
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+}
+.member-profile-modal.open .member-sheet { transform: translateY(0); }
 .mp-cover { height: 76px; position: relative; background: linear-gradient(135deg, var(--accent), var(--teal), #7c3aed); }
 .mp-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: .8rem; color: #fff; cursor: none; border: none; transition: all var(--t); }
 .mp-close:hover { background: rgba(255,255,255,.35); }
@@ -1861,6 +1882,29 @@ const UI = {
   }
 };
 
+/**
+ * Opens a modal element by adding .open with a one-frame delay so CSS
+ * transitions fire correctly after display:none → display:flex/block.
+ * Without this delay the browser skips the "from" keyframe entirely.
+ */
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'flex'; // make it exist in layout immediately
+  // One rAF so the browser registers the initial (non-open) CSS state
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      el.classList.add('open');
+    });
+  });
+}
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('open');
+}
+
 function toast(msg, type='', duration=3000) {
   const c = document.getElementById('toast-container');
   if (!c) return;
@@ -2147,16 +2191,8 @@ function openEditProfile() {
   if (nameEl) nameEl.value = State.profile.displayName || '';
   if (bioEl) bioEl.value = State.profile.bio || '';
   renderAvatarPicker();
-
-  const modal = document.getElementById('edit-modal');
-  const card = modal.querySelector('.modal-card');
-  card.classList.remove('is-opening');
-  modal.classList.add('open');
-  void card.offsetWidth;
-  card.classList.add('is-opening');
-  card.addEventListener('animationend', () => card.classList.remove('is-opening'), { once: true });
-
-  if (window._applyHoverListeners) window._applyHoverListeners(modal);
+  document.getElementById('edit-modal').classList.add('open');
+  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('edit-modal'));
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
 function closeEditOutside(e) { if (e.target.id === 'edit-modal') closeEditModal(); }
@@ -2361,16 +2397,8 @@ function openCreateGroup() {
   ['cg-name','cg-desc','cg-member-email'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   ['cg-member-error','cg-member-result'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   cgRenderPendingMembers();
-
-  const modal = document.getElementById('create-group-modal');
-  const card = modal.querySelector('.modal-card');
-  card.classList.remove('is-opening');
-  modal.classList.add('open');
-  void card.offsetWidth;
-  card.classList.add('is-opening');
-  card.addEventListener('animationend', () => card.classList.remove('is-opening'), { once: true });
-
-  if (window._applyHoverListeners) window._applyHoverListeners(modal);
+  document.getElementById('create-group-modal').classList.add('open');
+  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('create-group-modal'));
 }
 function closeCreateGroup() { document.getElementById('create-group-modal').classList.remove('open'); }
 function closeCreateGroupOutside(e) { if (e.target.id === 'create-group-modal') closeCreateGroup(); }
@@ -2465,16 +2493,8 @@ function openMembersModal() {
   const msErr = document.getElementById('ms-error'); if (msErr) msErr.className = 'ms-error';
   const msRes = document.getElementById('ms-result'); if (msRes) msRes.style.display = 'none';
   msFillCurrentMembers();
-
-  const modal = document.getElementById('members-modal');
-  const sheet = modal.querySelector('.members-sheet');
-  sheet.classList.remove('is-opening');
-  modal.classList.add('open');
-  void sheet.offsetWidth;
-  sheet.classList.add('is-opening');
-  sheet.addEventListener('animationend', () => sheet.classList.remove('is-opening'), { once: true });
-
-  if (window._applyHoverListeners) window._applyHoverListeners(modal);
+  document.getElementById('members-modal').classList.add('open');
+  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('members-modal'));
 }
 function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
 function closeMembersOutside(e) { if (e.target.id === 'members-modal') closeMembersModal(); }
@@ -2692,17 +2712,7 @@ function openChat(group) {
   document.getElementById('chat-emoji').textContent = freshGroup.emoji || '👥';
   document.getElementById('chat-group-name-label').textContent = freshGroup.name;
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
-
-  const overlay = document.getElementById('chat-overlay');
-  const modal = document.getElementById('chat-modal');
-  // Trigger animation only on fresh open
-  modal.classList.remove('is-opening');
-  overlay.classList.add('open');
-  // Force reflow so the class removal is committed before re-adding
-  void modal.offsetWidth;
-  modal.classList.add('is-opening');
-  modal.addEventListener('animationend', () => modal.classList.remove('is-opening'), { once: true });
-
+  document.getElementById('chat-overlay').classList.add('open');
   loadChatMessages(freshGroup.id);
 }
 
