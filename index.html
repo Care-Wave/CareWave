@@ -230,7 +230,9 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .form-input {
   width: 100%; padding: 13px 17px;
   background: var(--glass); border: 1px solid var(--border2);
-  border-radius: var(--r); font-size: .92rem; color: var(--text);
+  border-radius: var(--r);
+  /* 16px minimum prevents iOS Safari auto-zoom on focus */
+  font-size: 16px; color: var(--text);
   outline: none; transition: border-color var(--t), box-shadow var(--t), background var(--t);
   font-family: 'Cabinet Grotesk', sans-serif;
   box-sizing: border-box;
@@ -713,7 +715,7 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .groups-search {
   width: 100%; padding: 10px 14px 10px 36px;
   background: var(--glass); border: 1px solid var(--border2);
-  border-radius: 100px; font-size: .85rem; color: var(--text); outline: none;
+  border-radius: 100px; font-size: 16px; color: var(--text); outline: none;
   transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif;
 }
 .groups-search::placeholder { color: var(--text3); }
@@ -865,7 +867,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
   border-radius: var(--r2) var(--r2) 0 0;
   width: 100%; max-width: 640px; height: 88dvh;
   display: flex; flex-direction: column;
-  animation: slide-up .35s var(--t-smooth);
+  /* animation applied via .is-opening class only, not permanently */
+}
+.chat-modal.is-opening {
+  animation: slide-up .35s var(--t-smooth) forwards;
 }
 @keyframes slide-up { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .chat-header {
@@ -912,7 +917,9 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .chat-input-row { display: flex; gap: 9px; padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
 .chat-input {
   flex: 1; background: var(--glass); border: 1px solid var(--border2);
-  border-radius: 100px; padding: 9px 16px; font-size: .88rem; color: var(--text); outline: none;
+  border-radius: 100px; padding: 9px 16px;
+  /* 16px minimum prevents iOS Safari auto-zoom on focus */
+  font-size: 16px; color: var(--text); outline: none;
   transition: border-color var(--t), background var(--t); font-family: 'Cabinet Grotesk', sans-serif;
 }
 .chat-input::placeholder { color: var(--text3); }
@@ -956,8 +963,8 @@ body.cursor-text #cursor-ring { opacity: 0; }
   width: 100%; max-width: 640px; max-height: 88dvh;
   display: flex; flex-direction: column; overflow: hidden;
   border-top: 1px solid var(--border2);
-  animation: slide-up .3s var(--t-smooth);
 }
+.members-sheet.is-opening { animation: slide-up .3s var(--t-smooth) forwards; }
 .sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .sheet-title { font-family: 'Clash Display', sans-serif; font-size: .98rem; font-weight: 700; letter-spacing: -.02em; }
 .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: .82rem; color: var(--text2); cursor: none; transition: all var(--t); }
@@ -1014,11 +1021,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
   background: var(--c1); border: 1px solid var(--border2);
   border-radius: var(--r2); padding: 28px; width: 100%; max-width: 420px;
   box-shadow: var(--shadow-lg);
-  animation: modal-pop .3s var(--t-spring);
   max-height: 90dvh; overflow-y: auto;
-  /* Stack all children vertically */
   display: flex; flex-direction: column;
 }
+.modal-card.is-opening { animation: modal-pop .3s var(--t-spring) forwards; }
 @keyframes modal-pop { from { transform: scale(.93) translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
 .modal-title { font-family: 'Clash Display', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 18px; }
 .modal-footer { display: flex; flex-direction: row; gap: 9px; margin-top: 16px; flex-shrink: 0; }
@@ -1058,7 +1064,8 @@ body.cursor-text #cursor-ring { opacity: 0; }
 /* ══ MEMBER PROFILE MODAL ══ */
 .member-profile-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; }
 .member-profile-modal.open { display: flex; }
-.member-sheet { background: var(--c1); border-radius: var(--r2) var(--r2) 0 0; width: 100%; max-width: 640px; overflow: hidden; border-top: 1px solid var(--border2); animation: slide-up .3s var(--t-smooth); }
+.member-sheet { background: var(--c1); border-radius: var(--r2) var(--r2) 0 0; width: 100%; max-width: 640px; overflow: hidden; border-top: 1px solid var(--border2); }
+.member-sheet.is-opening { animation: slide-up .3s var(--t-smooth) forwards; }
 .mp-cover { height: 76px; position: relative; background: linear-gradient(135deg, var(--accent), var(--teal), #7c3aed); }
 .mp-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.2); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; font-size: .8rem; color: #fff; cursor: none; border: none; transition: all var(--t); }
 .mp-close:hover { background: rgba(255,255,255,.35); }
@@ -1816,7 +1823,8 @@ function resetAppState() {
   Object.assign(State, {
     user:null, profile:{}, selectedStatus:new Set(),
     groups:[], notifications:[], currentGroup:null,
-    unread:{}, statusHistory:[], streak:0
+    unread:{}, statusHistory:[], streak:0,
+    _listeningGroups: new Set()
   });
   // Reset UI
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
@@ -1917,7 +1925,6 @@ function switchTab(name) {
     const n = document.getElementById('nav-' + t);
     if (!p || !n) return;
     const active = t === name;
-    // FIX: use display correctly - tab-panels are block when active
     if (active) {
       p.classList.add('active');
       n.classList.add('active');
@@ -1928,9 +1935,10 @@ function switchTab(name) {
       n.setAttribute('aria-selected', 'false');
     }
   });
-  if (name === 'groups') loadGroups();
+  // Only reload groups if the list is empty (not yet loaded) to avoid duplicate listeners
+  if (name === 'groups' && State.groups.length === 0) loadGroups();
+  else if (name === 'groups') renderGroups(); // just re-render from cache
   if (name === 'profile') { renderProfileHeader(); loadProfileStats(); }
-  // Re-apply cursor hover listeners for dynamic content
   if (window._applyHoverListeners) window._applyHoverListeners();
 }
 
@@ -2139,8 +2147,16 @@ function openEditProfile() {
   if (nameEl) nameEl.value = State.profile.displayName || '';
   if (bioEl) bioEl.value = State.profile.bio || '';
   renderAvatarPicker();
-  document.getElementById('edit-modal').classList.add('open');
-  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('edit-modal'));
+
+  const modal = document.getElementById('edit-modal');
+  const card = modal.querySelector('.modal-card');
+  card.classList.remove('is-opening');
+  modal.classList.add('open');
+  void card.offsetWidth;
+  card.classList.add('is-opening');
+  card.addEventListener('animationend', () => card.classList.remove('is-opening'), { once: true });
+
+  if (window._applyHoverListeners) window._applyHoverListeners(modal);
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
 function closeEditOutside(e) { if (e.target.id === 'edit-modal') closeEditModal(); }
@@ -2167,12 +2183,31 @@ async function saveProfile() {
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
   const {db, doc, updateDoc} = window._fb;
   try {
-    await updateDoc(doc(db,'users',State.user.uid), { displayName:name, bio, avatar: State.profile.avatar||'🧑' });
-    State.profile.displayName = name; State.profile.bio = bio;
+    const newAvatar = State.profile.avatar || '🧑';
+    // Update user document
+    await updateDoc(doc(db,'users',State.user.uid), { displayName:name, bio, avatar: newAvatar });
+    State.profile.displayName = name;
+    State.profile.bio = bio;
+    // Update memberNames & memberAvatars in all groups the user is part of
+    if (State.groups.length > 0) {
+      await Promise.all(State.groups.map(async g => {
+        const idx = (g.members || []).indexOf(State.user.uid);
+        if (idx === -1) return;
+        // Update the name at the right index
+        const newNames = [...(g.memberNames || [])];
+        newNames[idx] = name;
+        const newAvatars = [...(g.memberAvatars || g.members.map(() => '🧑'))];
+        newAvatars[idx] = newAvatar;
+        await updateDoc(doc(db,'groups',g.id), { memberNames: newNames, memberAvatars: newAvatars });
+        g.memberNames = newNames;
+        g.memberAvatars = newAvatars;
+      }));
+    }
     renderProfileHeader();
     closeEditModal();
     toast('Profil mis à jour ✅','success');
   } catch(e) {
+    console.error('saveProfile:', e);
     toast('Erreur lors de la sauvegarde','error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Sauvegarder'; }
@@ -2189,6 +2224,11 @@ function listenGroupNotifications(groups) {
   if (!window._fb || !groups?.length) return;
   const {db, collection, query, orderBy, limit, onSnapshot} = window._fb;
   groups.forEach(group => {
+    // Skip if we already have a listener for this group
+    if (State._listeningGroups && State._listeningGroups.has(group.id)) return;
+    if (!State._listeningGroups) State._listeningGroups = new Set();
+    State._listeningGroups.add(group.id);
+
     let isFirst = true;
     const q = query(collection(db,'groups',group.id,'messages'), orderBy('createdAt','desc'), limit(1));
     const unsub = onSnapshot(q, snap => {
@@ -2197,18 +2237,19 @@ function listenGroupNotifications(groups) {
       const msgTime = msg.createdAt?.toDate?.();
       const lastRead = getLastRead(group.id);
       if (isFirst) {
-        if (msgTime && msgTime > lastRead) { State.unread[group.id] = (State.unread[group.id] || 0) + 1; renderGroups(); }
+        if (msgTime && msgTime > lastRead) { State.unread[group.id] = (State.unread[group.id] || 0) + 1; renderGroups(); updateGroupsBadge(); }
         isFirst = false; return;
       }
       if (msgTime && State.currentGroup?.id !== group.id) {
         if (msg.uid === State.user?.uid) return;
         State.unread[group.id] = (State.unread[group.id] || 0) + 1;
         renderGroups(); updateGroupsBadge();
-        const txt = msg.type === 'status_update'
+        const isStatus = msg.type === 'status_update';
+        const txt = isStatus
           ? `Nouveau statut dans "${group.name}"`
-          : `${msg.displayName||'Quelqu\'un'} dans "${group.name}"`;
-        addNotification(msg.type === 'status_update' ? '🌊' : '💬', txt);
-        toast((msg.type === 'status_update' ? '🌊 ' : '💬 ') + txt, 'info');
+          : `${msg.displayName||'Quelqu\'un'} a écrit dans "${group.name}"`;
+        addNotification(isStatus ? '🌊' : '💬', txt);
+        toast((isStatus ? '🌊 ' : '💬 ') + txt, 'info');
       }
     }, err => console.warn('Group notif:', err.message));
     _unsubs.push(unsub);
@@ -2320,8 +2361,16 @@ function openCreateGroup() {
   ['cg-name','cg-desc','cg-member-email'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   ['cg-member-error','cg-member-result'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   cgRenderPendingMembers();
-  document.getElementById('create-group-modal').classList.add('open');
-  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('create-group-modal'));
+
+  const modal = document.getElementById('create-group-modal');
+  const card = modal.querySelector('.modal-card');
+  card.classList.remove('is-opening');
+  modal.classList.add('open');
+  void card.offsetWidth;
+  card.classList.add('is-opening');
+  card.addEventListener('animationend', () => card.classList.remove('is-opening'), { once: true });
+
+  if (window._applyHoverListeners) window._applyHoverListeners(modal);
 }
 function closeCreateGroup() { document.getElementById('create-group-modal').classList.remove('open'); }
 function closeCreateGroupOutside(e) { if (e.target.id === 'create-group-modal') closeCreateGroup(); }
@@ -2416,8 +2465,16 @@ function openMembersModal() {
   const msErr = document.getElementById('ms-error'); if (msErr) msErr.className = 'ms-error';
   const msRes = document.getElementById('ms-result'); if (msRes) msRes.style.display = 'none';
   msFillCurrentMembers();
-  document.getElementById('members-modal').classList.add('open');
-  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('members-modal'));
+
+  const modal = document.getElementById('members-modal');
+  const sheet = modal.querySelector('.members-sheet');
+  sheet.classList.remove('is-opening');
+  modal.classList.add('open');
+  void sheet.offsetWidth;
+  sheet.classList.add('is-opening');
+  sheet.addEventListener('animationend', () => sheet.classList.remove('is-opening'), { once: true });
+
+  if (window._applyHoverListeners) window._applyHoverListeners(modal);
 }
 function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
 function closeMembersOutside(e) { if (e.target.id === 'members-modal') closeMembersModal(); }
@@ -2426,9 +2483,11 @@ function msFillCurrentMembers() {
   const el = document.getElementById('ms-members-list'); if (!el || !State.currentGroup) return;
   const names = State.currentGroup.memberNames || [];
   const ids = State.currentGroup.members || [];
+  const avatars = State.currentGroup.memberAvatars || [];
   if (!names.length) { el.innerHTML='<div style="color:var(--text3);font-size:.83rem;">Aucun membre.</div>'; return; }
   el.innerHTML = names.map((n, i) => {
     const uid = ids[i];
+    const avatar = avatars[i] || '🧑';
     const isMe = uid === State.user?.uid;
     const isCreator = uid === State.currentGroup.createdBy;
     let roleEl = '';
@@ -2436,7 +2495,7 @@ function msFillCurrentMembers() {
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
     const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}">👁 Voir</button>` : '';
     return `<div class="ms-member-row" ${!isMe?`data-uid="${uid}"`:''}>
-      <span class="ms-member-avatar">🧑</span>
+      <span class="ms-member-avatar">${avatar}</span>
       <span class="ms-member-name">${n}</span>
       ${roleEl}${viewBtn}
     </div>`;
@@ -2543,8 +2602,9 @@ async function msAddMember() {
     const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
     const nm = [...(State.currentGroup.members||[]), uid];
     const nn = [...(State.currentGroup.memberNames||[]), name];
-    await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn });
-    State.currentGroup.members = nm; State.currentGroup.memberNames = nn;
+    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), '🧑'];
+    await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn, memberAvatars:na });
+    State.currentGroup.members = nm; State.currentGroup.memberNames = nn; State.currentGroup.memberAvatars = na;
     const idx = State.groups.findIndex(g => g.id === State.currentGroup.id);
     if (idx !== -1) { State.groups[idx].members = nm; State.groups[idx].memberNames = nn; }
     document.getElementById('chat-members-count').textContent = `${nm.length} membre(s)`;
@@ -2623,15 +2683,27 @@ async function _deleteGroupById(groupId, groupName) {
    CHAT
 ════════════════════════════════════════════════ */
 function openChat(group) {
-  State.currentGroup = group;
-  State.unread[group.id] = 0;
-  setLastRead(group.id);
+  // Always use the fresh group data from State.groups if available
+  const freshGroup = State.groups.find(g => g.id === group.id) || group;
+  State.currentGroup = freshGroup;
+  State.unread[freshGroup.id] = 0;
+  setLastRead(freshGroup.id);
   renderGroups(); updateGroupsBadge();
-  document.getElementById('chat-emoji').textContent = group.emoji || '👥';
-  document.getElementById('chat-group-name-label').textContent = group.name;
-  document.getElementById('chat-members-count').textContent = `${group.members?.length||1} membre(s)`;
-  document.getElementById('chat-overlay').classList.add('open');
-  loadChatMessages(group.id);
+  document.getElementById('chat-emoji').textContent = freshGroup.emoji || '👥';
+  document.getElementById('chat-group-name-label').textContent = freshGroup.name;
+  document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
+
+  const overlay = document.getElementById('chat-overlay');
+  const modal = document.getElementById('chat-modal');
+  // Trigger animation only on fresh open
+  modal.classList.remove('is-opening');
+  overlay.classList.add('open');
+  // Force reflow so the class removal is committed before re-adding
+  void modal.offsetWidth;
+  modal.classList.add('is-opening');
+  modal.addEventListener('animationend', () => modal.classList.remove('is-opening'), { once: true });
+
+  loadChatMessages(freshGroup.id);
 }
 
 function closeChat() {
@@ -2873,9 +2945,10 @@ const App = {
       const pending = State.cgPendingMembers || [];
       const memberUids = [State.user.uid, ...pending.map(m => m.uid)];
       const memberNames = [State.profile.displayName||'Moi', ...pending.map(m => m.name)];
+      const memberAvatars = [State.profile.avatar||'🧑', ...pending.map(m => m.avatar||'🧑')];
       await addDoc(collection(db,'groups'), {
         name, description:desc, emoji: State.groupSelectedEmoji,
-        createdBy: State.user.uid, members: memberUids, memberNames,
+        createdBy: State.user.uid, members: memberUids, memberNames, memberAvatars,
         createdAt: serverTimestamp()
       });
       State.cgPendingMembers = [];
