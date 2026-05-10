@@ -231,7 +231,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
   width: 100%; padding: 13px 17px;
   background: var(--glass); border: 1px solid var(--border2);
   border-radius: var(--r);
-  /* 16px minimum prevents iOS Safari auto-zoom on focus */
   font-size: 16px; color: var(--text);
   outline: none; transition: border-color var(--t), box-shadow var(--t), background var(--t);
   font-family: 'Cabinet Grotesk', sans-serif;
@@ -254,7 +253,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .pw-strength-bar { height: 100%; border-radius: 3px; transition: width .4s var(--t-smooth), background .4s; width: 0; }
 .form-error { display: none; font-size: .74rem; color: var(--rose); margin-top: 5px; padding: 0 2px; }
 .form-error.show { display: block; }
-/* Horizontal search row: input + button side by side */
 .input-group { display: flex; flex-direction: row; gap: 8px; width: 100%; }
 .input-group .form-input { flex: 1; min-width: 0; width: auto; }
 .input-group .btn { flex-shrink: 0; }
@@ -918,7 +916,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .chat-input {
   flex: 1; background: var(--glass); border: 1px solid var(--border2);
   border-radius: 100px; padding: 9px 16px;
-  /* 16px minimum prevents iOS Safari auto-zoom on focus */
   font-size: 16px; color: var(--text); outline: none;
   transition: border-color var(--t), background var(--t); font-family: 'Cabinet Grotesk', sans-serif;
 }
@@ -1033,7 +1030,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
   box-shadow: var(--shadow-lg);
   max-height: 90dvh; overflow-y: auto;
   display: flex; flex-direction: column;
-  /* Transition only — no animation, no keyframes that can replay */
   opacity: 0;
   transform: scale(.95) translateY(8px);
   transition: opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
@@ -1045,9 +1041,7 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .modal-title { font-family: 'Clash Display', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 18px; }
 .modal-footer { display: flex; flex-direction: row; gap: 9px; margin-top: 16px; flex-shrink: 0; }
 @media (max-width: 360px) { .modal-footer { flex-direction: column; } }
-/* Ensure btn-full inside modal-footer splits evenly */
 .modal-footer .btn-full { flex: 1; }
-/* All direct block children of modal-card get full width */
 .modal-card > .form-group,
 .modal-card > .form-label,
 .modal-card > div:not(.modal-footer) { width: 100%; }
@@ -1184,7 +1178,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <button class="btn btn-ghost btn-lg" onclick="UI.show('login')">Se connecter →</button>
     </div>
     <div class="hero-social-proof">
-      
       <span>rester connectés en famille ou entre amis</span>
       <br>
     </div>
@@ -1346,7 +1339,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
 
     <!-- STATUS TAB -->
     <div class="tab-panel active" id="tab-status" role="tabpanel">
-      <!-- Current status card -->
       <div class="current-status-card" id="cs-card">
         <div class="cs-glow" aria-hidden="true"></div>
         <div class="cs-top">
@@ -1363,7 +1355,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
         </div>
       </div>
 
-      <!-- Status options -->
       <div class="section-header">✨ Choisir mon état</div>
       <div class="status-categories">
         <div><div class="status-cat-label">⚡ Bien-être général</div><div class="status-options" id="opts-wellness"></div></div>
@@ -1372,7 +1363,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
         <div><div class="status-cat-label">📱 Disponibilité</div><div class="status-options" id="opts-availability"></div></div>
       </div>
 
-      <!-- Message area -->
       <div class="section-header" style="margin-top:18px;">💬 Message libre</div>
       <div class="msg-area-wrap">
         <textarea class="msg-textarea" id="status-msg" maxlength="180" placeholder="Comment tu te sens ? (optionnel)" oninput="updateMsgCounter()" aria-label="Message libre"></textarea>
@@ -1381,7 +1371,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <div class="quick-msgs" id="quick-msgs"></div>
       <button class="publish-btn" id="publish-btn" onclick="App.publishStatus()">Partager mon état 🌊</button>
 
-      <!-- Status history -->
       <div class="section-header" style="margin-top:28px;">📅 Historique récent</div>
       <div id="status-history-list"></div>
     </div>
@@ -1413,7 +1402,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
 
     <!-- PROFILE TAB -->
     <div class="tab-panel" id="tab-profile" role="tabpanel">
-      <!-- Profile card -->
       <div class="profile-card">
         <div class="profile-cover" aria-hidden="true"></div>
         <div class="profile-avatar-row">
@@ -1436,7 +1424,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
         </div>
       </div>
 
-      <!-- Preferences -->
       <div class="settings-block">
         <div class="settings-block-title">Préférences</div>
         <div class="settings-row">
@@ -1457,7 +1444,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
         </div>
       </div>
 
-      <!-- Danger zone -->
       <div class="danger-zone">
         <div class="danger-title">🚨 Zone danger</div>
         <p style="font-size:.82rem;color:var(--text2);margin-bottom:11px;line-height:1.5;">Supprimer définitivement votre compte et toutes vos données. Cette action est irréversible.</p>
@@ -1530,9 +1516,7 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <button class="sheet-close" onclick="closeMembersModal()" aria-label="Fermer">✕</button>
     </div>
     <div class="sheet-body">
-      <!-- Main body -->
       <div id="ms-main-body">
-        <!-- Search member to add -->
         <div class="ms-section-label">Inviter un membre</div>
         <div class="input-group" style="margin-bottom:10px;">
           <input class="form-input" type="email" id="ms-email" placeholder="email@exemple.com" onkeydown="if(event.key==='Enter'){event.preventDefault();msSearch();}" aria-label="Email" style="border-radius:var(--r);" />
@@ -1545,11 +1529,9 @@ body.cursor-text #cursor-ring { opacity: 0; }
           <button id="ms-add-btn" class="btn btn-primary btn-sm" onclick="msAddMember()" style="font-size:.78rem;">+ Ajouter</button>
         </div>
 
-        <!-- Current members -->
         <div class="ms-section-label" style="margin-top:14px;">Membres actuels</div>
         <div id="ms-members-list"></div>
 
-        <!-- Danger / leave zones -->
         <div class="zone-warning zone-delete" id="ms-danger-zone" style="display:none;">
           <div class="zone-title danger">🚨 Zone danger</div>
           <div class="zone-desc">Supprimer ce groupe définitivement pour tous les membres.<br><strong>Cette action est irréversible.</strong></div>
@@ -1562,7 +1544,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
         </div>
       </div>
 
-      <!-- Member profile panel -->
       <div class="ms-profile-panel" id="ms-profile-panel">
         <button class="ms-profile-back" onclick="hideMemberProfile()">← Retour aux membres</button>
         <div class="ms-profile-cover"></div>
@@ -1830,7 +1811,10 @@ const State = {
   cgPendingMembers: [],
   unread: {},
   statusHistory: [],
-  streak: 0
+  streak: 0,
+  // FIX: flag pour éviter que onAuthStateChanged agisse pendant l'inscription
+  _isRegistering: false,
+  _pendingProfile: null
 };
 let _unsubs = [];
 
@@ -1841,9 +1825,10 @@ function resetAppState() {
     user:null, profile:{}, selectedStatus:new Set(),
     groups:[], notifications:[], currentGroup:null,
     unread:{}, statusHistory:[], streak:0,
-    _listeningGroups: new Set()
+    _listeningGroups: new Set(),
+    _isRegistering: false,
+    _pendingProfile: null
   });
-  // Reset UI
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
   safe('cs-tags', el => el.innerHTML='<span class="cs-tag">Aucun statut partagé</span>');
   safe('cs-message', el => { el.style.display='none'; el.textContent=''; });
@@ -1878,16 +1863,10 @@ const UI = {
   }
 };
 
-/**
- * Opens a modal element by adding .open with a one-frame delay so CSS
- * transitions fire correctly after display:none → display:flex/block.
- * Without this delay the browser skips the "from" keyframe entirely.
- */
 function openModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.style.display = 'flex'; // make it exist in layout immediately
-  // One rAF so the browser registers the initial (non-open) CSS state
+  el.style.display = 'flex';
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       el.classList.add('open');
@@ -1975,9 +1954,8 @@ function switchTab(name) {
       n.setAttribute('aria-selected', 'false');
     }
   });
-  // Only reload groups if the list is empty (not yet loaded) to avoid duplicate listeners
   if (name === 'groups' && State.groups.length === 0) loadGroups();
-  else if (name === 'groups') renderGroups(); // just re-render from cache
+  else if (name === 'groups') renderGroups();
   if (name === 'profile') { renderProfileHeader(); loadProfileStats(); }
   if (window._applyHoverListeners) window._applyHoverListeners();
 }
@@ -2043,7 +2021,6 @@ function updateCurrentStatusCard(data) {
   const timeEl = document.getElementById('cs-time');
   if (timeEl) timeEl.textContent = '⏱ ' + ts.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' });
 
-  // Update streak display
   const streakEl = document.getElementById('cs-streak');
   const streakNumEl = document.getElementById('streak-num');
   if (streakEl && streakNumEl && State.streak > 0) {
@@ -2051,7 +2028,6 @@ function updateCurrentStatusCard(data) {
     streakNumEl.textContent = State.streak;
   }
 
-  // Profile tab current status
   const pcEl = document.getElementById('profile-current-status');
   const pctEl = document.getElementById('profile-cs-tags');
   const pcmEl = document.getElementById('profile-cs-message');
@@ -2124,7 +2100,6 @@ function listenLatestStatus() {
     State.streak = computeStreak(docs);
     if (docs.length > 0) updateCurrentStatusCard(docs[0]);
     renderStatusHistory();
-    // Update streak on profile
     const ssEl = document.getElementById('stat-streak');
     if (ssEl) ssEl.textContent = State.streak > 0 ? `🔥${State.streak}` : '0';
   }, err => console.warn('Status listener:', err.message));
@@ -2216,16 +2191,13 @@ async function saveProfile() {
   const {db, doc, updateDoc} = window._fb;
   try {
     const newAvatar = State.profile.avatar || '🧑';
-    // Update user document
     await updateDoc(doc(db,'users',State.user.uid), { displayName:name, bio, avatar: newAvatar });
     State.profile.displayName = name;
     State.profile.bio = bio;
-    // Update memberNames & memberAvatars in all groups the user is part of
     if (State.groups.length > 0) {
       await Promise.all(State.groups.map(async g => {
         const idx = (g.members || []).indexOf(State.user.uid);
         if (idx === -1) return;
-        // Update the name at the right index
         const newNames = [...(g.memberNames || [])];
         newNames[idx] = name;
         const newAvatars = [...(g.memberAvatars || g.members.map(() => '🧑'))];
@@ -2256,7 +2228,6 @@ function listenGroupNotifications(groups) {
   if (!window._fb || !groups?.length) return;
   const {db, collection, query, orderBy, limit, onSnapshot} = window._fb;
   groups.forEach(group => {
-    // Skip if we already have a listener for this group
     if (State._listeningGroups && State._listeningGroups.has(group.id)) return;
     if (!State._listeningGroups) State._listeningGroups = new Set();
     State._listeningGroups.add(group.id);
@@ -2332,14 +2303,12 @@ function renderGroups() {
   const storiesEl = document.getElementById('groups-stories');
   if (!feedEl) return;
 
-  // Stories bar
   if (storiesEl) {
     storiesEl.innerHTML = `<div class="story-item story-new" onclick="openCreateGroup()">
       <div class="story-ring"><div class="story-inner">+</div></div>
       <div class="story-label">Nouveau</div>
     </div>` + State.groups.map(g => {
       const hasUnread = (State.unread[g.id] || 0) > 0;
-      const safeG = JSON.stringify(g).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
       return `<div class="story-item${hasUnread?' has-unread':''}" onclick='openChat(${JSON.stringify(g).replace(/'/g,"&#39;")})' role="listitem">
         <div class="story-ring"><div class="story-inner">${g.emoji||'👥'}</div></div>
         <div class="story-label">${g.name}</div>
@@ -2442,8 +2411,11 @@ async function cgSearchMember() {
       document.getElementById('cg-result-name').textContent = ud.displayName || email;
       document.getElementById('cg-result-email').textContent = email;
       const ab = document.getElementById('cg-add-member-btn');
-      ab.dataset.uid = ud.uid; ab.dataset.name = ud.displayName || email;
-      ab.dataset.avatar = ud.avatar || '🧑'; ab.dataset.email = email;
+      // FIX: stocker aussi l'avatar réel de l'utilisateur trouvé
+      ab.dataset.uid = ud.uid;
+      ab.dataset.name = ud.displayName || email;
+      ab.dataset.avatar = ud.avatar || '🧑';
+      ab.dataset.email = email;
       resEl.style.display = 'flex';
     }
   } catch(e) { errEl.textContent = 'Erreur réseau. Réessayez.'; errEl.style.display = 'block'; }
@@ -2452,8 +2424,10 @@ async function cgSearchMember() {
 
 function cgAddMember() {
   const btn = document.getElementById('cg-add-member-btn');
+  // FIX: récupérer l'avatar depuis le dataset (était manquant dans l'original)
   const { uid, name, avatar, email } = btn.dataset;
-  State.cgPendingMembers.push({ uid, name, avatar, email });
+  if (!uid || !name) return;
+  State.cgPendingMembers.push({ uid, name, avatar: avatar || '🧑', email });
   document.getElementById('cg-member-result').style.display = 'none';
   document.getElementById('cg-member-email').value = '';
   cgRenderPendingMembers();
@@ -2602,7 +2576,13 @@ async function msSearch() {
       document.getElementById('ms-result-email-disp').textContent = email;
       const ab = document.getElementById('ms-add-btn');
       if (inGroup) { ab.textContent = 'Déjà membre'; ab.disabled = true; }
-      else { ab.textContent = '+ Ajouter'; ab.disabled = false; ab.dataset.uid = ud.uid; ab.dataset.name = ud.displayName||email; }
+      else {
+        ab.textContent = '+ Ajouter'; ab.disabled = false;
+        ab.dataset.uid = ud.uid;
+        ab.dataset.name = ud.displayName || email;
+        // FIX: stocker l'avatar réel de l'utilisateur trouvé
+        ab.dataset.avatar = ud.avatar || '🧑';
+      }
       resEl.style.display = 'flex';
     }
   } catch(e) { errEl.textContent = 'Erreur réseau.'; errEl.className = 'ms-error show'; }
@@ -2611,18 +2591,26 @@ async function msSearch() {
 
 async function msAddMember() {
   const btn = document.getElementById('ms-add-btn');
-  const { uid, name } = btn.dataset;
+  const { uid, name, avatar } = btn.dataset;
   if (!uid || !State.currentGroup?.id) return;
   btn.disabled = true; btn.textContent = '⏳';
   try {
     const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
     const nm = [...(State.currentGroup.members||[]), uid];
     const nn = [...(State.currentGroup.memberNames||[]), name];
-    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), '🧑'];
+    // FIX: utiliser l'avatar réel stocké dans le dataset
+    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), avatar || '🧑'];
     await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn, memberAvatars:na });
-    State.currentGroup.members = nm; State.currentGroup.memberNames = nn; State.currentGroup.memberAvatars = na;
+    // FIX: mettre à jour currentGroup ET State.groups en même temps
+    State.currentGroup.members = nm;
+    State.currentGroup.memberNames = nn;
+    State.currentGroup.memberAvatars = na;
     const idx = State.groups.findIndex(g => g.id === State.currentGroup.id);
-    if (idx !== -1) { State.groups[idx].members = nm; State.groups[idx].memberNames = nn; }
+    if (idx !== -1) {
+      State.groups[idx].members = nm;
+      State.groups[idx].memberNames = nn;
+      State.groups[idx].memberAvatars = na;
+    }
     document.getElementById('chat-members-count').textContent = `${nm.length} membre(s)`;
     await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
       type:'system', text:`${name} a rejoint le groupe 👋`, createdAt:serverTimestamp()
@@ -2666,7 +2654,8 @@ async function leaveGroup() {
     const newMembers = (g.members||[]).filter(uid => uid !== State.user.uid);
     const idx = (g.members||[]).indexOf(State.user.uid);
     const newNames = (g.memberNames||[]).filter((_,i) => i !== idx);
-    await updateDoc(doc(db,'groups',g.id), { members:newMembers, memberNames:newNames });
+    const newAvatars = (g.memberAvatars||[]).filter((_,i) => i !== idx);
+    await updateDoc(doc(db,'groups',g.id), { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
     await addDoc(collection(db,'groups',g.id,'messages'), {
       type:'system',
       text:`${State.profile.displayName||'Quelqu\'un'} a quitté le groupe 🚪`,
@@ -2699,7 +2688,6 @@ async function _deleteGroupById(groupId, groupName) {
    CHAT
 ════════════════════════════════════════════════ */
 function openChat(group) {
-  // Always use the fresh group data from State.groups if available
   const freshGroup = State.groups.find(g => g.id === group.id) || group;
   State.currentGroup = freshGroup;
   State.unread[freshGroup.id] = 0;
@@ -2741,7 +2729,6 @@ function loadChatMessages(groupId) {
       try { ts = m.createdAt?.toDate?.(); } catch(e){}
       const dayStr = ts ? ts.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
 
-      // Day separator
       if (dayStr && dayStr !== lastDay) {
         lastDay = dayStr;
         const div = document.createElement('div');
@@ -2810,6 +2797,29 @@ function closeMemberProfileOutside(e) { if (e.target.id === 'member-profile-moda
 /* ════════════════════════════════════════════════
    APP CORE
 ════════════════════════════════════════════════ */
+
+// Fonction utilitaire : initialise le dashboard après auth
+async function _initDashboard(user, profile) {
+  State.user = user;
+  State.profile = profile;
+
+  // Apply theme
+  State.dark = profile.darkMode !== false;
+  document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
+  const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
+  const dtp = document.getElementById('dark-toggle-profile');
+  if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
+
+  renderProfileHeader();
+  renderStatusOptions();
+  renderQuickMsgs();
+  listenLatestStatus();
+  UI.show('dashboard');
+  switchTab('status');
+  loadGroups();
+  toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
+}
+
 const App = {
   async login() {
     const email = document.getElementById('login-email').value.trim();
@@ -2827,6 +2837,7 @@ const App = {
     try {
       const {auth, signInWithEmailAndPassword} = window._fb;
       await signInWithEmailAndPassword(auth, email, pw);
+      // onAuthStateChanged gère la suite
     } catch(e) {
       showLoader(false);
       const msgs = {
@@ -2858,14 +2869,41 @@ const App = {
     const btn = document.getElementById('register-btn');
     btn.disabled = true; btn.textContent = '⏳ Création…';
     showLoader(true);
+
+    // FIX: poser le flag AVANT createUserWithEmailAndPassword pour bloquer
+    // onAuthStateChanged pendant qu'on écrit le doc Firestore
+    State._isRegistering = true;
+
     try {
       const {auth, db, createUserWithEmailAndPassword, updateProfile, doc, setDoc, serverTimestamp} = window._fb;
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
+
+      // updateProfile en parallèle avec setDoc pour que Firebase Auth ait le bon displayName
       await updateProfile(cred.user, { displayName: name });
-      await setDoc(doc(db,'users',cred.user.uid), {
-        displayName: name, email, bio: '', avatar: '🧑', darkMode: true, createdAt: serverTimestamp()
-      });
+
+      const profileData = {
+        displayName: name,
+        email,
+        bio: '',
+        avatar: '🧑',
+        darkMode: true,
+        createdAt: serverTimestamp()
+      };
+
+      // FIX: ATTENDRE que setDoc soit terminé AVANT de lever le flag
+      // C'est la correction principale : onAuthStateChanged se déclenche pendant createUser,
+      // avant que setDoc soit fini, ce qui cause le doc vide / pseudo manquant sur appareils lents.
+      await setDoc(doc(db, 'users', cred.user.uid), profileData);
+
+      // FIX: initialiser le dashboard directement ici avec les données connues,
+      // sans passer par onAuthStateChanged (qui s'est déjà déclenché avec un doc potentiellement vide)
+      State._isRegistering = false;
+      resetAppState();
+      await _initDashboard(cred.user, { displayName: name, email, bio: '', avatar: '🧑', darkMode: true });
+      showLoader(false);
+
     } catch(e) {
+      State._isRegistering = false;
       showLoader(false);
       const msgs = {
         'auth/email-already-in-use': 'Cet email est déjà utilisé.',
@@ -2899,7 +2937,6 @@ const App = {
 
     const {db, collection, addDoc, serverTimestamp} = window._fb;
     try {
-      const now = new Date();
       await addDoc(collection(db,'statuses'), {
         uid: State.user.uid,
         displayName: State.profile.displayName || 'Anonyme',
@@ -2907,7 +2944,6 @@ const App = {
         tags, message, createdAt: serverTimestamp()
       });
 
-      // Broadcast to groups
       if (State.groups?.length) {
         const tagStr = tags.join(' · ');
         const avatar = State.profile.avatar || '🧑';
@@ -2925,13 +2961,11 @@ const App = {
       toast('Statut partagé 🌊','success');
       addNotification('🌊', 'Votre statut a été partagé !');
 
-      // Reset selection
       State.selectedStatus.clear();
       document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
       document.getElementById('status-msg').value = '';
       updateMsgCounter();
 
-      // Animate status card
       if (typeof gsap !== 'undefined') gsap.from('#cs-card', { scale:.96, duration:.4, ease:'back.out(2)' });
     } catch(e) {
       console.error('publishStatus:', e); toast('Erreur lors du partage.','error');
@@ -2951,18 +2985,46 @@ const App = {
       const pending = State.cgPendingMembers || [];
       const memberUids = [State.user.uid, ...pending.map(m => m.uid)];
       const memberNames = [State.profile.displayName||'Moi', ...pending.map(m => m.name)];
+      // FIX: utiliser les vrais avatars des membres invités (stockés dans cgPendingMembers)
       const memberAvatars = [State.profile.avatar||'🧑', ...pending.map(m => m.avatar||'🧑')];
-      await addDoc(collection(db,'groups'), {
-        name, description:desc, emoji: State.groupSelectedEmoji,
-        createdBy: State.user.uid, members: memberUids, memberNames, memberAvatars,
+
+      const groupData = {
+        name,
+        description: desc,
+        emoji: State.groupSelectedEmoji,
+        createdBy: State.user.uid,
+        members: memberUids,
+        memberNames,
+        memberAvatars,
         createdAt: serverTimestamp()
-      });
+      };
+
+      const docRef = await addDoc(collection(db,'groups'), groupData);
+
+      // FIX: ajouter le groupe directement dans State.groups sans attendre loadGroups()
+      // pour éviter la race condition où getDocs() retourne avant que Firestore propage l'écriture
+      const newGroup = { id: docRef.id, ...groupData, createdAt: new Date() };
+      State.groups.push(newGroup);
+
       State.cgPendingMembers = [];
-      closeCreateGroup(); toast('Groupe créé ! 🎉','success');
+      closeCreateGroup();
+      toast('Groupe créé ! 🎉','success');
       addNotification('👥', `Groupe "${name}" créé`);
-      await loadGroups();
-    } catch(e) { console.error('createGroup:', e); toast('Erreur lors de la création.','error'); }
-    finally { btn.disabled = false; btn.textContent = 'Créer ✨'; }
+
+      // Mettre à jour l'affichage immédiatement, puis recharger en background pour avoir les données fraîches
+      renderGroups();
+      renderProfileHeader();
+
+      // Recharger en background pour synchroniser avec Firestore
+      // (met à jour les listeners de notifs pour le nouveau groupe)
+      loadGroups();
+
+    } catch(e) {
+      console.error('createGroup:', e);
+      toast('Erreur lors de la création.','error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Créer ✨';
+    }
   },
 
   async deleteAccount() {
@@ -2987,38 +3049,43 @@ window.addEventListener('fb-ready', () => {
   const {auth, db, onAuthStateChanged, doc, getDoc} = window._fb;
 
   onAuthStateChanged(auth, async user => {
+    // FIX: si on est en train de s'inscrire, on laisse App.register() gérer le dashboard
+    // car le document Firestore n'est peut-être pas encore écrit
+    if (State._isRegistering) {
+      console.log('onAuthStateChanged: inscription en cours, on ignore cet événement');
+      return;
+    }
+
     showLoader(false);
+
     if (user) {
       resetAppState();
       State.user = user;
+
+      let profile = null;
       try {
         const snap = await getDoc(doc(db,'users',user.uid));
-        if (snap.exists()) State.profile = snap.data();
-        else State.profile = { displayName: user.displayName||user.email?.split('@')[0]||'Utilisateur', avatar:'🧑', bio:'', darkMode:true };
+        if (snap.exists()) {
+          profile = snap.data();
+        }
       } catch(e) {
-        console.warn('Profile load:', e.message);
-        State.profile = { displayName: user.displayName||'Utilisateur', avatar:'🧑', bio:'', darkMode:true };
+        console.warn('Profile load error:', e.message);
       }
 
-      // Apply theme
-      State.dark = State.profile.darkMode !== false;
-      document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
-      const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
-      const dtp = document.getElementById('dark-toggle-profile');
-      if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
+      // FIX: si le doc n'existe pas encore (rare, peut arriver si setDoc a échoué)
+      // ou si displayName est vide, utiliser le displayName de Firebase Auth
+      // qui est toujours fiable car updateProfile() est appelé avant setDoc()
+      if (!profile || !profile.displayName) {
+        profile = {
+          displayName: user.displayName || user.email?.split('@')[0] || 'Utilisateur',
+          email: user.email || '',
+          bio: '',
+          avatar: profile?.avatar || '🧑',
+          darkMode: profile?.darkMode !== false
+        };
+      }
 
-      // Init UI
-      renderProfileHeader();
-      renderStatusOptions();
-      renderQuickMsgs();
-      listenLatestStatus();
-      UI.show('dashboard');
-      switchTab('status');
-
-      // Load groups in background
-      loadGroups();
-
-      toast(`Bienvenue ${State.profile.displayName} 🌊`, 'success');
+      await _initDashboard(user, profile);
     } else {
       resetAppState();
       State.dark = true;
@@ -3028,7 +3095,7 @@ window.addEventListener('fb-ready', () => {
   });
 });
 
-// Fallback if Firebase doesn't load
+// Fallback si Firebase ne charge pas
 setTimeout(() => {
   if (!window._fb) {
     showLoader(false);
@@ -3044,7 +3111,6 @@ setTimeout(() => {
 ════════════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    // Close topmost open modal
     if (document.getElementById('member-profile-modal').classList.contains('open')) { closeMemberProfile(); return; }
     if (document.getElementById('members-modal').classList.contains('open')) { closeMembersModal(); return; }
     if (document.getElementById('chat-overlay').classList.contains('open')) { closeChat(); return; }
