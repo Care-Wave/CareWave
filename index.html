@@ -97,7 +97,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
@@ -341,8 +340,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
   display: flex; align-items: center; gap: 10px; margin-top: 16px;
   font-size: .78rem; color: var(--text3);
 }
-.hero-avatars { display: flex; }
-.hero-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--c0); background: var(--c3); margin-right: -8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; }
 .scroll-cue {
   position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -868,9 +865,8 @@ body.cursor-text #cursor-ring { opacity: 0; }
   transform: translateY(100%);
   transition: transform .35s cubic-bezier(.16,1,.3,1);
 }
-.modal-overlay.open .chat-modal {
-  transform: translateY(0);
-}
+.modal-overlay.open .chat-modal { transform: translateY(0); }
+
 .chat-header {
   display: flex; align-items: center; gap: 11px;
   padding: 16px 18px; border-bottom: 1px solid var(--border);
@@ -880,25 +876,149 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .chat-group-name { font-weight: 800; font-size: .98rem; font-family: 'Clash Display', sans-serif; letter-spacing: -.02em; }
 .chat-members-count { font-size: .71rem; color: var(--text3); }
 .chat-header-actions { display: flex; gap: 6px; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; scroll-behavior: smooth; }
-.chat-bubble { max-width: 72%; padding: 9px 13px; border-radius: 18px; font-size: .86rem; line-height: 1.45; position: relative; }
-.chat-bubble.mine { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-.chat-bubble.theirs { background: var(--glass2); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); }
-.chat-bubble.system { background: transparent; color: var(--text3); font-size: .72rem; text-align: center; align-self: center; border: none; padding: 3px 0; max-width: 90%; }
+
+/* ══ CHAT MESSAGES — IMPROVED ══ */
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  scroll-behavior: smooth;
+}
+
+/* Loading state for chat */
+.chat-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; flex: 1; gap: 12px;
+  color: var(--text3); font-size: .83rem;
+}
+.chat-loading-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent2);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Message groups: consecutive messages from same user are visually grouped */
+.msg-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+.msg-group.mine { align-items: flex-end; }
+.msg-group.theirs { align-items: flex-start; }
+.msg-group.system-group, .msg-group.status-group { align-items: center; }
+
+/* Sender header — only shown on first message of a group */
+.msg-sender-header {
+  display: flex; align-items: center; gap: 7px;
+  margin-bottom: 5px; padding: 0 4px;
+}
+.msg-sender-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+  border: 2px solid var(--border2);
+}
+.msg-sender-name {
+  font-size: .72rem; font-weight: 800;
+  letter-spacing: -.01em;
+}
+.msg-sender-time {
+  font-size: .62rem; color: var(--text3); margin-left: auto;
+}
+
+/* Bubbles */
+.chat-bubble {
+  max-width: 72%; padding: 9px 13px; border-radius: 18px;
+  font-size: .86rem; line-height: 1.45; position: relative;
+  word-break: break-word;
+  transition: transform .15s ease;
+  user-select: text;
+}
+.chat-bubble + .chat-bubble { margin-top: 3px; }
+.chat-bubble:active { transform: scale(.98); }
+
+/* Mine bubbles */
+.chat-bubble.mine {
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 2px 12px rgba(99,102,241,.3);
+}
+.chat-bubble.mine + .chat-bubble.mine { border-top-right-radius: 8px; }
+.chat-bubble.mine:first-child { border-top-right-radius: 18px; }
+
+/* Theirs bubbles */
+.chat-bubble.theirs {
+  background: var(--glass2);
+  color: var(--text);
+  border-bottom-left-radius: 5px;
+  border: 1px solid var(--border2);
+}
+.chat-bubble.theirs + .chat-bubble.theirs { border-top-left-radius: 8px; }
+
+/* System / status bubbles */
+.chat-bubble.system {
+  background: transparent; color: var(--text3);
+  font-size: .72rem; text-align: center;
+  border: none; padding: 3px 8px; max-width: 90%;
+}
 .chat-bubble.status-update {
   background: rgba(129,140,248,.1); color: var(--accent2);
   font-size: .75rem; font-weight: 700; text-align: center;
-  align-self: center; border: 1px solid rgba(129,140,248,.2);
+  border: 1px solid rgba(129,140,248,.2);
   border-radius: 100px; padding: 6px 14px; max-width: 92%;
 }
-.bubble-name { font-size: .68rem; font-weight: 700; opacity: .55; margin-bottom: 2px; }
-.bubble-time { font-size: .62rem; opacity: .55; margin-top: 3px; text-align: right; }
+
+/* Timestamp on bubble hover */
+.bubble-time {
+  font-size: .6rem; opacity: 0; margin-top: 3px;
+  transition: opacity .2s; text-align: right;
+}
+.chat-bubble:hover .bubble-time { opacity: .55; }
+.chat-bubble.mine .bubble-time { text-align: right; }
+.chat-bubble.theirs .bubble-time { text-align: left; }
+
+/* ══ LIKES SYSTEM ══ */
+.bubble-like-area {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 4px; opacity: 0;
+  transition: opacity .2s;
+  justify-content: flex-end;
+}
+.msg-group.theirs .bubble-like-area { justify-content: flex-start; }
+.chat-bubble:hover ~ .bubble-like-area,
+.bubble-like-area:hover,
+.bubble-like-area.has-likes { opacity: 1; }
+
+.like-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 100px;
+  font-size: .72rem; font-weight: 700;
+  background: var(--glass2); border: 1px solid var(--border2);
+  cursor: none; transition: all .2s var(--t-spring);
+  font-family: 'Cabinet Grotesk', sans-serif; color: var(--text3);
+}
+.like-btn:hover { background: rgba(244,63,94,.1); border-color: rgba(244,63,94,.3); color: var(--rose); transform: scale(1.05); }
+.like-btn.liked { background: rgba(244,63,94,.12); border-color: rgba(244,63,94,.35); color: var(--rose); }
+.like-btn .like-count { font-size: .7rem; }
+
+/* Double-click heart burst animation */
+@keyframes heart-burst {
+  0% { transform: translate(-50%,-50%) scale(0) rotate(-15deg); opacity: 1; }
+  50% { transform: translate(-50%,-120%) scale(1.4) rotate(5deg); opacity: 1; }
+  100% { transform: translate(-50%,-180%) scale(.8) rotate(-5deg); opacity: 0; }
+}
+.heart-burst {
+  position: fixed; pointer-events: none; z-index: 9999;
+  font-size: 2rem; animation: heart-burst .6s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+
+/* ══ DAY DIVIDER ══ */
 .chat-day-divider {
   text-align: center; font-size: .68rem; color: var(--text3);
   font-weight: 700; letter-spacing: .05em;
-  display: flex; align-items: center; gap: 8px; margin: 6px 0;
+  display: flex; align-items: center; gap: 8px; margin: 10px 0;
 }
 .chat-day-divider::before, .chat-day-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Typing indicator */
 .typing-indicator {
   display: flex; align-items: center; gap: 4px;
   background: var(--glass2); border: 1px solid var(--border);
@@ -909,9 +1029,11 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .typing-dot:nth-child(2) { animation-delay: .15s; }
 .typing-dot:nth-child(3) { animation-delay: .3s; }
 @keyframes typing-bounce { 0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);} }
+
 .quick-reactions { display: flex; gap: 5px; padding: 0 14px 8px; flex-wrap: wrap; }
 .quick-reaction { padding: 5px 10px; border-radius: 100px; background: var(--glass); border: 1px solid var(--border); font-size: .74rem; color: var(--text2); cursor: none; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; }
 .quick-reaction:hover { background: rgba(129,140,248,.1); color: var(--accent2); border-color: rgba(129,140,248,.3); }
+
 .chat-input-row { display: flex; gap: 9px; padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
 .chat-input {
   flex: 1; background: var(--glass); border: 1px solid var(--border2);
@@ -930,6 +1052,16 @@ body.cursor-text #cursor-ring { opacity: 0; }
 }
 .chat-send:hover { transform: scale(1.1); box-shadow: 0 0 22px rgba(99,102,241,.5); }
 .chat-send:active { transform: scale(.95); }
+
+/* ══ MEMBER COLORS (for avatar backgrounds) ══ */
+.member-color-0 { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+.member-color-1 { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
+.member-color-2 { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+.member-color-3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.member-color-4 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.member-color-5 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.member-color-6 { background: linear-gradient(135deg, #ec4899, #db2777); }
+.member-color-7 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
 /* ══ NOTIFICATIONS DRAWER ══ */
 .notif-drawer {
@@ -980,6 +1112,19 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .ms-member-role.me { background: rgba(45,212,191,.12); color: var(--teal); }
 .ms-view-btn { padding: 5px 11px; border-radius: 100px; background: rgba(129,140,248,.1); color: var(--accent2); font-size: .7rem; font-weight: 800; border: 1px solid rgba(129,140,248,.2); cursor: none; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0; }
 .ms-view-btn:hover { background: var(--accent); color: #fff; border-color: transparent; }
+
+/* KICK MEMBER BUTTON (creator only) */
+.ms-kick-btn {
+  padding: 4px 10px; border-radius: 100px;
+  background: rgba(244,63,94,.08); color: var(--rose);
+  font-size: .68rem; font-weight: 800;
+  border: 1px solid rgba(244,63,94,.22);
+  cursor: none; transition: all var(--t);
+  font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0;
+  margin-left: 4px;
+}
+.ms-kick-btn:hover { background: var(--rose); color: #fff; border-color: transparent; }
+
 .ms-error { font-size: .8rem; color: var(--rose); background: rgba(244,63,94,.08); padding: 9px 12px; border-radius: var(--r); margin-bottom: 12px; display: none; border: 1px solid rgba(244,63,94,.18); }
 .ms-error.show { display: block; }
 
@@ -1179,12 +1324,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
     </div>
     <div class="hero-social-proof">
       <span>rester connectés en famille ou entre amis</span>
-      <br>
     </div>
     <div class="scroll-cue" aria-hidden="true"><span>Découvrir</span><div class="scroll-line"></div></div>
   </section>
 
-  <!-- Demo cards -->
   <div class="demo-section">
     <div class="demo-grid" id="demo-grid">
       <div class="demo-card">
@@ -1208,7 +1351,6 @@ body.cursor-text #cursor-ring { opacity: 0; }
     </div>
   </div>
 
-  <!-- Marquee -->
   <div class="marquee-section" aria-hidden="true">
     <div class="marquee-track">
       <span class="marquee-tag">⚡ Un tap suffit</span>
@@ -1220,6 +1362,7 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <span class="marquee-tag">🎯 Simple &amp; rapide</span>
       <span class="marquee-tag">💬 Chat intégré</span>
       <span class="marquee-tag">🔥 Streak quotidien</span>
+      <span class="marquee-tag">❤️ Likes de messages</span>
       <span class="marquee-tag">⚡ Un tap suffit</span>
       <span class="marquee-tag">🔒 Groupes privés</span>
       <span class="marquee-tag">💙 Sans pression</span>
@@ -1229,10 +1372,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <span class="marquee-tag">🎯 Simple &amp; rapide</span>
       <span class="marquee-tag">💬 Chat intégré</span>
       <span class="marquee-tag">🔥 Streak quotidien</span>
+      <span class="marquee-tag">❤️ Likes de messages</span>
     </div>
   </div>
 
-  <!-- Features -->
   <section class="features-section">
     <div class="section-eyebrow">Fonctionnalités</div>
     <h2 class="section-title">Tout ce dont vous avez besoin, rien de plus.</h2>
@@ -1240,13 +1383,12 @@ body.cursor-text #cursor-ring { opacity: 0; }
       <div class="feat-card"><div class="feat-icon">⚡</div><div class="feat-title">Un tap suffit</div><div class="feat-desc">Partagez votre état en quelques secondes, sans formulaire complexe ni effort.</div></div>
       <div class="feat-card"><div class="feat-icon">🔒</div><div class="feat-title">Groupes privés</div><div class="feat-desc">Créez des groupes famille ou amis. Seuls les membres invités voient vos statuts.</div></div>
       <div class="feat-card"><div class="feat-icon">💙</div><div class="feat-title">Sans pression</div><div class="feat-desc">Pas besoin de répondre à chaque message. Votre statut parle pour vous.</div></div>
-      <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Historique</div><div class="feat-desc">Visualisez l'évolution de votre bien-être dans le temps avec votre timeline.</div></div>
+      <div class="feat-card"><div class="feat-icon">❤️</div><div class="feat-title">Likes express</div><div class="feat-desc">Double-cliquez sur un message pour l'aimer en un instant.</div></div>
       <div class="feat-card"><div class="feat-icon">🔥</div><div class="feat-title">Streaks</div><div class="feat-desc">Gardez le rythme avec votre compteur de jours consécutifs de partage.</div></div>
       <div class="feat-card"><div class="feat-icon">💬</div><div class="feat-title">Chat de groupe</div><div class="feat-desc">Échangez en direct avec vos proches dans des conversations privées dédiées.</div></div>
     </div>
   </section>
 
-  <!-- How it works -->
   <section class="how-section">
     <div class="section-eyebrow">Comment ça marche</div>
     <h2 class="section-title">En trois étapes simples.</h2>
@@ -1493,7 +1635,12 @@ body.cursor-text #cursor-ring { opacity: 0; }
         <button class="icon-btn" onclick="closeChat()" aria-label="Fermer">✕</button>
       </div>
     </div>
-    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"></div>
+    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
+      <div class="chat-loading">
+        <div class="chat-loading-spinner"></div>
+        <span>Chargement des messages…</span>
+      </div>
+    </div>
     <div class="quick-reactions">
       <button class="quick-reaction" onclick="sendQuick('💙 On pense à toi')">💙 On pense à toi</button>
       <button class="quick-reaction" onclick="sendQuick('💪 Courage !')">💪 Courage !</button>
@@ -1643,7 +1790,7 @@ if ($cursor && window.matchMedia('(pointer:fine)').matches) {
   document.addEventListener('mouseup', () => document.body.classList.remove('cursor-click'));
 
   function applyHoverListeners(root = document) {
-    root.querySelectorAll('button:not([data-hover]),a:not([data-hover]),[onclick]:not([data-hover]),.status-opt,.demo-card,.feat-card,.group-row,.nav-item,.avatar-opt,.emoji-opt,.quick-msg,.quick-reaction,.settings-row').forEach(el => {
+    root.querySelectorAll('button:not([data-hover]),a:not([data-hover]),[onclick]:not([data-hover]),.status-opt,.demo-card,.feat-card,.group-row,.nav-item,.avatar-opt,.emoji-opt,.quick-msg,.quick-reaction,.settings-row,.like-btn,.ms-kick-btn').forEach(el => {
       if (el.dataset.hover) return;
       el.dataset.hover = '1';
       el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
@@ -1751,6 +1898,19 @@ function showLoader(v = true) {
 ════════════════════════════════════════════════ */
 const AVATARS = ['🧑','👩','👨','🧓','👴','👵','🧒','👦','👧','🧑‍💻','👩‍💻','👨‍🍳','👩‍🍳','🧑‍🎨','👩‍⚕️','👨‍⚕️','🧑‍🦰','🧑‍🦱','🧑‍🦳','🧑‍🦲'];
 const GROUP_EMOJIS = ['👨‍👩‍👧‍👦','❤️','🌟','🏥','🌈','🌸','⚡','🎯','🎪','🦋','🩺','🫂'];
+
+// Palette de couleurs pour distinguer les membres dans le chat
+const MEMBER_COLORS = [
+  '#818cf8', // indigo
+  '#2dd4bf', // teal
+  '#f43f5e', // rose
+  '#f59e0b', // amber
+  '#22c55e', // green
+  '#60a5fa', // blue
+  '#ec4899', // pink
+  '#a78bfa', // purple
+];
+
 const STATUS_OPTS = {
   wellness:[
     {emoji:'😁',label:'Super forme !',color:'opt-green'},
@@ -1812,9 +1972,9 @@ const State = {
   unread: {},
   statusHistory: [],
   streak: 0,
-  // FIX: flag pour éviter que onAuthStateChanged agisse pendant l'inscription
   _isRegistering: false,
-  _pendingProfile: null
+  _pendingProfile: null,
+  _memberColorMap: {}  // uid -> color index
 };
 let _unsubs = [];
 
@@ -1827,7 +1987,8 @@ function resetAppState() {
     unread:{}, statusHistory:[], streak:0,
     _listeningGroups: new Set(),
     _isRegistering: false,
-    _pendingProfile: null
+    _pendingProfile: null,
+    _memberColorMap: {}
   });
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
   safe('cs-tags', el => el.innerHTML='<span class="cs-tag">Aucun statut partagé</span>');
@@ -1849,6 +2010,28 @@ function resetAppState() {
 }
 
 /* ════════════════════════════════════════════════
+   MEMBER COLOR ASSIGNMENT
+════════════════════════════════════════════════ */
+function getMemberColor(uid) {
+  if (!State._memberColorMap) State._memberColorMap = {};
+  if (State._memberColorMap[uid] === undefined) {
+    const keys = Object.keys(State._memberColorMap);
+    State._memberColorMap[uid] = keys.length % MEMBER_COLORS.length;
+  }
+  return MEMBER_COLORS[State._memberColorMap[uid]];
+}
+
+function initMemberColors(members) {
+  if (!members) return;
+  members.forEach((uid, i) => {
+    if (!State._memberColorMap) State._memberColorMap = {};
+    if (State._memberColorMap[uid] === undefined) {
+      State._memberColorMap[uid] = i % MEMBER_COLORS.length;
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════
    UI HELPERS
 ════════════════════════════════════════════════ */
 const UI = {
@@ -1862,23 +2045,6 @@ const UI = {
     }
   }
 };
-
-function openModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.style.display = 'flex';
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.classList.add('open');
-    });
-  });
-}
-
-function closeModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove('open');
-}
 
 function toast(msg, type='', duration=3000) {
   const c = document.getElementById('toast-container');
@@ -2245,14 +2411,31 @@ function listenGroupNotifications(groups) {
       }
       if (msgTime && State.currentGroup?.id !== group.id) {
         if (msg.uid === State.user?.uid) return;
+        // Only notify for regular messages, not system/status messages
+        const isStatus = msg.type === 'status_update';
+        const isSystem = msg.type === 'system';
+
         State.unread[group.id] = (State.unread[group.id] || 0) + 1;
         renderGroups(); updateGroupsBadge();
-        const isStatus = msg.type === 'status_update';
-        const txt = isStatus
-          ? `Nouveau statut dans "${group.name}"`
-          : `${msg.displayName||'Quelqu\'un'} a écrit dans "${group.name}"`;
-        addNotification(isStatus ? '🌊' : '💬', txt);
-        toast((isStatus ? '🌊 ' : '💬 ') + txt, 'info');
+
+        let notifText, notifIcon;
+        if (isStatus) {
+          notifText = `Nouveau statut dans "${group.name}"`;
+          notifIcon = '🌊';
+        } else if (isSystem) {
+          notifText = `${msg.text} (${group.name})`;
+          notifIcon = 'ℹ️';
+        } else {
+          // Regular chat message notification
+          const senderName = msg.displayName || 'Quelqu\'un';
+          notifText = `💬 Nouveau message de ${senderName} dans "${group.name}"`;
+          notifIcon = '💬';
+        }
+
+        addNotification(notifIcon, notifText);
+        if (!isSystem) {
+          toast(notifIcon + ' ' + notifText, 'info');
+        }
       }
     }, err => console.warn('Group notif:', err.message));
     _unsubs.push(unsub);
@@ -2281,6 +2464,8 @@ async function loadGroups() {
     const groups = [];
     snap.forEach(d => groups.push({ id: d.id, ...d.data() }));
     State.groups = groups;
+    // Initialize member colors for all groups
+    groups.forEach(g => initMemberColors(g.members || []));
     renderGroups(); listenGroupNotifications(groups);
     renderProfileHeader(); loadProfileStats();
   } catch(e) {
@@ -2411,7 +2596,6 @@ async function cgSearchMember() {
       document.getElementById('cg-result-name').textContent = ud.displayName || email;
       document.getElementById('cg-result-email').textContent = email;
       const ab = document.getElementById('cg-add-member-btn');
-      // FIX: stocker aussi l'avatar réel de l'utilisateur trouvé
       ab.dataset.uid = ud.uid;
       ab.dataset.name = ud.displayName || email;
       ab.dataset.avatar = ud.avatar || '🧑';
@@ -2424,7 +2608,6 @@ async function cgSearchMember() {
 
 function cgAddMember() {
   const btn = document.getElementById('cg-add-member-btn');
-  // FIX: récupérer l'avatar depuis le dataset (était manquant dans l'original)
   const { uid, name, avatar, email } = btn.dataset;
   if (!uid || !name) return;
   State.cgPendingMembers.push({ uid, name, avatar: avatar || '🧑', email });
@@ -2474,6 +2657,8 @@ function msFillCurrentMembers() {
   const names = State.currentGroup.memberNames || [];
   const ids = State.currentGroup.members || [];
   const avatars = State.currentGroup.memberAvatars || [];
+  const isCurrentUserCreator = State.currentGroup.createdBy === State.user?.uid;
+
   if (!names.length) { el.innerHTML='<div style="color:var(--text3);font-size:.83rem;">Aucun membre.</div>'; return; }
   el.innerHTML = names.map((n, i) => {
     const uid = ids[i];
@@ -2483,21 +2668,94 @@ function msFillCurrentMembers() {
     let roleEl = '';
     if (isCreator) roleEl = '<span class="ms-member-role creator">👑 Créateur</span>';
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
+
+    // View profile button (not for self)
     const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}">👁 Voir</button>` : '';
-    return `<div class="ms-member-row" ${!isMe?`data-uid="${uid}"`:''}>
+
+    // Kick button: only creator can kick, and only on non-creator members, and not themselves
+    const canKick = isCurrentUserCreator && !isCreator && !isMe;
+    const kickBtn = canKick
+      ? `<button class="ms-kick-btn" data-uid="${uid}" data-name="${n}" aria-label="Retirer ${n}">✕ Retirer</button>`
+      : '';
+
+    return `<div class="ms-member-row">
       <span class="ms-member-avatar">${avatar}</span>
       <span class="ms-member-name">${n}</span>
-      ${roleEl}${viewBtn}
+      ${roleEl}${viewBtn}${kickBtn}
     </div>`;
   }).join('');
-  el.querySelectorAll('[data-uid]').forEach(row => {
-    row.addEventListener('click', function(e) {
-      if (e.target.classList.contains('ms-view-btn') || e.target.closest('.ms-view-btn')) {
-        openMemberProfile(this.dataset.uid);
-      }
-    });
+
+  // Attach event listeners
+  el.querySelectorAll('.ms-view-btn').forEach(btn => {
+    btn.addEventListener('click', function() { openMemberProfile(this.dataset.uid); });
   });
+  el.querySelectorAll('.ms-kick-btn').forEach(btn => {
+    btn.addEventListener('click', function() { kickMember(this.dataset.uid, this.dataset.name); });
+  });
+
   if (window._applyHoverListeners) window._applyHoverListeners(el);
+}
+
+/* ════════════════════════════════════════════════
+   KICK MEMBER (creator only)
+════════════════════════════════════════════════ */
+async function kickMember(uid, name) {
+  if (!State.currentGroup) return;
+  if (State.currentGroup.createdBy !== State.user?.uid) {
+    toast('Seul le créateur peut retirer des membres.', 'error'); return;
+  }
+  if (uid === State.user?.uid) { toast('Vous ne pouvez pas vous retirer vous-même.', 'error'); return; }
+  if (!confirm(`Retirer ${name} du groupe "${State.currentGroup.name}" ?\n\nIl/elle pourra être réinvité(e) plus tard.`)) return;
+
+  try {
+    const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
+    const idx = (State.currentGroup.members || []).indexOf(uid);
+    if (idx === -1) { toast('Membre introuvable.', 'error'); return; }
+
+    const newMembers = [...(State.currentGroup.members || [])];
+    const newNames = [...(State.currentGroup.memberNames || [])];
+    const newAvatars = [...(State.currentGroup.memberAvatars || [])];
+
+    newMembers.splice(idx, 1);
+    newNames.splice(idx, 1);
+    newAvatars.splice(idx, 1);
+
+    await updateDoc(doc(db,'groups',State.currentGroup.id), {
+      members: newMembers, memberNames: newNames, memberAvatars: newAvatars
+    });
+
+    // Notify in chat
+    await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
+      type:'system',
+      text:`${name} a été retiré(e) du groupe 👋`,
+      createdAt: serverTimestamp()
+    });
+
+    // Update local state
+    State.currentGroup.members = newMembers;
+    State.currentGroup.memberNames = newNames;
+    State.currentGroup.memberAvatars = newAvatars;
+
+    // Update in groups list too
+    const gi = State.groups.findIndex(g => g.id === State.currentGroup.id);
+    if (gi !== -1) {
+      State.groups[gi].members = newMembers;
+      State.groups[gi].memberNames = newNames;
+      State.groups[gi].memberAvatars = newAvatars;
+    }
+
+    // Update chat header member count
+    const cmc = document.getElementById('chat-members-count');
+    if (cmc) cmc.textContent = `${newMembers.length} membre(s)`;
+
+    msFillCurrentMembers();
+    renderGroups();
+    toast(`${name} retiré(e) du groupe ✅`, 'success');
+    addNotification('👋', `${name} a été retiré(e) de "${State.currentGroup.name}"`);
+  } catch(e) {
+    console.error('kickMember:', e);
+    toast('Erreur lors de la suppression du membre.', 'error');
+  }
 }
 
 async function openMemberProfile(uid) {
@@ -2580,7 +2838,6 @@ async function msSearch() {
         ab.textContent = '+ Ajouter'; ab.disabled = false;
         ab.dataset.uid = ud.uid;
         ab.dataset.name = ud.displayName || email;
-        // FIX: stocker l'avatar réel de l'utilisateur trouvé
         ab.dataset.avatar = ud.avatar || '🧑';
       }
       resEl.style.display = 'flex';
@@ -2598,10 +2855,8 @@ async function msAddMember() {
     const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
     const nm = [...(State.currentGroup.members||[]), uid];
     const nn = [...(State.currentGroup.memberNames||[]), name];
-    // FIX: utiliser l'avatar réel stocké dans le dataset
     const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), avatar || '🧑'];
     await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn, memberAvatars:na });
-    // FIX: mettre à jour currentGroup ET State.groups en même temps
     State.currentGroup.members = nm;
     State.currentGroup.memberNames = nn;
     State.currentGroup.memberAvatars = na;
@@ -2685,18 +2940,30 @@ async function _deleteGroupById(groupId, groupName) {
 }
 
 /* ════════════════════════════════════════════════
-   CHAT
+   CHAT — IMPROVED WITH GROUPING + LIKES
 ════════════════════════════════════════════════ */
 function openChat(group) {
   const freshGroup = State.groups.find(g => g.id === group.id) || group;
   State.currentGroup = freshGroup;
   State.unread[freshGroup.id] = 0;
   setLastRead(freshGroup.id);
+
+  // Initialize member colors for this group
+  initMemberColors(freshGroup.members || []);
+
   renderGroups(); updateGroupsBadge();
   document.getElementById('chat-emoji').textContent = freshGroup.emoji || '👥';
   document.getElementById('chat-group-name-label').textContent = freshGroup.name;
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
   document.getElementById('chat-overlay').classList.add('open');
+
+  // Show loading state immediately
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML = `<div class="chat-loading">
+    <div class="chat-loading-spinner"></div>
+    <span>Chargement des messages…</span>
+  </div>`;
+
   loadChatMessages(freshGroup.id);
 }
 
@@ -2711,58 +2978,291 @@ function formatChatTime(date) {
   return date.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
 }
 
+/* Build grouped message DOM — consecutive messages from same sender are grouped */
+function buildMessageGroups(messages) {
+  const groups = [];
+  let currentGroup = null;
+
+  messages.forEach(({ id, data: m }) => {
+    const mine = m.uid === State.user?.uid;
+    const isSystem = m.type === 'system';
+    const isStatus = m.type === 'status_update';
+
+    // System/status messages always go alone
+    if (isSystem || isStatus) {
+      groups.push({ type: isStatus ? 'status' : 'system', messages: [{ id, data: m }] });
+      currentGroup = null;
+      return;
+    }
+
+    // Regular messages: group consecutive ones from same sender
+    if (currentGroup && currentGroup.uid === m.uid && !currentGroup.isSpecial) {
+      currentGroup.messages.push({ id, data: m });
+    } else {
+      currentGroup = {
+        uid: m.uid,
+        mine,
+        isSpecial: false,
+        displayName: m.displayName || 'Anonyme',
+        avatar: m.avatar || '🧑',
+        messages: [{ id, data: m }]
+      };
+      groups.push(currentGroup);
+    }
+  });
+
+  return groups;
+}
+
+function renderLikes(msgId, likes = {}, groupEl) {
+  const likeCount = Object.keys(likes).length;
+  const iLiked = State.user && likes[State.user.uid];
+  const likeArea = groupEl.querySelector(`[data-like-area="${msgId}"]`);
+  if (!likeArea) return;
+
+  likeArea.className = `bubble-like-area${likeCount > 0 ? ' has-likes' : ''}`;
+  likeArea.innerHTML = `<button class="like-btn ${iLiked ? 'liked' : ''}" data-msg-id="${msgId}" onclick="toggleLike('${msgId}',${iLiked})">
+    ${iLiked ? '❤️' : '🤍'}<span class="like-count">${likeCount > 0 ? likeCount : ''}</span>
+  </button>`;
+  if (window._applyHoverListeners) window._applyHoverListeners(likeArea);
+}
+
+async function toggleLike(msgId, isLiked) {
+  if (!State.currentGroup || !State.user || !window._fb) return;
+  const {db, doc, updateDoc} = window._fb;
+  try {
+    const msgRef = doc(db, 'groups', State.currentGroup.id, 'messages', msgId);
+    const fieldPath = `likes.${State.user.uid}`;
+    if (isLiked) {
+      // Remove like — use deleteField
+      const {deleteField} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      await updateDoc(msgRef, { [fieldPath]: deleteField() });
+    } else {
+      await updateDoc(msgRef, { [fieldPath]: true });
+    }
+  } catch(e) {
+    console.warn('toggleLike error:', e);
+    toast('Impossible de liker ce message.', 'error');
+  }
+}
+
+function spawnHeartBurst(x, y) {
+  const heart = document.createElement('div');
+  heart.className = 'heart-burst';
+  heart.textContent = '❤️';
+  heart.style.left = x + 'px';
+  heart.style.top = y + 'px';
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 700);
+}
+
 function loadChatMessages(groupId) {
   const {db, collection, query, orderBy, onSnapshot} = window._fb;
   const msgsEl = document.getElementById('chat-messages');
-  msgsEl.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:.8rem;padding:20px;">⏳ Chargement des messages…</div>';
-  const q = query(collection(db,'groups',groupId,'messages'), orderBy('createdAt','asc'));
-  if (State.chatUnsub) State.chatUnsub();
+  if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} }
+
+  let firstLoad = true;
+
+  const q = query(collection(db, 'groups', groupId, 'messages'), orderBy('createdAt', 'asc'));
 
   State.chatUnsub = onSnapshot(q, snap => {
-    let lastDay = '';
-    const wasAtBottom = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 80;
-    msgsEl.innerHTML = '';
-    snap.forEach(d => {
-      const m = d.data();
-      const mine = m.uid === State.user?.uid;
-      let ts = null;
-      try { ts = m.createdAt?.toDate?.(); } catch(e){}
-      const dayStr = ts ? ts.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
+    const wasAtBottom = firstLoad || (msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 100);
 
-      if (dayStr && dayStr !== lastDay) {
-        lastDay = dayStr;
+    // Collect all messages with their IDs
+    const allMessages = [];
+    snap.forEach(d => allMessages.push({ id: d.id, data: d.data() }));
+
+    // Build day-separated and grouped DOM
+    msgsEl.innerHTML = '';
+    if (allMessages.length === 0) {
+      msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
+        <div class="empty-icon">💬</div>
+        <div class="empty-title">Aucun message encore</div>
+        <div class="empty-sub">Soyez le premier à écrire !</div>
+      </div>`;
+      firstLoad = false;
+      return;
+    }
+
+    let lastDay = '';
+
+    // Group messages by day first, then by sender within each day section
+    let dayMessages = [];
+    let currentDayStr = '';
+
+    function flushDayMessages() {
+      if (!dayMessages.length) return;
+      const groups = buildMessageGroups(dayMessages);
+      groups.forEach(group => renderMessageGroup(group, msgsEl));
+      dayMessages = [];
+    }
+
+    allMessages.forEach(({ id, data: m }) => {
+      let ts = null;
+      try { ts = m.createdAt?.toDate?.(); } catch(e) {}
+      const dayStr = ts
+        ? ts.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
+        : '';
+      const capDay = dayStr ? dayStr.charAt(0).toUpperCase() + dayStr.slice(1) : '';
+
+      if (capDay && capDay !== currentDayStr) {
+        flushDayMessages();
+        currentDayStr = capDay;
         const div = document.createElement('div');
         div.className = 'chat-day-divider';
-        div.innerHTML = `<span>${dayStr.charAt(0).toUpperCase()+dayStr.slice(1)}</span>`;
+        div.innerHTML = `<span>${capDay}</span>`;
         msgsEl.appendChild(div);
       }
-
-      const el = document.createElement('div');
-      if (m.type === 'system') {
-        el.className = 'chat-bubble system'; el.textContent = m.text;
-      } else if (m.type === 'status_update') {
-        el.className = 'chat-bubble status-update'; el.textContent = m.text;
-      } else {
-        el.className = `chat-bubble ${mine ? 'mine' : 'theirs'}`;
-        if (!mine) {
-          const ne = document.createElement('div');
-          ne.className = 'bubble-name'; ne.textContent = m.displayName || 'Anonyme';
-          el.appendChild(ne);
-        }
-        el.appendChild(document.createTextNode(m.text));
-        if (ts) {
-          const te = document.createElement('div');
-          te.className = 'bubble-time';
-          te.textContent = formatChatTime(ts);
-          el.appendChild(te);
-        }
-      }
-      msgsEl.appendChild(el);
+      dayMessages.push({ id, data: m });
     });
-    if (wasAtBottom || msgsEl.children.length <= 3) {
+    flushDayMessages();
+
+    if (wasAtBottom) {
       msgsEl.scrollTop = msgsEl.scrollHeight;
     }
-  }, err => console.warn('Chat listener:', err.message));
+    firstLoad = false;
+  }, err => {
+    console.warn('Chat listener:', err.message);
+    msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
+      <div class="empty-icon">⚠️</div>
+      <div class="empty-title">Erreur de chargement</div>
+      <div class="empty-sub">Vérifiez votre connexion</div>
+    </div>`;
+  });
+}
+
+function renderMessageGroup(group, container) {
+  if (group.type === 'system') {
+    const [{ data: m }] = group.messages;
+    const el = document.createElement('div');
+    el.className = 'msg-group system-group';
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble system';
+    bubble.textContent = m.text;
+    el.appendChild(bubble);
+    container.appendChild(el);
+    return;
+  }
+
+  if (group.type === 'status') {
+    const [{ data: m }] = group.messages;
+    const el = document.createElement('div');
+    el.className = 'msg-group status-group';
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble status-update';
+    bubble.textContent = m.text;
+    el.appendChild(bubble);
+    container.appendChild(el);
+    return;
+  }
+
+  // Regular message group
+  const groupEl = document.createElement('div');
+  groupEl.className = `msg-group ${group.mine ? 'mine' : 'theirs'}`;
+
+  // Sender header (only for "theirs" messages)
+  if (!group.mine) {
+    const color = getMemberColor(group.uid);
+    const header = document.createElement('div');
+    header.className = 'msg-sender-header';
+    // Small colored avatar circle
+    const avatarEl = document.createElement('div');
+    avatarEl.className = 'msg-sender-avatar';
+    avatarEl.style.background = color + '22'; // slight bg tint
+    avatarEl.style.borderColor = color + '44';
+    avatarEl.textContent = group.avatar;
+    // Name with member color
+    const nameEl = document.createElement('div');
+    nameEl.className = 'msg-sender-name';
+    nameEl.style.color = color;
+    nameEl.textContent = group.displayName;
+    header.appendChild(avatarEl);
+    header.appendChild(nameEl);
+    groupEl.appendChild(header);
+  }
+
+  // Each message bubble in the group
+  group.messages.forEach(({ id, data: m }) => {
+    let ts = null;
+    try { ts = m.createdAt?.toDate?.(); } catch(e) {}
+    const likes = m.likes || {};
+
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${group.mine ? 'mine' : 'theirs'}`;
+    bubble.dataset.msgId = id;
+
+    // Message text
+    const textNode = document.createTextNode(m.text || '');
+    bubble.appendChild(textNode);
+
+    // Timestamp (hidden, shows on hover)
+    if (ts) {
+      const timeEl = document.createElement('div');
+      timeEl.className = 'bubble-time';
+      timeEl.textContent = formatChatTime(ts);
+      bubble.appendChild(timeEl);
+    }
+
+    groupEl.appendChild(bubble);
+
+    // Like area (below each bubble)
+    const likeArea = document.createElement('div');
+    const likeCount = Object.keys(likes).length;
+    const iLiked = State.user && likes[State.user.uid];
+    likeArea.className = `bubble-like-area${likeCount > 0 ? ' has-likes' : ''}`;
+    likeArea.dataset.likeArea = id;
+    likeArea.innerHTML = `<button class="like-btn ${iLiked ? 'liked' : ''}" data-msg-id="${id}">
+      ${iLiked ? '❤️' : '🤍'}<span class="like-count">${likeCount > 0 ? likeCount : ''}</span>
+    </button>`;
+    groupEl.appendChild(likeArea);
+
+    // Single-click on like button
+    const likeBtn = likeArea.querySelector('.like-btn');
+    if (likeBtn) {
+      likeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleLike(id, !!iLiked);
+      });
+    }
+
+    // Double-click on bubble → like with animation
+    let clickTimer = null;
+    bubble.addEventListener('click', () => {
+      if (clickTimer) {
+        // Double click detected
+        clearTimeout(clickTimer);
+        clickTimer = null;
+        if (!iLiked) {
+          toggleLike(id, false);
+          const rect = bubble.getBoundingClientRect();
+          spawnHeartBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+      } else {
+        clickTimer = setTimeout(() => { clickTimer = null; }, 280);
+      }
+    });
+
+    // Touch double-tap support
+    let lastTap = 0;
+    bubble.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        e.preventDefault();
+        if (!iLiked) {
+          toggleLike(id, false);
+          const rect = bubble.getBoundingClientRect();
+          spawnHeartBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+        lastTap = 0;
+      } else {
+        lastTap = now;
+      }
+    });
+
+    if (window._applyHoverListeners) window._applyHoverListeners(likeArea);
+  });
+
+  container.appendChild(groupEl);
 }
 
 async function sendChatMsg() {
@@ -2777,7 +3277,8 @@ async function sendChatMsg() {
       uid: State.user.uid,
       displayName: State.profile.displayName || 'Anonyme',
       avatar: State.profile.avatar || '🧑',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      likes: {}
     });
   } catch(e) { inp.value = text; toast('Impossible d\'envoyer le message.','error'); }
 }
@@ -2797,13 +3298,10 @@ function closeMemberProfileOutside(e) { if (e.target.id === 'member-profile-moda
 /* ════════════════════════════════════════════════
    APP CORE
 ════════════════════════════════════════════════ */
-
-// Fonction utilitaire : initialise le dashboard après auth
 async function _initDashboard(user, profile) {
   State.user = user;
   State.profile = profile;
 
-  // Apply theme
   State.dark = profile.darkMode !== false;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
   const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
@@ -2837,7 +3335,6 @@ const App = {
     try {
       const {auth, signInWithEmailAndPassword} = window._fb;
       await signInWithEmailAndPassword(auth, email, pw);
-      // onAuthStateChanged gère la suite
     } catch(e) {
       showLoader(false);
       const msgs = {
@@ -2869,39 +3366,21 @@ const App = {
     const btn = document.getElementById('register-btn');
     btn.disabled = true; btn.textContent = '⏳ Création…';
     showLoader(true);
-
-    // FIX: poser le flag AVANT createUserWithEmailAndPassword pour bloquer
-    // onAuthStateChanged pendant qu'on écrit le doc Firestore
     State._isRegistering = true;
 
     try {
       const {auth, db, createUserWithEmailAndPassword, updateProfile, doc, setDoc, serverTimestamp} = window._fb;
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
-
-      // updateProfile en parallèle avec setDoc pour que Firebase Auth ait le bon displayName
       await updateProfile(cred.user, { displayName: name });
-
       const profileData = {
-        displayName: name,
-        email,
-        bio: '',
-        avatar: '🧑',
-        darkMode: true,
-        createdAt: serverTimestamp()
+        displayName: name, email, bio: '', avatar: '🧑',
+        darkMode: true, createdAt: serverTimestamp()
       };
-
-      // FIX: ATTENDRE que setDoc soit terminé AVANT de lever le flag
-      // C'est la correction principale : onAuthStateChanged se déclenche pendant createUser,
-      // avant que setDoc soit fini, ce qui cause le doc vide / pseudo manquant sur appareils lents.
       await setDoc(doc(db, 'users', cred.user.uid), profileData);
-
-      // FIX: initialiser le dashboard directement ici avec les données connues,
-      // sans passer par onAuthStateChanged (qui s'est déjà déclenché avec un doc potentiellement vide)
       State._isRegistering = false;
       resetAppState();
       await _initDashboard(cred.user, { displayName: name, email, bio: '', avatar: '🧑', darkMode: true });
       showLoader(false);
-
     } catch(e) {
       State._isRegistering = false;
       showLoader(false);
@@ -2985,40 +3464,27 @@ const App = {
       const pending = State.cgPendingMembers || [];
       const memberUids = [State.user.uid, ...pending.map(m => m.uid)];
       const memberNames = [State.profile.displayName||'Moi', ...pending.map(m => m.name)];
-      // FIX: utiliser les vrais avatars des membres invités (stockés dans cgPendingMembers)
       const memberAvatars = [State.profile.avatar||'🧑', ...pending.map(m => m.avatar||'🧑')];
 
       const groupData = {
-        name,
-        description: desc,
-        emoji: State.groupSelectedEmoji,
+        name, description: desc, emoji: State.groupSelectedEmoji,
         createdBy: State.user.uid,
-        members: memberUids,
-        memberNames,
-        memberAvatars,
+        members: memberUids, memberNames, memberAvatars,
         createdAt: serverTimestamp()
       };
 
       const docRef = await addDoc(collection(db,'groups'), groupData);
-
-      // FIX: ajouter le groupe directement dans State.groups sans attendre loadGroups()
-      // pour éviter la race condition où getDocs() retourne avant que Firestore propage l'écriture
       const newGroup = { id: docRef.id, ...groupData, createdAt: new Date() };
       State.groups.push(newGroup);
+      initMemberColors(memberUids);
 
       State.cgPendingMembers = [];
       closeCreateGroup();
       toast('Groupe créé ! 🎉','success');
       addNotification('👥', `Groupe "${name}" créé`);
-
-      // Mettre à jour l'affichage immédiatement, puis recharger en background pour avoir les données fraîches
       renderGroups();
       renderProfileHeader();
-
-      // Recharger en background pour synchroniser avec Firestore
-      // (met à jour les listeners de notifs pour le nouveau groupe)
       loadGroups();
-
     } catch(e) {
       console.error('createGroup:', e);
       toast('Erreur lors de la création.','error');
@@ -3049,10 +3515,8 @@ window.addEventListener('fb-ready', () => {
   const {auth, db, onAuthStateChanged, doc, getDoc} = window._fb;
 
   onAuthStateChanged(auth, async user => {
-    // FIX: si on est en train de s'inscrire, on laisse App.register() gérer le dashboard
-    // car le document Firestore n'est peut-être pas encore écrit
     if (State._isRegistering) {
-      console.log('onAuthStateChanged: inscription en cours, on ignore cet événement');
+      console.log('onAuthStateChanged: inscription en cours, ignoré');
       return;
     }
 
@@ -3065,16 +3529,9 @@ window.addEventListener('fb-ready', () => {
       let profile = null;
       try {
         const snap = await getDoc(doc(db,'users',user.uid));
-        if (snap.exists()) {
-          profile = snap.data();
-        }
-      } catch(e) {
-        console.warn('Profile load error:', e.message);
-      }
+        if (snap.exists()) profile = snap.data();
+      } catch(e) { console.warn('Profile load error:', e.message); }
 
-      // FIX: si le doc n'existe pas encore (rare, peut arriver si setDoc a échoué)
-      // ou si displayName est vide, utiliser le displayName de Firebase Auth
-      // qui est toujours fiable car updateProfile() est appelé avant setDoc()
       if (!profile || !profile.displayName) {
         profile = {
           displayName: user.displayName || user.email?.split('@')[0] || 'Utilisateur',
