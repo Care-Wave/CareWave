@@ -768,17 +768,48 @@ body.cursor-text #cursor-ring { opacity: 0; }
   border-radius: var(--r2); margin-bottom: 14px; overflow: hidden;
 }
 .profile-cover {
-  height: 100px;
-  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 45%, var(--teal) 100%);
+  height: 130px;
+  background: linear-gradient(135deg, #3730a3 0%, #6366f1 30%, #7c3aed 58%, #0d9488 100%);
   position: relative; overflow: hidden;
 }
+/* Animated shimmer layer */
 .profile-cover::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 35% 55%, rgba(255,255,255,.12), transparent 55%);
+  background:
+    radial-gradient(ellipse 70% 80% at 15% 40%, rgba(255,255,255,.14) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 85% 20%, rgba(45,212,191,.22) 0%, transparent 55%),
+    radial-gradient(ellipse 35% 40% at 50% 90%, rgba(129,140,248,.18) 0%, transparent 55%);
+  animation: cover-shimmer 7s ease-in-out infinite alternate;
 }
-.profile-cover::after { content: '🌊'; position: absolute; right: 16px; bottom: -8px; font-size: 4.5rem; opacity: .12; line-height: 1; }
-.profile-avatar-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 0 16px; margin-top: -26px; margin-bottom: 8px; position: relative; z-index: 2; }
+@keyframes cover-shimmer {
+  0%   { opacity: .8; transform: scale(1) translateX(0); }
+  100% { opacity: 1;  transform: scale(1.04) translateX(6px); }
+}
+/* Decorative emoji motifs */
+.profile-cover::after {
+  content: '🌊';
+  position: absolute; right: 14px; bottom: -10px;
+  font-size: 5.5rem; opacity: .13; line-height: 1;
+  animation: cover-wave 4s ease-in-out infinite;
+}
+@keyframes cover-wave {
+  0%,100% { transform: rotate(-6deg) translateY(0); }
+  50%      { transform: rotate(4deg)  translateY(-4px); }
+}
+/* Extra decorative dot grid overlay */
+.profile-cover-dots {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to right, transparent, rgba(0,0,0,.4) 40%, rgba(0,0,0,.4) 60%, transparent);
+}
+/* Horizontal glow line at bottom */
+.profile-cover-line {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(129,140,248,.6) 30%, rgba(45,212,191,.7) 70%, transparent);
+}
+.profile-avatar-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 0 16px; margin-top: -30px; margin-bottom: 8px; position: relative; z-index: 2; }
 .profile-avatar {
   width: 66px; height: 66px; border-radius: 50%;
   background: var(--c1); border: 3px solid var(--c0);
@@ -849,6 +880,16 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .history-msg { font-size: .8rem; color: var(--text2); font-style: italic; margin-bottom: 2px; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-time { font-size: .68rem; color: var(--text3); }
 .history-empty { text-align: center; padding: 24px; color: var(--text3); font-size: .85rem; }
+.history-delete-btn {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(244,63,94,.07); border: 1px solid rgba(244,63,94,.18);
+  color: var(--rose); font-size: .75rem;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: all var(--t); cursor: none;
+  align-self: center;
+}
+.history-item:hover .history-delete-btn { opacity: 1; }
+.history-delete-btn:hover { background: var(--rose); color: #fff; transform: scale(1.1); }
 
 /* ══ CHAT MODAL ══ */
 .modal-overlay {
@@ -976,16 +1017,29 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .chat-bubble.theirs .bubble-time { text-align: left; }
 
 /* ══ LIKES SYSTEM ══ */
+/* Wrapper that owns the hover zone — bubble + like area share one parent */
+.bubble-row {
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.msg-group.mine  .bubble-row { align-items: flex-end; }
+.msg-group.theirs .bubble-row { align-items: flex-start; }
+
 .bubble-like-area {
   display: flex; align-items: center; gap: 4px;
-  margin-top: 4px; opacity: 0;
-  transition: opacity .2s;
+  margin-top: 3px; opacity: 0;
+  transition: opacity .18s ease;
   justify-content: flex-end;
+  pointer-events: none; /* invisible = non-interactable until shown */
 }
 .msg-group.theirs .bubble-like-area { justify-content: flex-start; }
-.chat-bubble:hover ~ .bubble-like-area,
-.bubble-like-area:hover,
-.bubble-like-area.has-likes { opacity: 1; }
+
+/* Show on wrapper hover OR when there are actual likes */
+.bubble-row:hover .bubble-like-area,
+.bubble-like-area.has-likes {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .like-btn {
   display: inline-flex; align-items: center; gap: 3px;
@@ -1545,7 +1599,10 @@ body.cursor-text #cursor-ring { opacity: 0; }
     <!-- PROFILE TAB -->
     <div class="tab-panel" id="tab-profile" role="tabpanel">
       <div class="profile-card">
-        <div class="profile-cover" aria-hidden="true"></div>
+        <div class="profile-cover" aria-hidden="true">
+          <div class="profile-cover-dots"></div>
+          <div class="profile-cover-line"></div>
+        </div>
         <div class="profile-avatar-row">
           <div class="profile-avatar" id="profile-avatar-display" onclick="openEditProfile()" title="Modifier l'avatar" aria-label="Avatar">🧑</div>
           <button class="profile-edit-btn" onclick="openEditProfile()">✏️ Modifier</button>
@@ -2219,9 +2276,13 @@ function renderStatusHistory() {
   el.innerHTML = '<div class="history-list">' + items.map(s => {
     const tags = s.tags || [];
     const msg = s.message || '';
+    const docId = s.id || '';
     let ts;
     try { ts = s.createdAt?.toDate?.() || new Date(s.createdAt || 0); } catch(e) { ts = new Date(0); }
     const timeStr = ts.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' });
+    const deleteBtn = docId
+      ? `<button class="history-delete-btn" onclick="deleteStatus('${docId}')" title="Supprimer ce statut" aria-label="Supprimer">🗑</button>`
+      : '';
     return `<div class="history-item">
       <div class="history-dot"></div>
       <div class="history-body">
@@ -2229,8 +2290,23 @@ function renderStatusHistory() {
         ${msg ? `<div class="history-msg">"${msg}"</div>` : ''}
         <div class="history-time">${timeStr}</div>
       </div>
+      ${deleteBtn}
     </div>`;
   }).join('') + '</div>';
+}
+
+async function deleteStatus(docId) {
+  if (!docId || !State.user || !window._fb) return;
+  if (!confirm('Supprimer ce statut de votre historique ?')) return;
+  try {
+    const {db, doc, deleteDoc} = window._fb;
+    await deleteDoc(doc(db, 'statuses', docId));
+    toast('Statut supprimé ✅', 'success');
+    // listener will auto-refresh renderStatusHistory via onSnapshot
+  } catch(e) {
+    console.error('deleteStatus:', e);
+    toast('Erreur lors de la suppression.', 'error');
+  }
 }
 
 function computeStreak(statuses) {
@@ -2260,7 +2336,7 @@ function listenLatestStatus() {
   const q = query(collection(db, 'statuses'), where('uid', '==', State.user.uid));
   const unsub = onSnapshot(q, snap => {
     const docs = [];
-    snap.forEach(d => docs.push(d.data()));
+    snap.forEach(d => docs.push({ id: d.id, ...d.data() })); // keep doc ID
     docs.sort((a,b) => (b.createdAt?.toDate?.()?.getTime()||0) - (a.createdAt?.toDate?.()?.getTime()||0));
     State.statusHistory = docs;
     State.streak = computeStreak(docs);
@@ -3186,42 +3262,45 @@ function renderMessageGroup(group, container) {
     let ts = null;
     try { ts = m.createdAt?.toDate?.(); } catch(e) {}
     const likes = m.likes || {};
+    const likeCount = Object.keys(likes).length;
+    const iLiked = !!(State.user && likes[State.user.uid]);
 
+    // ── Wrapper that owns the hover zone ──────────────────
+    const row = document.createElement('div');
+    row.className = 'bubble-row';
+
+    // Bubble
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${group.mine ? 'mine' : 'theirs'}`;
     bubble.dataset.msgId = id;
+    bubble.appendChild(document.createTextNode(m.text || ''));
 
-    // Message text
-    const textNode = document.createTextNode(m.text || '');
-    bubble.appendChild(textNode);
-
-    // Timestamp (hidden, shows on hover)
+    // Timestamp (hidden, fades in on row hover via CSS on bubble)
     if (ts) {
       const timeEl = document.createElement('div');
       timeEl.className = 'bubble-time';
       timeEl.textContent = formatChatTime(ts);
       bubble.appendChild(timeEl);
     }
+    row.appendChild(bubble);
 
-    groupEl.appendChild(bubble);
-
-    // Like area (below each bubble)
+    // Like area — inside the same wrapper
     const likeArea = document.createElement('div');
-    const likeCount = Object.keys(likes).length;
-    const iLiked = State.user && likes[State.user.uid];
     likeArea.className = `bubble-like-area${likeCount > 0 ? ' has-likes' : ''}`;
     likeArea.dataset.likeArea = id;
     likeArea.innerHTML = `<button class="like-btn ${iLiked ? 'liked' : ''}" data-msg-id="${id}">
       ${iLiked ? '❤️' : '🤍'}<span class="like-count">${likeCount > 0 ? likeCount : ''}</span>
     </button>`;
-    groupEl.appendChild(likeArea);
+    row.appendChild(likeArea);
 
-    // Single-click on like button
+    groupEl.appendChild(row);
+
+    // Like button click
     const likeBtn = likeArea.querySelector('.like-btn');
     if (likeBtn) {
       likeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        toggleLike(id, !!iLiked);
+        toggleLike(id, iLiked);
       });
     }
 
@@ -3229,7 +3308,6 @@ function renderMessageGroup(group, container) {
     let clickTimer = null;
     bubble.addEventListener('click', () => {
       if (clickTimer) {
-        // Double click detected
         clearTimeout(clickTimer);
         clickTimer = null;
         if (!iLiked) {
@@ -3242,7 +3320,7 @@ function renderMessageGroup(group, container) {
       }
     });
 
-    // Touch double-tap support
+    // Touch double-tap
     let lastTap = 0;
     bubble.addEventListener('touchend', (e) => {
       const now = Date.now();
@@ -3254,9 +3332,7 @@ function renderMessageGroup(group, container) {
           spawnHeartBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
         }
         lastTap = 0;
-      } else {
-        lastTap = now;
-      }
+      } else { lastTap = now; }
     });
 
     if (window._applyHoverListeners) window._applyHoverListeners(likeArea);
@@ -3495,12 +3571,49 @@ const App = {
 
   async deleteAccount() {
     if (!confirm('Supprimer définitivement votre compte et toutes vos données ?\n\nCette action est irréversible.')) return;
+    const uid = State.user.uid;
+    const displayName = State.profile.displayName || 'Quelqu\'un';
     try {
-      const {auth, db, deleteUser, doc, deleteDoc} = window._fb;
-      await deleteDoc(doc(db,'users',State.user.uid));
+      const {auth, db, deleteUser, doc, deleteDoc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp} = window._fb;
+
+      // 1. Delete all own statuses
+      const statusSnap = await getDocs(query(collection(db,'statuses'), where('uid','==',uid)));
+      await Promise.all(statusSnap.docs.map(d => deleteDoc(d.ref)));
+
+      // 2. Remove from each group (or delete group if creator)
+      const groupSnap = await getDocs(query(collection(db,'groups'), where('members','array-contains',uid)));
+      await Promise.all(groupSnap.docs.map(async gDoc => {
+        const g = gDoc.data();
+        if (g.createdBy === uid) {
+          // Creator: delete messages sub-collection then group
+          const msgsSnap = await getDocs(collection(db,'groups',gDoc.id,'messages'));
+          await Promise.all(msgsSnap.docs.map(d => deleteDoc(d.ref)));
+          await deleteDoc(gDoc.ref);
+        } else {
+          // Member: remove from arrays, add system message
+          const idx = (g.members||[]).indexOf(uid);
+          if (idx === -1) return;
+          const newMembers = [...(g.members||[])]; newMembers.splice(idx,1);
+          const newNames   = [...(g.memberNames||[])]; newNames.splice(idx,1);
+          const newAvatars = [...(g.memberAvatars||[])]; newAvatars.splice(idx,1);
+          await updateDoc(gDoc.ref, { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
+          await addDoc(collection(db,'groups',gDoc.id,'messages'), {
+            type:'system', text:`${displayName} a quitté l'application 👋`, createdAt:serverTimestamp()
+          });
+        }
+      }));
+
+      // 3. Delete user profile doc
+      await deleteDoc(doc(db,'users',uid));
+
+      // 4. Delete Firebase Auth account
       await deleteUser(auth.currentUser);
-      resetAppState(); toast('Compte supprimé.','success'); UI.show('landing');
+
+      resetAppState();
+      toast('Compte et données supprimés. Au revoir 👋','success');
+      UI.show('landing');
     } catch(e) {
+      console.error('deleteAccount:', e);
       if (e.code === 'auth/requires-recent-login') {
         toast('Reconnectez-vous avant de supprimer votre compte.','error');
       } else { toast('Erreur lors de la suppression.','error'); }
