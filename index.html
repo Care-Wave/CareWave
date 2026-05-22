@@ -966,9 +966,11 @@ body.cursor-text #cursor-ring { opacity: 0; }
 
 /* Bubbles */
 .chat-bubble {
-  max-width: 72%; padding: 9px 13px; border-radius: 18px;
+  padding: 9px 13px; border-radius: 18px;
   font-size: .86rem; line-height: 1.45; position: relative;
   word-break: break-word;
+  width: fit-content;      /* se rétracte au texte */
+  min-width: 48px;         /* évite les bulles trop minuscules */
   transition: transform .15s ease;
   user-select: text;
 }
@@ -1021,16 +1023,20 @@ body.cursor-text #cursor-ring { opacity: 0; }
 .bubble-row {
   display: flex; flex-direction: column;
   position: relative;
+  max-width: 72%;          /* même contrainte que les bulles */
+  min-width: 0;
+  width: fit-content;      /* se rétracte à la taille du contenu */
 }
-.msg-group.mine  .bubble-row { align-items: flex-end; }
-.msg-group.theirs .bubble-row { align-items: flex-start; }
+/* Alignement gauche/droite hérité du msg-group parent */
+.msg-group.mine  .bubble-row { align-self: flex-end; align-items: flex-end; }
+.msg-group.theirs .bubble-row { align-self: flex-start; align-items: flex-start; }
 
 .bubble-like-area {
   display: flex; align-items: center; gap: 4px;
   margin-top: 3px; opacity: 0;
   transition: opacity .18s ease;
   justify-content: flex-end;
-  pointer-events: none; /* invisible = non-interactable until shown */
+  pointer-events: none;
 }
 .msg-group.theirs .bubble-like-area { justify-content: flex-start; }
 
