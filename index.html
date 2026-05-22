@@ -2299,13 +2299,18 @@ async function deleteStatus(docId) {
   if (!docId || !State.user || !window._fb) return;
   if (!confirm('Supprimer ce statut de votre historique ?')) return;
   try {
-    const {db, doc, deleteDoc} = window._fb;
-    await deleteDoc(doc(db, 'statuses', docId));
+    const fb = window._fb;
+    const ref = fb.doc(fb.db, 'statuses', docId);
+    await fb.deleteDoc(ref);
     toast('Statut supprimé ✅', 'success');
-    // listener will auto-refresh renderStatusHistory via onSnapshot
+    // onSnapshot se charge de rafraîchir l'historique automatiquement
   } catch(e) {
-    console.error('deleteStatus:', e);
-    toast('Erreur lors de la suppression.', 'error');
+    console.error('deleteStatus error:', e.code, e.message);
+    if (e.code === 'permission-denied') {
+      toast('Permission refusée — vérifiez les règles Firestore.', 'error');
+    } else {
+      toast('Erreur lors de la suppression.', 'error');
+    }
   }
 }
 
