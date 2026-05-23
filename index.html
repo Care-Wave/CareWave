@@ -11,13 +11,13 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   const firebaseConfig = { apiKey:"AIzaSyAt245YXg-80Q0aHolRUNS3M2iZ1q4Jfx0",authDomain:"carew-95ee4.firebaseapp.com",projectId:"carew-95ee4",storageBucket:"carew-95ee4.firebasestorage.app",messagingSenderId:"443664388194",appId:"1:443664388194:web:477905a47e2e2f9aaac13b" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 
@@ -601,10 +601,21 @@ body {
   border: 2px solid var(--c0);
 }
 
+/* ══ TAB PANELS — animated transition ══ */
+.tab-panel { display: none; }
+.tab-panel.active {
+  display: block;
+  animation: tab-enter .28s cubic-bezier(.16,1,.3,1);
+}
+@keyframes tab-enter {
+  from { opacity: 0; transform: translateY(14px) scale(.99); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
 /* ══ TAB PANELS ══ */
-.tab-panel { display: none; animation: fade-up .3s ease; }
-.tab-panel.active { display: block; }
-@keyframes fade-up { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: tab-enter .25s cubic-bezier(.16,1,.3,1); }
+@keyframes tab-enter { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
 /* ══ STATUS TAB ══ */
 .current-status-card {
@@ -3842,49 +3853,75 @@ const App = {
   },
 
   async googleSignIn() {
-    const {auth, db, GoogleAuthProvider, signInWithPopup, doc, getDoc, setDoc, serverTimestamp} = window._fb;
-    const btnLogin  = document.getElementById('login-google-btn');
-    const btnReg    = document.getElementById('register-google-btn');
+    const {auth, db, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail, doc, getDoc, setDoc, serverTimestamp} = window._fb;
+    const btnLogin = document.getElementById('login-google-btn');
+    const btnReg   = document.getElementById('register-google-btn');
     const googleSvg = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>`;
-    if (btnLogin)  { btnLogin.disabled  = true; btnLogin.textContent  = '⏳ Connexion…'; }
-    if (btnReg)    { btnReg.disabled    = true; btnReg.textContent    = '⏳ Connexion…'; }
+
+    if (btnLogin) { btnLogin.disabled = true; btnLogin.textContent = '⏳ Connexion…'; }
+    if (btnReg)   { btnReg.disabled   = true; btnReg.textContent   = '⏳ Connexion…'; }
     showLoader(true);
+
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
+
+      // ── Étape 1 : déclencher le popup Google pour obtenir l'email ────
       const cred = await signInWithPopup(auth, provider);
       const user  = cred.user;
+      const email = user.email;
 
-      // Lookup by UID — completely independent from email-based accounts
+      // ── Étape 2 : vérifier si cet email a déjà un compte email/password ──
+      // Firebase Auth fusionne par défaut les comptes avec le même email.
+      // Pour éviter ça, on vérifie les providers AVANT de créer le profil Firestore.
+      // Si l'utilisateur est maintenant connecté via Google MAIS avait un compte
+      // email/password, on le détecte via providerData.
+      const providers = user.providerData.map(p => p.providerId);
+      const hasEmailPassword = providers.includes('password');
+      const hasGoogle = providers.includes('google.com');
+
+      if (hasEmailPassword && hasGoogle) {
+        // Firebase a fusionné automatiquement — on doit séparer.
+        // On déconnecte et on informe l'utilisateur.
+        await window._fb.signOut(auth);
+        showLoader(false);
+        toast('⚠️ Cet email a déjà un compte CareWave. Connectez-vous avec email + mot de passe.', 'error', 6000);
+        if (btnLogin) { btnLogin.disabled = false; btnLogin.innerHTML = `${googleSvg} Continuer avec Google`; }
+        if (btnReg)   { btnReg.disabled   = false; btnReg.innerHTML   = `${googleSvg} Continuer avec Google`; }
+        return;
+      }
+
+      // ── Étape 3 : lookup Firestore par UID (pas par email) ──────────
+      // Chaque provider (Google / email+pw) a son propre UID Firebase distinct.
+      // Le profil Firestore est toujours indexé par UID.
       const userRef  = doc(db, 'users', user.uid);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // ── Première connexion Google : créer le profil ──────────────
-        const rawName = user.displayName || user.email?.split('@')[0] || 'Utilisateur';
+        // Première connexion Google → créer le profil Firestore
+        const rawName = user.displayName || email?.split('@')[0] || 'Utilisateur';
         const profileData = {
           displayName:      rawName,
           displayNameLower: rawName.toLowerCase(),
-          email:            user.email || '',
+          email:            email || '',
           bio: '', avatar: '🧑',
           darkMode: true,
-          authProvider: 'google',          // marqueur pour différencier
+          authProvider: 'google',
           createdAt: serverTimestamp()
         };
         await setDoc(userRef, profileData);
-        // Initialiser directement (onAuthStateChanged peut se déclencher aussi,
-        // mais _isRegistering n'est pas posé ici — on laisse onAuthStateChanged
-        // finir normalement car le doc existe maintenant)
-        showLoader(false);
-        // onAuthStateChanged va relire le doc et appeler _initDashboard
-      } else {
-        // ── Reconnexion : onAuthStateChanged gère le reste ─────────
-        showLoader(false);
+        // onAuthStateChanged se déclenche et appelle _initDashboard
       }
+      // Reconnexion Google existante → onAuthStateChanged gère la suite
+      showLoader(false);
+
     } catch(e) {
       showLoader(false);
       console.error('googleSignIn:', e.code, e.message);
-      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      if (e.code === 'auth/account-exists-with-different-credential') {
+        // Cas où Firebase détecte lui-même le conflit avant nous
+        toast('⚠️ Cet email a déjà un compte CareWave. Connectez-vous avec email + mot de passe.', 'error', 6000);
+      } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
         toast('Erreur lors de la connexion Google. Réessayez.', 'error');
       }
     } finally {
