@@ -1603,6 +1603,7 @@ body {
     <div class="verify-banner-text">
       Vérifiez votre email pour activer votre compte.
       <span id="verify-banner-email"></span>
+      <span> — Si vous ne le trouvez pas, vérifiez vos <strong>spams</strong>.</span>
     </div>
     <button class="verify-resend-btn" id="verify-resend-btn" onclick="resendVerificationEmail()">
       Renvoyer l'email
@@ -3821,7 +3822,7 @@ const App = {
         };
         await sendEmailVerification(cred.user, actionCodeSettings);
         showVerifyBanner(cred.user);
-        toast('📧 Email de vérification envoyé !', 'info', 5000);
+        toast('📧 Email de vérification envoyé ! Vérifiez vos spams si besoin.', 'info', 6000);
       } catch(verifyErr) {
         console.warn('sendEmailVerification:', verifyErr.message);
       }
