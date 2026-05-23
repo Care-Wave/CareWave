@@ -11,13 +11,13 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   const firebaseConfig = { apiKey:"AIzaSyAt245YXg-80Q0aHolRUNS3M2iZ1q4Jfx0",authDomain:"carew-95ee4.firebaseapp.com",projectId:"carew-95ee4",storageBucket:"carew-95ee4.firebasestorage.app",messagingSenderId:"443664388194",appId:"1:443664388194:web:477905a47e2e2f9aaac13b" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 
@@ -100,6 +100,37 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ══ VERIFICATION BANNER ══ */
+.verify-banner {
+  display: none;
+  align-items: center; gap: 10px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(249,115,22,.1));
+  border-bottom: 1px solid rgba(245,158,11,.3);
+  font-size: .8rem; color: var(--amber);
+  flex-wrap: wrap;
+  position: sticky; top: 70px; z-index: 190;
+  backdrop-filter: blur(10px);
+}
+.verify-banner.show { display: flex; }
+.verify-banner-icon { font-size: 1rem; flex-shrink: 0; }
+.verify-banner-text { flex: 1; min-width: 180px; font-weight: 600; line-height: 1.4; }
+.verify-banner-text span { opacity: .8; font-weight: 400; }
+.verify-resend-btn {
+  padding: 5px 13px; border-radius: 100px;
+  background: rgba(245,158,11,.2); border: 1px solid rgba(245,158,11,.4);
+  color: var(--amber); font-size: .75rem; font-weight: 800;
+  cursor: pointer; transition: all var(--t);
+  font-family: 'Cabinet Grotesk', sans-serif; white-space: nowrap; flex-shrink: 0;
+}
+.verify-resend-btn:hover { background: var(--amber); color: #000; }
+.verify-resend-btn:disabled { opacity: .5; cursor: not-allowed; }
+.verify-dismiss-btn {
+  background: none; border: none; color: var(--amber);
+  font-size: .85rem; cursor: pointer; opacity: .6; padding: 2px 4px; flex-shrink: 0;
+}
+.verify-dismiss-btn:hover { opacity: 1; }
 
 /* ══ BACKGROUND MESH ══ */
 .bg-mesh {
@@ -1566,6 +1597,19 @@ body {
     </div>
   </header>
 
+  <!-- Bandeau vérification email -->
+  <div class="verify-banner" id="verify-banner" role="alert">
+    <span class="verify-banner-icon">✉️</span>
+    <div class="verify-banner-text">
+      Vérifiez votre email pour activer votre compte.
+      <span id="verify-banner-email"></span>
+    </div>
+    <button class="verify-resend-btn" id="verify-resend-btn" onclick="resendVerificationEmail()">
+      Renvoyer l'email
+    </button>
+    <button class="verify-dismiss-btn" onclick="dismissVerifyBanner()" aria-label="Fermer">✕</button>
+  </div>
+
   <main class="app-content" role="main" id="app-content">
 
     <!-- STATUS TAB -->
@@ -1878,6 +1922,85 @@ body {
 </div>
 
 <script>
+/* ════════════════════════════════════════════════
+   EMAIL VERIFICATION BANNER
+════════════════════════════════════════════════ */
+function showVerifyBanner(user) {
+  if (!user || user.emailVerified) return;
+  // Pas de bandeau pour les comptes Google (email déjà vérifié via Google)
+  const isGoogle = user.providerData?.some(p => p.providerId === 'google.com');
+  if (isGoogle) return;
+  // Pas de bandeau si l'utilisateur l'a déjà fermé cette session
+  try { if (sessionStorage.getItem('cw_verify_dismissed') === '1') return; } catch(e) {}
+
+  const banner = document.getElementById('verify-banner');
+  const emailSpan = document.getElementById('verify-banner-email');
+  if (!banner) return;
+  if (emailSpan && user.email) emailSpan.textContent = ` (${user.email})`;
+  banner.classList.add('show');
+  startVerifyCheck();
+}
+
+function hideVerifyBanner() {
+  const banner = document.getElementById('verify-banner');
+  if (banner) banner.classList.remove('show');
+  stopVerifyCheck();
+}
+
+function dismissVerifyBanner() {
+  hideVerifyBanner();
+  try { sessionStorage.setItem('cw_verify_dismissed', '1'); } catch(e) {}
+}
+
+async function resendVerificationEmail() {
+  const btn = document.getElementById('verify-resend-btn');
+  const user = window._fb?.auth?.currentUser;
+  if (!btn || !user) return;
+
+  // Vérifier d'abord si l'email a entretemps été vérifié
+  try { await user.reload(); } catch(e) {}
+  if (user.emailVerified) { hideVerifyBanner(); return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Envoi…';
+  try {
+    await window._fb.sendEmailVerification(user, {
+      url: 'https://care-wave.github.io/CareWave/',
+      handleCodeInApp: false
+    });
+    toast('📧 Email de vérification renvoyé !', 'success', 5000);
+    btn.textContent = '✅ Envoyé !';
+    setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Renvoyer l\'email'; } }, 60000);
+  } catch(e) {
+    console.error('resendVerification:', e.code);
+    const msg = e.code === 'auth/too-many-requests'
+      ? 'Trop d\'envois. Attendez quelques minutes.'
+      : 'Erreur lors de l\'envoi. Réessayez.';
+    toast(msg, 'error');
+    btn.disabled = false; btn.textContent = 'Renvoyer l\'email';
+  }
+}
+
+// Vérification périodique : détecte quand l'utilisateur a cliqué le lien
+let _verifyCheckInterval = null;
+function startVerifyCheck() {
+  stopVerifyCheck();
+  _verifyCheckInterval = setInterval(async () => {
+    const user = window._fb?.auth?.currentUser;
+    if (!user) { stopVerifyCheck(); return; }
+    try {
+      await user.reload();
+      if (user.emailVerified) {
+        stopVerifyCheck();
+        hideVerifyBanner();
+        toast('✅ Email vérifié ! Votre compte est pleinement actif.', 'success', 6000);
+      }
+    } catch(e) { /* silencieux */ }
+  }, 8000); // toutes les 8 secondes
+}
+function stopVerifyCheck() {
+  if (_verifyCheckInterval) { clearInterval(_verifyCheckInterval); _verifyCheckInterval = null; }
+}
+
 /* ════════════════════════════════════════════════
    HOVER LISTENERS (stub — cursor natif)
 ════════════════════════════════════════════════ */
@@ -3599,6 +3722,11 @@ async function _initDashboard(user, profile) {
   switchTab('status');
   loadGroups();
   toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
+
+  // Afficher le bandeau si l'email n'est pas encore vérifié
+  if (window._fb?.auth?.currentUser) {
+    showVerifyBanner(window._fb.auth.currentUser);
+  }
 }
 
 const App = {
@@ -3684,6 +3812,19 @@ const App = {
       resetAppState();
       await _initDashboard(cred.user, { displayName: name, displayNameLower: name.toLowerCase(), email, bio: '', avatar: '🧑', darkMode: true });
       showLoader(false);
+
+      // Envoyer l'email de vérification APRÈS que le dashboard est affiché
+      try {
+        const actionCodeSettings = {
+          url: 'https://care-wave.github.io/CareWave/',
+          handleCodeInApp: false
+        };
+        await sendEmailVerification(cred.user, actionCodeSettings);
+        showVerifyBanner(cred.user);
+        toast('📧 Email de vérification envoyé !', 'info', 5000);
+      } catch(verifyErr) {
+        console.warn('sendEmailVerification:', verifyErr.message);
+      }
     } catch(e) {
       State._isRegistering = false;
       showLoader(false);
@@ -3754,6 +3895,8 @@ const App = {
 
   async logout() {
     const {auth, signOut} = window._fb;
+    stopVerifyCheck();
+    try { sessionStorage.removeItem('cw_verify_dismissed'); } catch(e) {}
     resetAppState();
     await signOut(auth);
     State.dark = true;
