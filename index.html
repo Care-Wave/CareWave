@@ -620,9 +620,12 @@ body {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 7px 13px; border-radius: 100px;
   font-size: .8rem; font-weight: 700;
-  border: 1.5px solid transparent; cursor: pointer; transition: all .2s var(--t-spring);
+  border: 1.5px solid transparent; cursor: pointer;
   font-family: 'Cabinet Grotesk', sans-serif; opacity: .6;
   -webkit-tap-highlight-color: transparent;
+  /* Transition séparée : couleur/opacité instantanée, transform rapide */
+  transition: transform .15s ease, box-shadow .15s ease;
+  will-change: transform;
 }
 .status-opt:hover { opacity: .85; transform: translateY(-1px); }
 .status-opt.selected { opacity: 1; transform: translateY(-2px) scale(1.05); font-weight: 800; }
@@ -2193,7 +2196,12 @@ function switchTab(name) {
   });
   if (name === 'groups' && State.groups.length === 0) loadGroups();
   else if (name === 'groups') renderGroups();
-  if (name === 'profile') { renderProfileHeader(); loadProfileStats(); }
+  if (name === 'profile') {
+    renderProfileHeader();
+    loadProfileStats();
+    // Démarrer la vague maintenant que le tab est visible
+    setTimeout(() => { if (window._startProfileWave) window._startProfileWave(); }, 50);
+  }
   if (window._applyHoverListeners) window._applyHoverListeners();
 }
 
@@ -2219,7 +2227,6 @@ function toggleStatusOpt(btn, label) {
   } else {
     State.selectedStatus.add(label);
     btn.classList.add('selected');
-    if (typeof gsap !== 'undefined') gsap.from(btn, { scale:.88, duration:.3, ease:'back.out(2)' });
   }
 }
 
@@ -2452,7 +2459,12 @@ async function saveProfile() {
   const {db, doc, updateDoc} = window._fb;
   try {
     const newAvatar = State.profile.avatar || '🧑';
-    await updateDoc(doc(db,'users',State.user.uid), { displayName:name, bio, avatar: newAvatar });
+    await updateDoc(doc(db,'users',State.user.uid), {
+      displayName: name,
+      displayNameLower: name.toLowerCase(),
+      bio,
+      avatar: newAvatar
+    });
     State.profile.displayName = name;
     State.profile.bio = bio;
     if (State.groups.length > 0) {
@@ -2983,18 +2995,63 @@ async function _searchByPseudo(searchTerm, excludeUids = []) {
   if (!searchTerm || searchTerm.length < 2 || !window._fb) return [];
   const {db, collection, query, where, getDocs} = window._fb;
   const term = searchTerm.toLowerCase().trim();
+
+  // Requête Firestore préfixe (fonctionne grâce à l'index automatique)
   const q = query(
     collection(db, 'users'),
     where('displayNameLower', '>=', term),
     where('displayNameLower', '<=', term + '\uf8ff')
   );
-  const snap = await getDocs(q);
-  const results = [];
-  snap.forEach(d => {
-    const uid = d.id;
-    if (!excludeUids.includes(uid)) results.push({ uid, ...d.data() });
-  });
-  return results.slice(0, 6); // max 6 résultats
+
+  try {
+    const snap = await getDocs(q);
+    const results = [];
+    snap.forEach(d => {
+      const uid = d.id;
+      if (!excludeUids.includes(uid)) results.push({ uid, ...d.data() });
+    });
+
+    // Si 0 résultats Firestore, tentative client-side (anciens comptes sans displayNameLower)
+    if (results.length === 0) {
+      const allSnap = await getDocs(collection(db, 'users'));
+      allSnap.forEach(d => {
+        const uid = d.id;
+        if (excludeUids.includes(uid)) return;
+        const data = d.data();
+        const name = (data.displayName || '').toLowerCase();
+        if (name.startsWith(term)) results.push({ uid, ...data });
+      });
+      // Rétroactivement écrire displayNameLower sur les docs trouvés sans ce champ
+      allSnap.forEach(async d => {
+        const data = d.data();
+        if (!data.displayNameLower && data.displayName) {
+          try {
+            const {updateDoc, doc} = window._fb;
+            await updateDoc(doc(db, 'users', d.id), {
+              displayNameLower: data.displayName.toLowerCase()
+            });
+          } catch(e) { /* silencieux */ }
+        }
+      });
+    }
+
+    return results.slice(0, 6);
+  } catch(e) {
+    console.warn('_searchByPseudo Firestore error:', e.message);
+    // Fallback complet si index absent ou autre erreur
+    try {
+      const allSnap = await getDocs(collection(db, 'users'));
+      const results = [];
+      allSnap.forEach(d => {
+        const uid = d.id;
+        if (excludeUids.includes(uid)) return;
+        const data = d.data();
+        const name = (data.displayName || '').toLowerCase();
+        if (name.startsWith(term)) results.push({ uid, ...data });
+      });
+      return results.slice(0, 6);
+    } catch(e2) { return []; }
+  }
 }
 
 // Pseudo search in members modal (existing group)
@@ -3518,6 +3575,16 @@ async function _initDashboard(user, profile) {
   State.user = user;
   State.profile = profile;
 
+  // Migration silencieuse : écrire displayNameLower si absent (anciens comptes)
+  if (profile.displayName && !profile.displayNameLower) {
+    try {
+      const {db, doc, updateDoc} = window._fb;
+      const lower = profile.displayName.toLowerCase();
+      await updateDoc(doc(db, 'users', user.uid), { displayNameLower: lower });
+      State.profile.displayNameLower = lower;
+    } catch(e) { /* silencieux */ }
+  }
+
   State.dark = profile.darkMode !== false;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
   const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
@@ -3927,82 +3994,115 @@ function addSwipeClose(sheetId, closeFn) {
    PROFILE COVER WAVE (Canvas + gyroscope)
 ════════════════════════════════════════════════ */
 (function initProfileWave() {
-  const canvas = document.getElementById('profile-wave-canvas');
-  if (!canvas) return;
+  function setup() {
+    const canvas = document.getElementById('profile-wave-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 60;
+    let tiltX = 0;
+    let animId = null;
+    let running = false;
 
-  const ctx = canvas.getContext('2d');
-  let W = 0, H = 0;
-  let tiltX = 0; // -1 to 1, from gyroscope
-  let animId = null;
-
-  function resize() {
-    const parent = canvas.parentElement;
-    W = canvas.width  = parent ? parent.offsetWidth  : 300;
-    H = canvas.height = 60;
-  }
-  resize();
-  window.addEventListener('resize', resize, { passive: true });
-
-  // Gyroscope: listen if available
-  if (window.DeviceOrientationEvent) {
-    const handler = e => {
-      // gamma = left/right tilt, range ~ -90 to 90
-      if (e.gamma != null) tiltX = Math.max(-1, Math.min(1, e.gamma / 30));
-    };
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // iOS 13+ requires permission — request on first user interaction
-      const askPermission = () => {
-        DeviceOrientationEvent.requestPermission().then(r => {
-          if (r === 'granted') window.addEventListener('deviceorientation', handler, { passive: true });
-        }).catch(() => {});
-        document.removeEventListener('touchstart', askPermission);
-      };
-      document.addEventListener('touchstart', askPermission, { once: true });
-    } else {
-      window.addEventListener('deviceorientation', handler, { passive: true });
+    function resize() {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.getBoundingClientRect().width;
+      if (w > 0) { W = canvas.width = w; H = canvas.height = 60; }
     }
-  }
 
-  // Wave params
-  const waves = [
-    { amp: 6,  speed: 0.018, phase: 0,   color: 'rgba(99,102,241,0.55)',  offset: 0.55 },
-    { amp: 5,  speed: 0.024, phase: 2.1, color: 'rgba(45,212,191,0.40)',  offset: 0.65 },
-    { amp: 4,  speed: 0.014, phase: 4.2, color: 'rgba(255,255,255,0.18)', offset: 0.75 },
-  ];
-  let t = 0;
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    waves.forEach(w => {
-      const tiltShift = tiltX * 40; // gyro shifts wave horizontally
-      const baseY = H * w.offset;
-      ctx.beginPath();
-      ctx.moveTo(0, H);
-      for (let x = 0; x <= W; x += 2) {
-        const y = baseY
-          + Math.sin((x / W) * Math.PI * 3 + t * w.speed * 60 + w.phase + tiltShift * 0.04) * w.amp
-          + Math.sin((x / W) * Math.PI * 5 + t * w.speed * 40 + w.phase * 1.3) * (w.amp * 0.5);
-        ctx.lineTo(x, y);
+    // Gyroscope
+    if (window.DeviceOrientationEvent) {
+      const handler = e => {
+        if (e.gamma != null) tiltX = Math.max(-1, Math.min(1, e.gamma / 45));
+      };
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        document.addEventListener('touchstart', () => {
+          DeviceOrientationEvent.requestPermission()
+            .then(r => { if (r === 'granted') window.addEventListener('deviceorientation', handler, { passive: true }); })
+            .catch(() => {});
+        }, { once: true });
+      } else {
+        window.addEventListener('deviceorientation', handler, { passive: true });
       }
-      ctx.lineTo(W, H);
-      ctx.closePath();
-      ctx.fillStyle = w.color;
-      ctx.fill();
-    });
+    }
 
-    t++;
-    animId = requestAnimationFrame(draw);
+    // Wave layers — paramètres réalistes : amplitude faible, fréquence basse, vitesse lente
+    const waves = [
+      { amp: 7,  freq: 1.4, speed: 0.55, phase: 0,    alpha: 0.50, color: '99,102,241'  },
+      { amp: 5,  freq: 2.1, speed: 0.80, phase: 1.05, alpha: 0.38, color: '45,212,191'  },
+      { amp: 4,  freq: 1.8, speed: 0.65, phase: 2.20, alpha: 0.22, color: '255,255,255' },
+    ];
+
+    function draw(now) {
+      if (!running) return;
+      const t = now * 0.001; // secondes, pas frames
+
+      ctx.clearRect(0, 0, W, H);
+
+      waves.forEach(w => {
+        const phaseShift = tiltX * 0.6; // gyro décale la phase
+        const baseY = H * 0.62; // ancrage à 62% de la hauteur du canvas
+
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+
+        for (let x = 0; x <= W; x += 3) {
+          const xn = x / W; // normalisé 0→1
+          const y = baseY
+            + Math.sin(xn * Math.PI * 2 * w.freq + t * w.speed * Math.PI * 2 + w.phase + phaseShift) * w.amp
+            + Math.sin(xn * Math.PI * 2 * w.freq * 1.7 + t * w.speed * Math.PI * 1.4 + w.phase * 0.7) * (w.amp * 0.38);
+          ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(W, H);
+        ctx.closePath();
+
+        // Dégradé vertical pour chaque vague
+        const grad = ctx.createLinearGradient(0, baseY - w.amp * 2, 0, H);
+        grad.addColorStop(0, `rgba(${w.color},${w.alpha})`);
+        grad.addColorStop(1, `rgba(${w.color},${w.alpha * 0.4})`);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+
+      animId = requestAnimationFrame(draw);
+    }
+
+    function start() {
+      if (running) return;
+      resize();
+      if (W === 0) {
+        // Canvas pas encore visible — retry dans 100ms
+        setTimeout(start, 100); return;
+      }
+      running = true;
+      animId = requestAnimationFrame(draw);
+    }
+
+    function stop() {
+      running = false;
+      if (animId) { cancelAnimationFrame(animId); animId = null; }
+    }
+
+    // IntersectionObserver : démarre quand visible
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) start(); else stop(); });
+    }, { threshold: 0.05 });
+    observer.observe(canvas);
+
+    // Resize on window change
+    window.addEventListener('resize', () => { if (running) resize(); }, { passive: true });
+
+    // Expose start so switchTab can trigger it
+    window._startProfileWave = start;
   }
 
-  // Only animate when tab profile is visible to save battery
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { if (!animId) draw(); }
-      else { if (animId) { cancelAnimationFrame(animId); animId = null; } }
-    });
-  }, { threshold: 0.1 });
-  observer.observe(canvas);
+  // Attendre que le DOM soit prêt
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
 })();
 </script>
 </body>
