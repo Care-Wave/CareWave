@@ -2255,7 +2255,14 @@ function resetAppState() {
   ['stat-total','stat-streak','stat-groups'].forEach(id => safe(id, el => el.textContent='—'));
   document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
   updateMsgCounter();
-  switchTab('status');
+  // Réinitialiser l'état interne des tabs sans déclencher de rendu
+  _currentTab = 'status';
+  TAB_ORDER.forEach(t => {
+    const p = document.getElementById('tab-' + t);
+    const n = document.getElementById('nav-' + t);
+    if (p) p.classList.remove('active', 'slide-from-right', 'slide-from-left');
+    if (n) { n.classList.remove('active'); n.setAttribute('aria-selected', 'false'); }
+  });
 }
 
 /* ════════════════════════════════════════════════
@@ -2358,14 +2365,10 @@ const TAB_ORDER = ['status', 'groups', 'profile'];
 let _currentTab = 'status';
 
 function switchTab(name) {
-  if (name === _currentTab && document.getElementById('tab-' + name)?.classList.contains('active')) {
-    // Même onglet — juste s'assurer que le contenu est à jour
-  }
-
   const prevIndex = TAB_ORDER.indexOf(_currentTab);
   const nextIndex = TAB_ORDER.indexOf(name);
+  const isNewTab  = prevIndex !== nextIndex; // true = changement réel de tab
   const direction = nextIndex > prevIndex ? 'slide-from-right' : 'slide-from-left';
-  const isFirstLoad = _currentTab === name; // pas d'animation si même tab
 
   TAB_ORDER.forEach(t => {
     const p = document.getElementById('tab-' + t);
@@ -2376,13 +2379,10 @@ function switchTab(name) {
       p.classList.add('active');
       n.classList.add('active');
       n.setAttribute('aria-selected', 'true');
-      // Animation directionnelle seulement si on change de tab
-      if (!isFirstLoad && prevIndex !== nextIndex) {
+      if (isNewTab) {
         p.classList.remove('slide-from-right', 'slide-from-left');
-        // Force reflow pour que l'animation se rejoue
-        void p.offsetWidth;
+        void p.offsetWidth; // force reflow pour rejouer l'animation
         p.classList.add(direction);
-        // Nettoyer la classe après l'animation
         setTimeout(() => p.classList.remove('slide-from-right', 'slide-from-left'), 320);
       }
     } else {
@@ -2393,8 +2393,6 @@ function switchTab(name) {
   });
 
   _currentTab = name;
-
-  // Mémoriser dans localStorage
   try { localStorage.setItem('cw_last_tab', name); } catch(e) {}
 
   if (name === 'groups' && State.groups.length === 0) loadGroups();
