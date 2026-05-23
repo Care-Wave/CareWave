@@ -616,6 +616,36 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: tab-enter .25s cubic-bezier(.16,1,.3,1); }
 @keyframes tab-enter { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.tab-panel.slide-from-right { animation: tab-from-right .28s cubic-bezier(.16,1,.3,1); }
+.tab-panel.slide-from-left  { animation: tab-from-left  .28s cubic-bezier(.16,1,.3,1); }
+@keyframes tab-from-right { from { opacity:0; transform:translateX(30px);  } to { opacity:1; transform:translateX(0); } }
+@keyframes tab-from-left  { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
+
+/* ══ INVITE LINK ══ */
+.invite-link-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; margin-bottom: 14px;
+  background: rgba(45,212,191,.07); border: 1px solid rgba(45,212,191,.2);
+  border-radius: var(--r); cursor: pointer; transition: all var(--t);
+}
+.invite-link-row:hover { background: rgba(45,212,191,.13); border-color: rgba(45,212,191,.35); }
+.invite-link-icon { font-size: 1.1rem; flex-shrink: 0; }
+.invite-link-text { flex: 1; min-width: 0; }
+.invite-link-label { font-size: .8rem; font-weight: 800; color: var(--teal); }
+.invite-link-url {
+  font-size: .68rem; color: var(--text3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 200px;
+}
+.invite-copy-btn {
+  flex-shrink: 0; padding: 5px 12px; border-radius: 100px;
+  background: rgba(45,212,191,.15); border: 1px solid rgba(45,212,191,.3);
+  color: var(--teal); font-size: .74rem; font-weight: 800;
+  cursor: pointer; transition: all var(--t);
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.invite-copy-btn:hover { background: var(--teal); color: #fff; border-color: transparent; }
+.invite-copy-btn.copied { background: var(--green); color: #fff; border-color: transparent; }
 
 /* ══ STATUS TAB ══ */
 .current-status-card {
@@ -1813,6 +1843,16 @@ body {
     </div>
     <div class="sheet-body">
       <div id="ms-main-body">
+        <!-- Lien d'invitation rapide -->
+        <div class="invite-link-row" id="ms-invite-row" onclick="copyGroupInviteLink()">
+          <span class="invite-link-icon">🔗</span>
+          <div class="invite-link-text">
+            <div class="invite-link-label">Lien d'invitation</div>
+            <div class="invite-link-url" id="ms-invite-url">care-wave.github.io/CareWave/</div>
+          </div>
+          <button class="invite-copy-btn" id="ms-copy-btn" onclick="event.stopPropagation();copyGroupInviteLink()">Copier</button>
+        </div>
+
         <div class="ms-section-label">Inviter un membre</div>
         <!-- Recherche par email -->
         <div style="font-size:.72rem;font-weight:700;color:var(--text3);margin-bottom:6px;">📧 Par email</div>
@@ -2313,8 +2353,21 @@ function saveSettings() {
   updateDoc(doc(db, 'users', State.user.uid), { darkMode: State.dark }).catch(() => {});
 }
 
+/* Ordre des tabs pour la direction de l'animation */
+const TAB_ORDER = ['status', 'groups', 'profile'];
+let _currentTab = 'status';
+
 function switchTab(name) {
-  ['status','groups','profile'].forEach(t => {
+  if (name === _currentTab && document.getElementById('tab-' + name)?.classList.contains('active')) {
+    // Même onglet — juste s'assurer que le contenu est à jour
+  }
+
+  const prevIndex = TAB_ORDER.indexOf(_currentTab);
+  const nextIndex = TAB_ORDER.indexOf(name);
+  const direction = nextIndex > prevIndex ? 'slide-from-right' : 'slide-from-left';
+  const isFirstLoad = _currentTab === name; // pas d'animation si même tab
+
+  TAB_ORDER.forEach(t => {
     const p = document.getElementById('tab-' + t);
     const n = document.getElementById('nav-' + t);
     if (!p || !n) return;
@@ -2323,18 +2376,32 @@ function switchTab(name) {
       p.classList.add('active');
       n.classList.add('active');
       n.setAttribute('aria-selected', 'true');
+      // Animation directionnelle seulement si on change de tab
+      if (!isFirstLoad && prevIndex !== nextIndex) {
+        p.classList.remove('slide-from-right', 'slide-from-left');
+        // Force reflow pour que l'animation se rejoue
+        void p.offsetWidth;
+        p.classList.add(direction);
+        // Nettoyer la classe après l'animation
+        setTimeout(() => p.classList.remove('slide-from-right', 'slide-from-left'), 320);
+      }
     } else {
       p.classList.remove('active');
       n.classList.remove('active');
       n.setAttribute('aria-selected', 'false');
     }
   });
+
+  _currentTab = name;
+
+  // Mémoriser dans localStorage
+  try { localStorage.setItem('cw_last_tab', name); } catch(e) {}
+
   if (name === 'groups' && State.groups.length === 0) loadGroups();
   else if (name === 'groups') renderGroups();
   if (name === 'profile') {
     renderProfileHeader();
     loadProfileStats();
-    // Démarrer la vague maintenant que le tab est visible
     setTimeout(() => { if (window._startProfileWave) window._startProfileWave(); }, 50);
   }
   if (window._applyHoverListeners) window._applyHoverListeners();
@@ -2887,9 +2954,52 @@ function openMembersModal() {
   document.getElementById('ms-email').value = '';
   const msErr = document.getElementById('ms-error'); if (msErr) msErr.className = 'ms-error';
   const msRes = document.getElementById('ms-result'); if (msRes) msRes.style.display = 'none';
+  // Reset pseudo search
+  const msPseudo = document.getElementById('ms-pseudo'); if (msPseudo) msPseudo.value = '';
+  const msPseudoRes = document.getElementById('ms-pseudo-results'); if (msPseudoRes) msPseudoRes.innerHTML = '';
+  // Mettre à jour le lien d'invitation
+  const inviteUrl = `https://care-wave.github.io/CareWave/?join=${State.currentGroup.id}`;
+  const urlEl = document.getElementById('ms-invite-url');
+  if (urlEl) urlEl.textContent = inviteUrl;
+  // Reset copy button
+  const copyBtn = document.getElementById('ms-copy-btn');
+  if (copyBtn) { copyBtn.textContent = 'Copier'; copyBtn.className = 'invite-copy-btn'; }
   msFillCurrentMembers();
   document.getElementById('members-modal').classList.add('open');
   if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('members-modal'));
+}
+
+async function copyGroupInviteLink() {
+  if (!State.currentGroup) return;
+  const inviteUrl = `https://care-wave.github.io/CareWave/?join=${State.currentGroup.id}`;
+  const btn = document.getElementById('ms-copy-btn');
+  try {
+    await navigator.clipboard.writeText(inviteUrl);
+    if (btn) {
+      btn.textContent = '✅ Copié !';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copier';
+        btn.classList.remove('copied');
+      }, 2500);
+    }
+    toast('🔗 Lien copié ! Partagez-le avec vos proches.', 'success', 4000);
+  } catch(e) {
+    // Fallback pour navigateurs sans clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = inviteUrl;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (btn) {
+      btn.textContent = '✅ Copié !';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2500);
+    }
+    toast('🔗 Lien copié !', 'success', 4000);
+  }
 }
 function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
 function closeMembersOutside(e) { if (e.target.id === 'members-modal') closeMembersModal(); }
@@ -3731,8 +3841,51 @@ async function _initDashboard(user, profile) {
   renderQuickMsgs();
   listenLatestStatus();
   UI.show('dashboard');
-  switchTab('status');
+
+  // Restaurer le dernier onglet visité
+  let lastTab = 'status';
+  try { lastTab = localStorage.getItem('cw_last_tab') || 'status'; } catch(e) {}
+  if (!TAB_ORDER.includes(lastTab)) lastTab = 'status';
+
+  // Gérer le paramètre ?join= (lien d'invitation groupe)
+  const joinGroupId = new URLSearchParams(window.location.search).get('join');
+  if (joinGroupId) {
+    lastTab = 'groups';
+    // Nettoyer l'URL sans recharger la page
+    try { window.history.replaceState({}, '', window.location.pathname); } catch(e) {}
+  }
+
+  _currentTab = lastTab;
+  switchTab(lastTab);
   loadGroups();
+
+  // Si invitation, ouvrir automatiquement le groupe après chargement
+  if (joinGroupId) {
+    setTimeout(async () => {
+      // Vérifier si déjà membre
+      const group = State.groups.find(g => g.id === joinGroupId);
+      if (group) {
+        openChat(group);
+        toast(`📬 Groupe "${group.name}" ouvert !`, 'success');
+      } else {
+        // Pas encore membre — proposer de rejoindre
+        try {
+          const {db, doc, getDoc} = window._fb;
+          const gSnap = await getDoc(doc(db, 'groups', joinGroupId));
+          if (gSnap.exists()) {
+            const gData = { id: joinGroupId, ...gSnap.data() };
+            if (confirm(`Rejoindre le groupe "${gData.name}" ?\n\nVous serez ajouté en tant que membre.`)) {
+              // Demander à être ajouté (le créateur doit l'inviter via email/pseudo)
+              toast('Demandez au créateur du groupe de vous inviter via email ou pseudo.', 'info', 6000);
+            }
+          } else {
+            toast("Ce lien d'invitation n'est plus valide.", 'error');
+          }
+        } catch(e) { console.warn('join group:', e); }
+      }
+    }, 1500); // attendre que loadGroups() finisse
+  }
+
   toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
 
   // Afficher le bandeau si l'email n'est pas encore vérifié
