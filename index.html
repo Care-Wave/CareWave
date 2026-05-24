@@ -2594,7 +2594,7 @@ function renderStatusHistory() {
   const el = document.getElementById('status-history-list'); if (!el) return;
   const items = State.statusHistory.slice(0, 8);
   if (!items.length) {
-    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. 🌊</div>';
+    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. </div>';
     return;
   }
   el.innerHTML = '<div class="history-list">' + items.map(s => {
