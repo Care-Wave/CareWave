@@ -1684,7 +1684,7 @@ body {
   <main class="app-content" role="main" id="app-content">
 
     <!-- STATUS TAB -->
-    <div class="tab-panel active" id="tab-status" role="tabpanel">
+    <div class="tab-panel" id="tab-status" role="tabpanel">
       <div class="current-status-card" id="cs-card">
         <div class="cs-glow" aria-hidden="true"></div>
         <div class="cs-top">
@@ -1804,7 +1804,7 @@ body {
   </main>
 
   <nav class="app-nav" role="tablist" aria-label="Navigation">
-    <button type="button" class="nav-item active" id="nav-status" onclick="switchTab('status')" role="tab" aria-selected="true" aria-controls="tab-status">
+    <button type="button" class="nav-item" id="nav-status" onclick="switchTab('status')" role="tab" aria-selected="false" aria-controls="tab-status">
       <span class="nav-icon" aria-hidden="true">💫</span><span>Statut</span>
     </button>
     <button type="button" class="nav-item" id="nav-groups" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="tab-groups">
@@ -2321,8 +2321,8 @@ function resetAppState() {
   ['stat-total','stat-streak','stat-groups'].forEach(id => safe(id, el => el.textContent='—'));
   document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
   updateMsgCounter();
-  // Réinitialiser l'état interne des tabs sans déclencher de rendu
-  _currentTab = 'status';
+  // Reset tabs — aucune classe active dans le HTML, switchTab gère tout
+  _currentTab = null;
   TAB_ORDER.forEach(t => {
     const p = document.getElementById('tab-' + t);
     const n = document.getElementById('nav-' + t);
@@ -2428,12 +2428,12 @@ function saveSettings() {
 
 /* Ordre des tabs pour la direction de l'animation */
 const TAB_ORDER = ['status', 'groups', 'profile'];
-let _currentTab = 'status';
+let _currentTab = null; // null = aucun tab actif au démarrage, HTML sans classe active
 
 function switchTab(name) {
-  const prevIndex = TAB_ORDER.indexOf(_currentTab);
+  const prevIndex = _currentTab !== null ? TAB_ORDER.indexOf(_currentTab) : -1;
   const nextIndex = TAB_ORDER.indexOf(name);
-  const isNewTab  = prevIndex !== nextIndex; // true = changement réel de tab
+  const isNewTab  = prevIndex !== nextIndex && prevIndex !== -1;
   const direction = nextIndex > prevIndex ? 'slide-from-right' : 'slide-from-left';
 
   TAB_ORDER.forEach(t => {
@@ -2447,7 +2447,7 @@ function switchTab(name) {
       n.setAttribute('aria-selected', 'true');
       if (isNewTab) {
         p.classList.remove('slide-from-right', 'slide-from-left');
-        void p.offsetWidth; // force reflow pour rejouer l'animation
+        void p.offsetWidth;
         p.classList.add(direction);
         setTimeout(() => p.classList.remove('slide-from-right', 'slide-from-left'), 320);
       }
