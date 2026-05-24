@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -688,36 +689,64 @@ body {
 .status-cat-label { font-size: .76rem; font-weight: 700; color: var(--text2); margin-bottom: 9px; }
 .status-options { display: flex; flex-wrap: wrap; gap: 7px; }
 
-.status-opt {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 13px; border-radius: 100px;
-  font-size: .8rem; font-weight: 700;
-  border: 1.5px solid transparent; cursor: pointer;
-  font-family: 'Cabinet Grotesk', sans-serif; opacity: .6;
-  -webkit-tap-highlight-color: transparent;
-  /* Transition séparée : couleur/opacité instantanée, transform rapide */
-  transition: transform .15s ease, box-shadow .15s ease;
-  will-change: transform;
+/* Icônes SVG dans les pills statuts */
+.status-opt svg {
+  flex-shrink: 0;
+  vertical-align: middle;
+  display: inline-block;
+  position: relative; top: -0.5px;
 }
-.status-opt:hover { opacity: .85; transform: translateY(-1px); }
-.status-opt.selected { opacity: 1; transform: translateY(-2px) scale(1.05); font-weight: 800; }
+.status-opt span { vertical-align: middle; }
 
-.opt-green { background: rgba(34,197,94,.1); color: #4ade80; border-color: rgba(74,222,128,.18); }
-.opt-green.selected { background: rgba(34,197,94,.25); border-color: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.2), 0 4px 14px rgba(74,222,128,.25); }
-.opt-yellow { background: rgba(234,179,8,.1); color: #facc15; border-color: rgba(250,204,21,.18); }
-.opt-yellow.selected { background: rgba(234,179,8,.25); border-color: #facc15; box-shadow: 0 0 0 3px rgba(250,204,21,.2), 0 4px 14px rgba(250,204,21,.25); }
-.opt-orange { background: rgba(249,115,22,.1); color: #fb923c; border-color: rgba(251,146,60,.18); }
-.opt-orange.selected { background: rgba(249,115,22,.25); border-color: #fb923c; box-shadow: 0 0 0 3px rgba(251,146,60,.2), 0 4px 14px rgba(251,146,60,.25); }
-.opt-red { background: rgba(239,68,68,.1); color: #f87171; border-color: rgba(248,113,113,.18); }
-.opt-red.selected { background: rgba(239,68,68,.25); border-color: #f87171; box-shadow: 0 0 0 3px rgba(244,63,94,.2), 0 4px 14px rgba(244,63,94,.28); }
-.opt-purple { background: rgba(139,92,246,.1); color: #a78bfa; border-color: rgba(167,139,250,.18); }
-.opt-purple.selected { background: rgba(139,92,246,.25); border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167,139,250,.2), 0 4px 14px rgba(139,92,246,.28); }
-.opt-blue { background: rgba(59,130,246,.1); color: #60a5fa; border-color: rgba(96,165,250,.18); }
-.opt-blue.selected { background: rgba(59,130,246,.25); border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.2), 0 4px 14px rgba(59,130,246,.28); }
-.opt-teal { background: rgba(45,212,191,.1); color: #2dd4bf; border-color: rgba(45,212,191,.18); }
-.opt-teal.selected { background: rgba(45,212,191,.25); border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45,212,191,.2), 0 4px 14px rgba(45,212,191,.28); }
-.opt-gray { background: var(--glass); color: var(--text2); border-color: var(--border2); }
-.opt-gray.selected { background: rgba(148,163,184,.18); border-color: rgba(148,163,184,.6); box-shadow: 0 0 0 3px rgba(148,163,184,.12); }
+.status-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 100px;
+  font-size: .82rem; font-weight: 600;
+  border: 1.5px solid transparent; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  opacity: .55;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .1s, transform .15s ease, box-shadow .15s ease, background .1s, border-color .1s;
+  will-change: transform, opacity;
+}
+/* Hover : mise en évidence immédiate et claire */
+.status-opt:hover {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.15);
+}
+.status-opt:active { transform: scale(.97); }
+.status-opt.selected {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.06);
+  font-weight: 800;
+  filter: brightness(1.1);
+}
+
+.opt-green  { background: rgba(34,197,94,.12);  color: #4ade80; border-color: rgba(74,222,128,.2); }
+.opt-green.selected  { background: rgba(34,197,94,.28);  border-color: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,.2), 0 4px 14px rgba(74,222,128,.25); }
+.opt-green:hover:not(.selected)  { background: rgba(34,197,94,.22);  border-color: rgba(74,222,128,.5); }
+.opt-yellow { background: rgba(234,179,8,.12);  color: #facc15; border-color: rgba(250,204,21,.2); }
+.opt-yellow.selected { background: rgba(234,179,8,.28);  border-color: #facc15; box-shadow: 0 0 0 3px rgba(250,204,21,.2), 0 4px 14px rgba(250,204,21,.25); }
+.opt-yellow:hover:not(.selected) { background: rgba(234,179,8,.22);  border-color: rgba(250,204,21,.5); }
+.opt-orange { background: rgba(249,115,22,.12); color: #fb923c; border-color: rgba(251,146,60,.2); }
+.opt-orange.selected { background: rgba(249,115,22,.28); border-color: #fb923c; box-shadow: 0 0 0 3px rgba(251,146,60,.2), 0 4px 14px rgba(251,146,60,.25); }
+.opt-orange:hover:not(.selected) { background: rgba(249,115,22,.22); border-color: rgba(251,146,60,.5); }
+.opt-red    { background: rgba(239,68,68,.12);  color: #f87171; border-color: rgba(248,113,113,.2); }
+.opt-red.selected    { background: rgba(239,68,68,.28);  border-color: #f87171; box-shadow: 0 0 0 3px rgba(244,63,94,.2), 0 4px 14px rgba(244,63,94,.28); }
+.opt-red:hover:not(.selected)    { background: rgba(239,68,68,.22);  border-color: rgba(248,113,113,.5); }
+.opt-purple { background: rgba(139,92,246,.12); color: #a78bfa; border-color: rgba(167,139,250,.2); }
+.opt-purple.selected { background: rgba(139,92,246,.28); border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(167,139,250,.2), 0 4px 14px rgba(139,92,246,.28); }
+.opt-purple:hover:not(.selected) { background: rgba(139,92,246,.22); border-color: rgba(167,139,250,.5); }
+.opt-blue   { background: rgba(59,130,246,.12);  color: #60a5fa; border-color: rgba(96,165,250,.2); }
+.opt-blue.selected   { background: rgba(59,130,246,.28);  border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.2), 0 4px 14px rgba(59,130,246,.28); }
+.opt-blue:hover:not(.selected)   { background: rgba(59,130,246,.22);  border-color: rgba(96,165,250,.5); }
+.opt-teal   { background: rgba(45,212,191,.12);  color: #2dd4bf; border-color: rgba(45,212,191,.2); }
+.opt-teal.selected   { background: rgba(45,212,191,.28);  border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45,212,191,.2), 0 4px 14px rgba(45,212,191,.28); }
+.opt-teal:hover:not(.selected)   { background: rgba(45,212,191,.22);  border-color: rgba(45,212,191,.5); }
+.opt-gray   { background: var(--glass);          color: var(--text2); border-color: var(--border2); }
+.opt-gray.selected   { background: rgba(148,163,184,.18); border-color: rgba(148,163,184,.6); box-shadow: 0 0 0 3px rgba(148,163,184,.12); }
+.opt-gray:hover:not(.selected)   { background: var(--glass2); border-color: var(--border3); }
 
 .msg-area-wrap { position: relative; }
 .msg-textarea {
@@ -2160,40 +2189,77 @@ const MEMBER_COLORS = [
   '#a78bfa', // purple
 ];
 
+// Helper pour créer un SVG Lucide inline (stroke, pas fill)
+function icon(name, size = 16) {
+  // On utilise lucide.createIcons via data-lucide, mais pour les pills on inline directement
+  const icons = {
+    // Wellness
+    'sparkles':       `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>`,
+    'smile':          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
+    'minus-circle':   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+    'battery-low':    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><line x1="6" y1="11" x2="6" y2="13"/></svg>`,
+    'zap-off':        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="12.41 6.75 13 2 10.57 4.92"/><polyline points="18.57 12.91 21 10 15.66 10"/><polyline points="8 8 3 14 12 14 11 22 16 16"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`,
+    'bed':            `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`,
+    // Symptoms
+    'alert-circle':   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    'activity':       `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+    'thermometer':    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>`,
+    'pill':           `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><line x1="8.5" y1="8.5" x2="15.5" y2="15.5"/></svg>`,
+    'cross':          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/></svg>`,
+    'rotate-ccw':     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 8"/></svg>`,
+    'syringe':        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 6 6"/></svg>`,
+    // Mood
+    'laugh':          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M18 13a6 6 0 0 1-6 5 6 6 0 0 1-6-5h12z"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
+    'leaf':           `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`,
+    'shield-alert':   `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    'cloud-rain':     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16" y1="13" x2="16" y2="21"/><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg>`,
+    'flame':          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    'shield':         `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    'sun':            `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`,
+    // Availability
+    'message-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+    'phone':          `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.3 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 5.55 5.55l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    'moon':           `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>`,
+    'bell-off':       `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 3A6 6 0 0 1 18 8a21.3 21.3 0 0 1 .6 5"/><path d="M17 17H3s3-2 3-9a4.67 4.67 0 0 1 .3-1.7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`,
+    'navigation':     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
+  };
+  return icons[name] || `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
+}
+
 const STATUS_OPTS = {
-  wellness:[
-    {emoji:'😁',label:'Super forme !',color:'opt-green'},
-    {emoji:'😊',label:'Bien',color:'opt-green'},
-    {emoji:'😐',label:'Ça va',color:'opt-yellow'},
-    {emoji:'😴',label:'Fatigué(e)',color:'opt-yellow'},
-    {emoji:'😩',label:'Épuisé(e)',color:'opt-orange'},
-    {emoji:'🛌',label:'Au repos',color:'opt-orange'}
+  wellness: [
+    { icon: 'sparkles',    label: 'Super forme',   color: 'opt-green'  },
+    { icon: 'smile',       label: 'Bien',          color: 'opt-green'  },
+    { icon: 'minus-circle',label: 'Ça va',         color: 'opt-yellow' },
+    { icon: 'battery-low', label: 'Fatigué(e)',    color: 'opt-yellow' },
+    { icon: 'zap-off',     label: 'Épuisé(e)',     color: 'opt-orange' },
+    { icon: 'bed',         label: 'Au repos',      color: 'opt-orange' },
   ],
-  symptoms:[
-    {emoji:'🤕',label:'Douleurs',color:'opt-red'},
-    {emoji:'🤢',label:'Nausées',color:'opt-red'},
-    {emoji:'🌡',label:'Fièvre',color:'opt-orange'},
-    {emoji:'💊',label:'Sous traitement',color:'opt-purple'},
-    {emoji:'🏥',label:'Hospitalisation',color:'opt-red'},
-    {emoji:'😵',label:'Vertiges',color:'opt-orange'},
-    {emoji:'💉',label:'Injection',color:'opt-purple'}
+  symptoms: [
+    { icon: 'alert-circle',label: 'Douleurs',          color: 'opt-red'    },
+    { icon: 'activity',    label: 'Nausées',            color: 'opt-red'    },
+    { icon: 'thermometer', label: 'Fièvre',             color: 'opt-orange' },
+    { icon: 'pill',        label: 'Sous traitement',    color: 'opt-purple' },
+    { icon: 'cross',       label: 'Hospitalisation',    color: 'opt-red'    },
+    { icon: 'rotate-ccw',  label: 'Vertiges',           color: 'opt-orange' },
+    { icon: 'syringe',     label: 'Injection',          color: 'opt-purple' },
   ],
-  mood:[
-    {emoji:'😄',label:'Heureux(se)',color:'opt-green'},
-    {emoji:'😌',label:'Serein(e)',color:'opt-teal'},
-    {emoji:'😟',label:'Anxieux(se)',color:'opt-yellow'},
-    {emoji:'😢',label:'Triste',color:'opt-blue'},
-    {emoji:'😤',label:'Irritable',color:'opt-orange'},
-    {emoji:'🥺',label:'Vulnérable',color:'opt-purple'},
-    {emoji:'🤩',label:'Super positif(ve)',color:'opt-green'}
+  mood: [
+    { icon: 'laugh',       label: 'Heureux(se)',        color: 'opt-green'  },
+    { icon: 'leaf',        label: 'Serein(e)',          color: 'opt-teal'   },
+    { icon: 'shield-alert',label: 'Anxieux(se)',        color: 'opt-yellow' },
+    { icon: 'cloud-rain',  label: 'Triste',             color: 'opt-blue'   },
+    { icon: 'flame',       label: 'Irritable',          color: 'opt-orange' },
+    { icon: 'shield',      label: 'Vulnérable',         color: 'opt-purple' },
+    { icon: 'sun',         label: 'Super positif(ve)',  color: 'opt-green'  },
   ],
-  availability:[
-    {emoji:'💬',label:'Dispo pour écrire',color:'opt-teal'},
-    {emoji:'📞',label:'Dispo pour appel',color:'opt-green'},
-    {emoji:'🤫',label:'Besoin de calme',color:'opt-gray'},
-    {emoji:'🚫',label:'Ne pas déranger',color:'opt-red'},
-    {emoji:'🏃',label:'En déplacement',color:'opt-blue'}
-  ]
+  availability: [
+    { icon: 'message-circle', label: 'Dispo pour écrire', color: 'opt-teal'  },
+    { icon: 'phone',          label: 'Dispo pour appel',  color: 'opt-green' },
+    { icon: 'moon',           label: 'Besoin de calme',   color: 'opt-gray'  },
+    { icon: 'bell-off',       label: 'Ne pas déranger',   color: 'opt-red'   },
+    { icon: 'navigation',     label: 'En déplacement',    color: 'opt-blue'  },
+  ],
 };
 const QUICK_MSGS = [
   'Recharge en cours… ⚡',
@@ -2412,12 +2478,12 @@ function renderStatusOptions() {
   Object.entries(STATUS_OPTS).forEach(([cat, opts]) => {
     const el = document.getElementById(`opts-${cat}`); if (!el) return;
     el.innerHTML = opts.map(o => {
-      const lbl = `${o.emoji} ${o.label}`;
-      const safeLabel = lbl.replace(/'/g, "\\'");
-      return `<button class="status-opt ${o.color}" data-label="${lbl}" onclick="toggleStatusOpt(this,'${safeLabel}')">${lbl}</button>`;
+      const safeLabel = o.label.replace(/'/g, "\\'");
+      return `<button class="status-opt ${o.color}" data-label="${o.label}" onclick="toggleStatusOpt(this,'${safeLabel}')">
+        ${icon(o.icon, 15)}<span>${o.label}</span>
+      </button>`;
     }).join('');
   });
-  if (window._applyHoverListeners) window._applyHoverListeners();
 }
 
 function toggleStatusOpt(btn, label) {
@@ -3849,39 +3915,62 @@ async function _initDashboard(user, profile) {
   const joinGroupId = new URLSearchParams(window.location.search).get('join');
   if (joinGroupId) {
     lastTab = 'groups';
-    // Nettoyer l'URL sans recharger la page
     try { window.history.replaceState({}, '', window.location.pathname); } catch(e) {}
   }
 
-  _currentTab = lastTab;
+  // _currentTab reste 'status' (valeur HTML par défaut), switchTab calcule la bonne direction
   switchTab(lastTab);
   loadGroups();
 
-  // Si invitation, ouvrir automatiquement le groupe après chargement
+  // Si invitation, rejoindre automatiquement le groupe
   if (joinGroupId) {
     setTimeout(async () => {
-      // Vérifier si déjà membre
-      const group = State.groups.find(g => g.id === joinGroupId);
-      if (group) {
-        openChat(group);
-        toast(`📬 Groupe "${group.name}" ouvert !`, 'success');
-      } else {
-        // Pas encore membre — proposer de rejoindre
-        try {
-          const {db, doc, getDoc} = window._fb;
-          const gSnap = await getDoc(doc(db, 'groups', joinGroupId));
-          if (gSnap.exists()) {
-            const gData = { id: joinGroupId, ...gSnap.data() };
-            if (confirm(`Rejoindre le groupe "${gData.name}" ?\n\nVous serez ajouté en tant que membre.`)) {
-              // Demander à être ajouté (le créateur doit l'inviter via email/pseudo)
-              toast('Demandez au créateur du groupe de vous inviter via email ou pseudo.', 'info', 6000);
-            }
-          } else {
-            toast("Ce lien d'invitation n'est plus valide.", 'error');
-          }
-        } catch(e) { console.warn('join group:', e); }
+      const {db, doc, getDoc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
+      try {
+        // Déjà membre ?
+        const alreadyMember = State.groups.find(g => g.id === joinGroupId);
+        if (alreadyMember) {
+          openChat(alreadyMember);
+          toast(`Groupe "${alreadyMember.name}" ouvert !`, 'success');
+          return;
+        }
+        // Charger le groupe
+        const gSnap = await getDoc(doc(db, 'groups', joinGroupId));
+        if (!gSnap.exists()) { toast("Ce lien d'invitation n'est plus valide.", 'error'); return; }
+        const gData = { id: joinGroupId, ...gSnap.data() };
+
+        // Confirmer avant d'ajouter
+        if (!confirm(`Rejoindre le groupe "${gData.name}" ?\n\nVous serez ajouté automatiquement en tant que membre.`)) return;
+
+        // Ajouter l'utilisateur au groupe
+        const newMembers  = [...(gData.members  || []), State.user.uid];
+        const newNames    = [...(gData.memberNames  || []), State.profile.displayName || 'Anonyme'];
+        const newAvatars  = [...(gData.memberAvatars || []), State.profile.avatar || '🧑'];
+
+        await updateDoc(doc(db, 'groups', joinGroupId), {
+          members: newMembers, memberNames: newNames, memberAvatars: newAvatars
+        });
+        // Message système dans le chat
+        await addDoc(collection(db, 'groups', joinGroupId, 'messages'), {
+          type: 'system',
+          text: `${State.profile.displayName || 'Quelqu\'un'} a rejoint le groupe via un lien d\'invitation 👋`,
+          createdAt: serverTimestamp()
+        });
+
+        // Mettre à jour l'état local
+        gData.members      = newMembers;
+        gData.memberNames  = newNames;
+        gData.memberAvatars = newAvatars;
+        State.groups.push(gData);
+        renderGroups();
+
+        toast(`Vous avez rejoint "${gData.name}" !`, 'success', 4000);
+        openChat(gData);
+      } catch(e) {
+        console.error('auto-join:', e);
+        toast("Erreur lors de l'adhésion au groupe.", 'error');
       }
-    }, 1500); // attendre que loadGroups() finisse
+    }, 1800);
   }
 
   toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
