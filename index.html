@@ -206,20 +206,12 @@ body {
   background: rgba(255,255,255,.08);
   opacity: 0; transition: opacity .25s;
 }
-.btn:hover::after { opacity: 1; }
 .btn:active { transform: scale(.97) !important; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
-.btn-ghost:hover { color: var(--text); border-color: var(--border3); background: var(--glass2); }
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), #7c3aed);
-  color: #fff; box-shadow: var(--shadow-accent);
-}
-.btn-primary:hover { box-shadow: 0 0 48px rgba(99,102,241,.55); transform: translateY(-1px); }
+.btn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; box-shadow: var(--shadow-accent); }
 .btn-teal { background: linear-gradient(135deg, var(--teal), #0d9488); color: #fff; box-shadow: var(--shadow-teal); }
 .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
-.btn-outline:hover { background: var(--glass2); border-color: var(--border3); }
 .btn-danger { background: linear-gradient(135deg, var(--rose), #be123c); color: #fff; box-shadow: 0 0 20px rgba(244,63,94,.3); }
-.btn-danger:hover { box-shadow: 0 0 32px rgba(244,63,94,.5); transform: translateY(-1px); }
 .btn-sm { padding: 8px 16px; font-size: .8rem; }
 .btn-lg { padding: 15px 34px; font-size: 1rem; }
 .btn-full { width: 100%; }
@@ -362,7 +354,6 @@ body {
   transition: border-color var(--t-spring), transform .4s var(--t-spring);
   transform-style: preserve-3d; will-change: transform;
 }
-.demo-card:hover { border-color: rgba(99,102,241,.25); }
 .demo-card-icon {
   width: 38px; height: 38px; border-radius: 12px;
   background: linear-gradient(135deg, var(--accent), var(--teal));
@@ -383,7 +374,6 @@ body {
 .marquee-section::before { left: 0; background: linear-gradient(to right, var(--c0), transparent); }
 .marquee-section::after { right: 0; background: linear-gradient(to left, var(--c0), transparent); }
 .marquee-track { display: flex; gap: 16px; width: max-content; animation: scroll-left 32s linear infinite; }
-.marquee-track:hover { animation-play-state: paused; }
 .marquee-tag {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 9px 18px; border-radius: 100px;
@@ -391,7 +381,6 @@ body {
   font-size: .82rem; font-weight: 600; color: var(--text2); white-space: nowrap;
   backdrop-filter: blur(8px); transition: all var(--t);
 }
-.marquee-tag:hover { border-color: rgba(99,102,241,.3); color: var(--accent2); background: var(--accent3); }
 @keyframes scroll-left { to { transform: translateX(-50%); } }
 
 /* ══ FEATURES ══ */
@@ -420,8 +409,6 @@ body {
   opacity: 0; transition: opacity var(--t), transform var(--t-smooth);
   transform: scale(.5);
 }
-.feat-card:hover { border-color: rgba(99,102,241,.25); transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.feat-card:hover::before { opacity: .08; transform: scale(1.2); }
 .feat-icon {
   width: 46px; height: 46px; border-radius: var(--r);
   background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(45,212,191,.1));
@@ -480,7 +467,6 @@ body {
 .auth-tagline { text-align: center; color: var(--text2); font-size: .86rem; margin-bottom: 28px; }
 .auth-footer { text-align: center; margin-top: 18px; font-size: .86rem; color: var(--text2); }
 .auth-footer a { color: var(--accent2); font-weight: 700; cursor: pointer; text-decoration: none; }
-.auth-footer a:hover { text-decoration: underline; }
 
 /* ══ GOOGLE BUTTON ══ */
 .btn-google {
@@ -490,7 +476,6 @@ body {
   font-size: .88rem; font-weight: 700;
   transition: all var(--t);
 }
-.btn-google:hover { background: var(--glass3); border-color: var(--border3); transform: translateY(-1px); }
 .btn-google svg { flex-shrink: 0; }
 
 /* ══ AUTH DIVIDER ══ */
@@ -514,7 +499,6 @@ body {
   background: var(--glass); border: 1px solid var(--border2);
   transition: all var(--t); cursor: pointer;
 }
-.pseudo-result-item:hover { background: var(--glass2); border-color: rgba(129,140,248,.3); }
 .pseudo-result-avatar { font-size: 1.3rem; flex-shrink: 0; }
 .pseudo-result-name { font-size: .86rem; font-weight: 800; flex: 1; }
 .pseudo-result-hint { font-size: .7rem; color: var(--text3); }
@@ -525,7 +509,6 @@ body {
   border: 1px solid rgba(129,140,248,.22); cursor: pointer;
   transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0;
 }
-.pseudo-add-btn:hover { background: var(--accent); color: #fff; border-color: transparent; }
 .pseudo-no-result { font-size: .8rem; color: var(--text3); padding: 8px 2px; text-align: center; }
 
 /* ══ APP SHELL ══ */
@@ -555,8 +538,6 @@ body {
 }
 /* Force la couleur du stroke SVG en mode nuit */
 .icon-btn svg { stroke: var(--text); }
-.icon-btn:hover { background: var(--glass3); border-color: var(--accent2); transform: scale(1.05); }
-.icon-btn:hover svg { stroke: var(--accent2); }
 .icon-btn:active { transform: scale(.95); }
 .notif-badge {
   position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px;
@@ -628,7 +609,6 @@ body {
   background: rgba(45,212,191,.07); border: 1px solid rgba(45,212,191,.2);
   border-radius: var(--r); cursor: pointer; transition: all var(--t);
 }
-.invite-link-row:hover { background: rgba(45,212,191,.13); border-color: rgba(45,212,191,.35); }
 .invite-link-icon { font-size: 1.1rem; flex-shrink: 0; }
 .invite-link-text { flex: 1; min-width: 0; }
 .invite-link-label { font-size: .8rem; font-weight: 800; color: var(--teal); }
@@ -644,7 +624,6 @@ body {
   cursor: pointer; transition: all var(--t);
   font-family: 'Cabinet Grotesk', sans-serif;
 }
-.invite-copy-btn:hover { background: var(--teal); color: #fff; border-color: transparent; }
 .invite-copy-btn.copied { background: var(--green); color: #fff; border-color: transparent; }
 
 /* ══ STATUS TAB ══ */
@@ -757,7 +736,6 @@ body {
   font-size: .74rem; color: var(--text2); cursor: pointer; transition: all var(--t);
   font-family: 'Cabinet Grotesk', sans-serif;
 }
-.quick-msg:hover { background: rgba(129,140,248,.1); color: var(--accent2); border-color: rgba(129,140,248,.3); transform: translateY(-1px); }
 
 .publish-btn {
   width: 100%; padding: 15px; border-radius: var(--r);
@@ -801,7 +779,6 @@ body {
   background: linear-gradient(135deg, var(--accent), var(--teal));
   padding: 2px; transition: all var(--t-spring);
 }
-.story-ring:hover { transform: scale(1.06); box-shadow: 0 0 18px rgba(99,102,241,.4); }
 .story-inner {
   width: 100%; height: 100%; border-radius: 50%;
   background: var(--c1); border: 2px solid var(--c1);
@@ -834,7 +811,6 @@ body {
   position: relative;
 }
 .group-row:last-child { border-bottom: none; }
-.group-row:hover { padding-left: 6px; }
 .group-row-avatar {
   width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
   background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(45,212,191,.08));
@@ -860,7 +836,6 @@ body {
   display: flex; align-items: center; justify-content: center;
   transition: all var(--t); cursor: pointer;
 }
-.group-row-delete:hover { background: var(--rose); color: #fff; transform: scale(1.1); }
 
 .groups-empty {
   display: flex; flex-direction: column; align-items: center;
@@ -951,7 +926,6 @@ body {
 .settings-block-title { font-size: .64rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; padding: 13px 16px 9px; border-bottom: 1px solid var(--border); }
 .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--border); transition: background var(--t); }
 .settings-row:last-child { border-bottom: none; }
-.settings-row:hover { background: var(--glass2); }
 .settings-row.clickable { cursor: pointer; }
 .settings-label { font-size: .88rem; font-weight: 700; }
 .settings-sub { font-size: .7rem; color: var(--text3); margin-top: 1px; }
@@ -973,7 +947,6 @@ body {
   display: flex; align-items: flex-start; gap: 10px;
   transition: border-color var(--t);
 }
-.history-item:hover { border-color: var(--border2); }
 .history-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; margin-top: 5px; box-shadow: 0 0 8px rgba(129,140,248,.4); }
 .history-body { flex: 1; min-width: 0; }
 .history-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; }
@@ -990,8 +963,6 @@ body {
   align-self: center;
 }
 /* Desktop: révèle au survol de l'item */
-@media (hover: hover) {
-  .history-item:hover .history-delete-btn { opacity: 1; }
 }
 /* Mobile / touch: toujours visible */
 @media (hover: none) {
@@ -1163,7 +1134,6 @@ body {
   cursor: pointer; transition: all .2s var(--t-spring);
   font-family: 'Cabinet Grotesk', sans-serif; color: var(--text3);
 }
-.like-btn:hover { background: rgba(244,63,94,.1); border-color: rgba(244,63,94,.3); color: var(--rose); transform: scale(1.05); }
 .like-btn.liked { background: rgba(244,63,94,.12); border-color: rgba(244,63,94,.35); color: var(--rose); }
 .like-btn .like-count { font-size: .7rem; }
 
@@ -1200,7 +1170,6 @@ body {
 
 .quick-reactions { display: flex; gap: 5px; padding: 0 14px 8px; flex-wrap: wrap; }
 .quick-reaction { padding: 5px 10px; border-radius: 100px; background: var(--glass); border: 1px solid var(--border); font-size: .74rem; color: var(--text2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; }
-.quick-reaction:hover { background: rgba(129,140,248,.1); color: var(--accent2); border-color: rgba(129,140,248,.3); }
 
 .chat-input-row { display: flex; gap: 9px; padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
 .chat-input {
@@ -1247,7 +1216,6 @@ body {
 .notif-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 .notif-item { display: flex; gap: 10px; padding: 11px; background: var(--glass); border-radius: var(--r); border-left: 2px solid var(--accent2); cursor: pointer; transition: all var(--t); }
 .notif-item.read { border-left-color: var(--border); opacity: .55; }
-.notif-item:hover { background: var(--glass2); }
 .notif-icon { font-size: 1.1rem; flex-shrink: 0; }
 .notif-text { font-size: .82rem; color: var(--text2); line-height: 1.4; }
 .notif-time { font-size: .68rem; color: var(--text3); margin-top: 2px; }
@@ -1279,7 +1247,6 @@ body {
 .ms-member-role.creator { background: rgba(99,102,241,.15); color: var(--accent2); }
 .ms-member-role.me { background: rgba(45,212,191,.12); color: var(--teal); }
 .ms-view-btn { padding: 5px 11px; border-radius: 100px; background: rgba(129,140,248,.1); color: var(--accent2); font-size: .7rem; font-weight: 800; border: 1px solid rgba(129,140,248,.2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0; }
-.ms-view-btn:hover { background: var(--accent); color: #fff; border-color: transparent; }
 
 /* KICK MEMBER BUTTON (creator only) */
 .ms-kick-btn {
@@ -1291,7 +1258,6 @@ body {
   font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0;
   margin-left: 4px;
 }
-.ms-kick-btn:hover { background: var(--rose); color: #fff; border-color: transparent; }
 
 .ms-error { font-size: .8rem; color: var(--rose); background: rgba(244,63,94,.08); padding: 9px 12px; border-radius: var(--r); margin-bottom: 12px; display: none; border: 1px solid rgba(244,63,94,.18); }
 .ms-error.show { display: block; }
@@ -1322,9 +1288,7 @@ body {
 .zone-desc { font-size: .8rem; color: var(--text2); margin-bottom: 11px; line-height: 1.45; }
 .zone-btn { width: 100%; padding: 10px; border-radius: var(--r); font-size: .86rem; font-weight: 800; transition: all var(--t); cursor: pointer; border: none; font-family: 'Cabinet Grotesk', sans-serif; }
 .zone-btn.danger { background: var(--rose); color: #fff; box-shadow: 0 0 16px rgba(244,63,94,.25); }
-.zone-btn.danger:hover { opacity: .88; }
 .zone-btn.warning { background: var(--amber); color: #fff; box-shadow: 0 0 16px rgba(245,158,11,.25); }
-.zone-btn.warning:hover { opacity: .88; }
 
 /* ══ EDIT MODALS ══ */
 .centered-modal {
@@ -1365,7 +1329,6 @@ body {
   border-radius: var(--r); border: 1.5px solid transparent;
   transition: all var(--t); line-height: 1;
 }
-.avatar-opt:hover { background: var(--glass2); border-color: var(--border2); transform: scale(1.1); }
 .avatar-opt.selected { background: rgba(129,140,248,.15); border-color: rgba(129,140,248,.5); transform: scale(1.08); }
 
 .emoji-picker { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
@@ -1373,7 +1336,6 @@ body {
   font-size: 1.4rem; padding: 7px 8px; border-radius: var(--r);
   border: 1.5px solid transparent; cursor: pointer; transition: all var(--t); line-height: 1;
 }
-.emoji-opt:hover { background: var(--glass2); border-color: var(--border2); transform: scale(1.1); }
 .emoji-opt.selected { background: rgba(129,140,248,.15); border-color: rgba(129,140,248,.5); transform: scale(1.08); }
 
 /* ══ PENDING MEMBERS LIST ══ */
@@ -1382,7 +1344,6 @@ body {
 .pending-name { font-size: .86rem; font-weight: 700; flex: 1; }
 .pending-email { font-size: .7rem; color: var(--text3); }
 .pending-remove { font-size: .72rem; color: var(--rose); font-weight: 700; padding: 3px 9px; border-radius: 100px; border: 1px solid rgba(244,63,94,.28); background: rgba(244,63,94,.08); cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; transition: all var(--t); }
-.pending-remove:hover { background: var(--rose); color: #fff; border-color: transparent; }
 
 /* ══ MEMBER PROFILE MODAL ══ */
 .member-profile-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center; }
@@ -1445,6 +1406,86 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ══ HOVER — desktop uniquement, jamais déclenché par touch ══ */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover::after { opacity: 1; }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border3); background: var(--glass2); }
+  .btn-primary:hover { box-shadow: 0 0 48px rgba(99,102,241,.55); transform: translateY(-1px); }
+  .btn-outline:hover { background: var(--glass2); border-color: var(--border3); }
+  .btn-danger:hover { box-shadow: 0 0 32px rgba(244,63,94,.5); transform: translateY(-1px); }
+  .btn-google:hover { background: var(--glass3); border-color: var(--border3); }
+  .icon-btn:hover { background: var(--glass3); border-color: var(--accent2); transform: scale(1.05); }
+  .icon-btn:hover svg { stroke: var(--accent2); }
+  .group-row:hover { padding-left: 6px; }
+  .group-row-delete:hover { background: var(--rose); color: #fff; transform: scale(1.1); }
+  .settings-row:hover { background: var(--glass2); }
+  .feat-card:hover { border-color: rgba(99,102,241,.25); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .feat-card:hover::before { opacity: .08; transform: scale(1.2); }
+  .demo-card:hover { border-color: rgba(99,102,241,.25); }
+  .marquee-tag:hover { border-color: rgba(99,102,241,.3); color: var(--accent2); background: var(--accent3); }
+  .marquee-track:hover { animation-play-state: paused; }
+  .story-ring:hover { transform: scale(1.06); box-shadow: 0 0 18px rgba(99,102,241,.4); }
+  .avatar-opt:hover { background: var(--glass2); border-color: var(--border2); transform: scale(1.1); }
+  .emoji-opt:hover { background: var(--glass2); border-color: var(--border2); transform: scale(1.1); }
+  .quick-msg:hover { background: rgba(129,140,248,.1); color: var(--accent2); border-color: rgba(129,140,248,.3); }
+  .quick-reaction:hover { background: rgba(129,140,248,.1); color: var(--accent2); border-color: rgba(129,140,248,.3); }
+  .ms-view-btn:hover { background: var(--accent); color: #fff; border-color: transparent; }
+  .ms-kick-btn:hover { background: var(--rose); color: #fff; border-color: transparent; }
+  .pending-remove:hover { background: var(--rose); color: #fff; border-color: transparent; }
+  .invite-copy-btn:hover { background: var(--teal); color: #fff; border-color: transparent; }
+  .invite-link-row:hover { background: rgba(45,212,191,.13); border-color: rgba(45,212,191,.35); }
+  .like-btn:hover { background: rgba(244,63,94,.1); border-color: rgba(244,63,94,.3); color: var(--rose); }
+  .pseudo-result-item:hover { background: var(--glass2); border-color: rgba(129,140,248,.3); }
+  .pseudo-add-btn:hover { background: var(--accent); color: #fff; border-color: transparent; }
+  .notif-item:hover { background: var(--glass2); }
+  .zone-btn.danger:hover { opacity: .88; }
+  .zone-btn.warning:hover { opacity: .88; }
+  .history-delete-btn:hover { background: var(--rose); color: #fff; transform: scale(1.1); opacity: 1; }
+  .auth-footer a:hover { text-decoration: underline; }
+  .groups-add-btn:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 0 28px rgba(99,102,241,.55); }
+  .profile-avatar:hover { transform: scale(1.05); }
+  .profile-edit-btn:hover { background: rgba(129,140,248,.1); border-color: rgba(129,140,248,.3); color: var(--accent2); }
+  .nav-item:hover { color: var(--accent2); }
+  .chat-send:hover { transform: scale(1.1); box-shadow: 0 0 22px rgba(99,102,241,.5); }
+  .sheet-close:hover { background: rgba(244,63,94,.1); color: var(--rose); }
+}
+
+/* ══ VISIBILITÉ TEXTES — dark mode ══
+   Les éléments gris qui doivent être bien visibles en mode sombre
+═══════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] .section-header {
+  color: rgba(255,255,255,.75);
+}
+[data-theme="dark"] .section-header::after {
+  background: rgba(255,255,255,.12);
+}
+[data-theme="dark"] .status-cat-label {
+  color: rgba(255,255,255,.8);
+}
+[data-theme="dark"] .hero-social-proof {
+  color: rgba(255,255,255,.65);
+}
+[data-theme="dark"] .cs-label {
+  color: var(--accent2);
+}
+[data-theme="dark"] .groups-section-label {
+  color: rgba(255,255,255,.6);
+}
+[data-theme="dark"] .settings-block-title {
+  color: rgba(255,255,255,.55);
+}
+[data-theme="dark"] .msg-textarea::placeholder,
+[data-theme="dark"] .chat-input::placeholder,
+[data-theme="dark"] .form-input::placeholder {
+  color: rgba(255,255,255,.35);
+}
+[data-theme="dark"] .form-label {
+  color: rgba(255,255,255,.55);
+}
+[data-theme="dark"] .publish-btn {
+  box-shadow: 0 0 40px rgba(99,102,241,.5), 0 4px 20px rgba(0,0,0,.4);
 }
 </style>
 </head>
@@ -1813,7 +1854,7 @@ body {
     <button class="icon-btn" style="margin-left:6px;" onclick="closeNotifs()" aria-label="Fermer">✕</button>
   </div>
   <div class="notif-list" id="notif-list" aria-live="polite">
-    <div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">Aucune notification</div></div>
+    <div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>
   </div>
 </div>
 
@@ -2022,14 +2063,14 @@ async function resendVerificationEmail() {
   try { await user.reload(); } catch(e) {}
   if (user.emailVerified) { hideVerifyBanner(); return; }
 
-  btn.disabled = true; btn.textContent = '⏳ Envoi…';
+  btn.disabled = true; btn.textContent = 'Envoi…';
   try {
     await window._fb.sendEmailVerification(user, {
       url: 'https://care-wave.github.io/CareWave/',
       handleCodeInApp: false
     });
     toast('📧 Email de vérification renvoyé !', 'success', 5000);
-    btn.textContent = '✅ Envoyé !';
+    btn.textContent = 'Envoyé !';
     setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Renvoyer l\'email'; } }, 60000);
   } catch(e) {
     console.error('resendVerification:', e.code);
@@ -2053,7 +2094,7 @@ function startVerifyCheck() {
       if (user.emailVerified) {
         stopVerifyCheck();
         hideVerifyBanner();
-        toast('✅ Email vérifié ! Votre compte est pleinement actif.', 'success', 6000);
+        toast('Email vérifié. Votre compte est pleinement actif.', 'success', 6000);
       }
     } catch(e) { /* silencieux */ }
   }, 8000); // toutes les 8 secondes
@@ -2279,12 +2320,12 @@ const STATUS_OPTS = {
   ],
 };
 const QUICK_MSGS = [
-  'Recharge en cours… ⚡',
-  'Besoin de calme aujourd\'hui ❤️',
-  'Je lis vos messages 💙',
-  'Une journée à la fois 🌸',
-  'Merci pour votre soutien 🙏',
-  'Ça va aller 🌈'
+  'Recharge en cours…',
+  'Besoin de calme aujourd\'hui',
+  'Je lis vos messages',
+  'Une journée à la fois',
+  'Merci pour votre soutien',
+  'Ça va aller'
 ];
 
 /* ════════════════════════════════════════════════
@@ -2331,7 +2372,7 @@ function resetAppState() {
   safe('groups-list', el => el.innerHTML='');
   safe('status-history-list', el => el.innerHTML='');
   safe('notif-badge', el => el.style.display='none');
-  safe('notif-list', el => el.innerHTML='<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">Aucune notification</div></div>');
+  safe('notif-list', el => el.innerHTML='<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>');
   safe('profile-current-status', el => el.style.display='none');
   safe('profile-cs-message', el => { el.style.display='none'; el.textContent=''; });
   safe('nav-groups-badge', el => el.style.display='none');
@@ -2431,7 +2472,7 @@ function toggleDark() {
   State.dark = !State.dark;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
   const dt = document.getElementById('dark-toggle');
-  if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
+  if (dt) dt.textContent = State.dark ? '○' : '●';
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
   saveSettings();
@@ -2576,7 +2617,7 @@ function renderStatusHistory() {
   const el = document.getElementById('status-history-list'); if (!el) return;
   const items = State.statusHistory.slice(0, 8);
   if (!items.length) {
-    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. </div>';
+    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant.</div>';
     return;
   }
   el.innerHTML = '<div class="history-list">' + items.map(s => {
@@ -2608,7 +2649,7 @@ async function deleteStatus(docId) {
     const fb = window._fb;
     const ref = fb.doc(fb.db, 'statuses', docId);
     await fb.deleteDoc(ref);
-    toast('Statut supprimé ✅', 'success');
+    toast('Statut supprimé', 'success');
     // onSnapshot se charge de rafraîchir l'historique automatiquement
   } catch(e) {
     console.error('deleteStatus error:', e.code, e.message);
@@ -2654,7 +2695,7 @@ function listenLatestStatus() {
     if (docs.length > 0) updateCurrentStatusCard(docs[0]);
     renderStatusHistory();
     const ssEl = document.getElementById('stat-streak');
-    if (ssEl) ssEl.textContent = State.streak > 0 ? `🔥${State.streak}` : '0';
+    if (ssEl) ssEl.textContent = State.streak > 0 ? State.streak : '0';
   }, err => console.warn('Status listener:', err.message));
   _unsubs.push(unsub);
 }
@@ -2673,7 +2714,7 @@ function renderNotifications() {
   if (badge) { badge.style.display = unread > 0 ? 'flex' : 'none'; badge.textContent = unread > 9 ? '9+' : unread; }
   const list = document.getElementById('notif-list'); if (!list) return;
   if (!State.notifications.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">Aucune notification</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>';
     return;
   }
   list.innerHTML = State.notifications.slice(0,20).map((n, i) => `
@@ -2694,18 +2735,18 @@ function closeNotifs() { document.getElementById('notif-drawer').classList.remov
 function renderProfileHeader() {
   const p = State.profile || {};
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
-  safe('profile-avatar-display', el => el.textContent = p.avatar || '🧑');
+  safe('profile-avatar-display', el => el.textContent = p.avatar || '');
   safe('profile-name-display', el => el.textContent = p.displayName || 'Sans nom');
   safe('profile-bio-display', el => el.textContent = p.bio || '');
   safe('stat-groups', el => el.textContent = State.groups.length);
-  safe('stat-streak', el => el.textContent = State.streak > 0 ? `🔥${State.streak}` : '0');
+  safe('stat-streak', el => el.textContent = State.streak > 0 ? State.streak : '0');
 }
 
 async function loadProfileStats() {
   if (!State.user || !window._fb) return;
   const safe = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
   safe('stat-total', State.statusHistory.length);
-  safe('stat-streak', State.streak > 0 ? `🔥${State.streak}` : '0');
+  safe('stat-streak', State.streak > 0 ? State.streak : '0');
   safe('stat-groups', State.groups.length);
 }
 
@@ -2740,10 +2781,10 @@ async function saveProfile() {
   const bio = document.getElementById('edit-bio').value.trim();
   if (!name) { toast('Le pseudo est requis','error'); return; }
   const btn = document.getElementById('save-profile-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
   const {db, doc, updateDoc} = window._fb;
   try {
-    const newAvatar = State.profile.avatar || '🧑';
+    const newAvatar = State.profile.avatar || '';
     await updateDoc(doc(db,'users',State.user.uid), {
       displayName: name,
       displayNameLower: name.toLowerCase(),
@@ -2767,7 +2808,7 @@ async function saveProfile() {
     }
     renderProfileHeader();
     closeEditModal();
-    toast('Profil mis à jour ✅','success');
+    toast('Profil mis à jour','success');
   } catch(e) {
     console.error('saveProfile:', e);
     toast('Erreur lors de la sauvegarde','error');
@@ -2813,15 +2854,15 @@ function listenGroupNotifications(groups) {
         let notifText, notifIcon;
         if (isStatus) {
           notifText = `Nouveau statut dans "${group.name}"`;
-          notifIcon = '🌊';
+          notifIcon = 'wave';
         } else if (isSystem) {
           notifText = `${msg.text} (${group.name})`;
           notifIcon = 'ℹ️';
         } else {
           // Regular chat message notification
           const senderName = msg.displayName || 'Quelqu\'un';
-          notifText = `💬 Nouveau message de ${senderName} dans "${group.name}"`;
-          notifIcon = '💬';
+          notifText = `Nouveau message de ${senderName} dans "${group.name}"`;
+          notifIcon = 'msg';
         }
 
         addNotification(notifIcon, notifText);
@@ -2887,7 +2928,7 @@ function renderGroups() {
     </div>` + State.groups.map(g => {
       const hasUnread = (State.unread[g.id] || 0) > 0;
       return `<div class="story-item${hasUnread?' has-unread':''}" onclick='openChat(${JSON.stringify(g).replace(/'/g,"&#39;")})' role="listitem">
-        <div class="story-ring"><div class="story-inner">${g.emoji||'👥'}</div></div>
+        <div class="story-ring"><div class="story-inner">${g.emoji||''}</div></div>
         <div class="story-label">${g.name}</div>
       </div>`;
     }).join('');
@@ -2896,7 +2937,7 @@ function renderGroups() {
 
   if (!State.groups.length) {
     feedEl.innerHTML = `<div class="groups-empty">
-      <div class="groups-empty-icon">👥</div>
+      <div class="groups-empty-icon"></div>
       <div class="groups-empty-title">Aucun groupe encore</div>
       <div class="groups-empty-sub">Créez un groupe famille, amis ou soignants pour rester connectés.</div>
       <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openCreateGroup()">✨ Créer un groupe</button>
@@ -2914,7 +2955,7 @@ function renderGroups() {
       ? `<button class="group-row-delete" title="Supprimer" onclick="event.stopPropagation();confirmDeleteGroup('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')">🗑</button>`
       : '';
     return `<div class="group-row" onclick='openChat(${JSON.stringify(g).replace(/'/g,"&#39;")})' role="button" tabindex="0" aria-label="Ouvrir ${g.name}">
-      <div class="group-row-avatar">${g.emoji||'👥'}</div>
+      <div class="group-row-avatar">${g.emoji||''}</div>
       <div class="group-row-body">
         <div class="group-row-name">${g.name}</div>
         <div class="group-row-preview">${g.description || `${mc} membre${mc>1?'s':''}`}</div>
@@ -2975,7 +3016,7 @@ async function cgSearchMember() {
     errEl.textContent = 'Cette personne est déjà dans la liste.'; errEl.style.display = 'block'; return;
   }
 
-  const btn = document.getElementById('cg-search-btn'); btn.disabled = true; btn.textContent = '⏳';
+  const btn = document.getElementById('cg-search-btn'); btn.disabled = true; btn.textContent = '…';
   try {
     const {db, collection, query, where, getDocs} = window._fb;
     const q = query(collection(db,'users'), where('email','==',email));
@@ -2984,13 +3025,13 @@ async function cgSearchMember() {
       errEl.textContent = 'Aucun compte CareWave trouvé pour cet email.'; errEl.style.display = 'block';
     } else {
       const ud = { uid: snap.docs[0].id, ...snap.docs[0].data() };
-      document.getElementById('cg-result-avatar').textContent = ud.avatar || '🧑';
+      document.getElementById('cg-result-avatar').textContent = ud.avatar || '';
       document.getElementById('cg-result-name').textContent = ud.displayName || email;
       document.getElementById('cg-result-email').textContent = email;
       const ab = document.getElementById('cg-add-member-btn');
       ab.dataset.uid = ud.uid;
       ab.dataset.name = ud.displayName || email;
-      ab.dataset.avatar = ud.avatar || '🧑';
+      ab.dataset.avatar = ud.avatar || '';
       ab.dataset.email = email;
       resEl.style.display = 'flex';
     }
@@ -3002,11 +3043,11 @@ function cgAddMember() {
   const btn = document.getElementById('cg-add-member-btn');
   const { uid, name, avatar, email } = btn.dataset;
   if (!uid || !name) return;
-  State.cgPendingMembers.push({ uid, name, avatar: avatar || '🧑', email });
+  State.cgPendingMembers.push({ uid, name, avatar: avatar || '', email });
   document.getElementById('cg-member-result').style.display = 'none';
   document.getElementById('cg-member-email').value = '';
   cgRenderPendingMembers();
-  toast(`${name} ajouté(e) ✅`, 'success');
+  toast(`${name} ajouté(e)`, 'success');
 }
 
 function cgRemovePendingMember(uid) {
@@ -3059,14 +3100,14 @@ async function copyGroupInviteLink() {
   try {
     await navigator.clipboard.writeText(inviteUrl);
     if (btn) {
-      btn.textContent = '✅ Copié !';
+      btn.textContent = 'Copié ✓';
       btn.classList.add('copied');
       setTimeout(() => {
         btn.textContent = 'Copier';
         btn.classList.remove('copied');
       }, 2500);
     }
-    toast('🔗 Lien copié ! Partagez-le avec vos proches.', 'success', 4000);
+    toast('Lien copié ! Partagez-le avec vos proches.', 'success', 4000);
   } catch(e) {
     // Fallback pour navigateurs sans clipboard API
     const ta = document.createElement('textarea');
@@ -3077,11 +3118,11 @@ async function copyGroupInviteLink() {
     document.execCommand('copy');
     document.body.removeChild(ta);
     if (btn) {
-      btn.textContent = '✅ Copié !';
+      btn.textContent = 'Copié ✓';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2500);
     }
-    toast('🔗 Lien copié !', 'success', 4000);
+    toast('Lien copié !', 'success', 4000);
   }
 }
 function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
@@ -3097,11 +3138,11 @@ function msFillCurrentMembers() {
   if (!names.length) { el.innerHTML='<div style="color:var(--text3);font-size:.83rem;">Aucun membre.</div>'; return; }
   el.innerHTML = names.map((n, i) => {
     const uid = ids[i];
-    const avatar = avatars[i] || '🧑';
+    const avatar = avatars[i] || '';
     const isMe = uid === State.user?.uid;
     const isCreator = uid === State.currentGroup.createdBy;
     let roleEl = '';
-    if (isCreator) roleEl = '<span class="ms-member-role creator">👑 Créateur</span>';
+    if (isCreator) roleEl = '<span class="ms-member-role creator">Créateur</span>';
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
 
     // View profile button (not for self)
@@ -3162,7 +3203,7 @@ async function kickMember(uid, name) {
     // Notify in chat
     await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
       type:'system',
-      text:`${name} a été retiré(e) du groupe 👋`,
+      text:`${name} a été retiré(e) du groupe`,
       createdAt: serverTimestamp()
     });
 
@@ -3185,8 +3226,8 @@ async function kickMember(uid, name) {
 
     msFillCurrentMembers();
     renderGroups();
-    toast(`${name} retiré(e) du groupe ✅`, 'success');
-    addNotification('👋', `${name} a été retiré(e) de "${State.currentGroup.name}"`);
+    toast(`${name} retiré(e) du groupe`, 'success');
+    addNotification('info', `${name} a été retiré(e) de "${State.currentGroup.name}"`);
   } catch(e) {
     console.error('kickMember:', e);
     toast('Erreur lors de la suppression du membre.', 'error');
@@ -3198,7 +3239,7 @@ async function openMemberProfile(uid) {
   document.getElementById('ms-main-body').style.display = 'none';
   const panel = document.getElementById('ms-profile-panel');
   panel.classList.add('open');
-  document.getElementById('ms-sheet-title').textContent = '👤 Profil du membre';
+  document.getElementById('ms-sheet-title').textContent = 'Profil du membre';
   const avEl = document.getElementById('ms-profile-avatar');
   const nmEl = document.getElementById('ms-profile-name');
   const bioEl = document.getElementById('ms-profile-bio');
@@ -3213,7 +3254,7 @@ async function openMemberProfile(uid) {
     ]);
     if (us.exists()) {
       const u = us.data();
-      if(avEl) avEl.textContent = u.avatar || '🧑';
+      if(avEl) avEl.textContent = u.avatar || '';
       if(nmEl) nmEl.textContent = u.displayName || 'Utilisateur';
       if(bioEl) bioEl.textContent = u.bio || '';
     }
@@ -3244,7 +3285,7 @@ function hideMemberProfile() {
   const body = document.getElementById('ms-main-body');
   if (body) body.style.display = '';
   const title = document.getElementById('ms-sheet-title');
-  if (title) title.textContent = '👥 Membres du groupe';
+  if (title) title.textContent = 'Membres du groupe';
 }
 
 async function msSearch() {
@@ -3255,7 +3296,7 @@ async function msSearch() {
   if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
     errEl.textContent = 'Entrez un email valide.'; errEl.className = 'ms-error show'; return;
   }
-  const btn = document.getElementById('ms-search-btn'); btn.disabled = true; btn.textContent = '⏳';
+  const btn = document.getElementById('ms-search-btn'); btn.disabled = true; btn.textContent = '…';
   try {
     const {db, collection, query, where, getDocs} = window._fb;
     const snap = await getDocs(query(collection(db,'users'), where('email','==',email)));
@@ -3264,7 +3305,7 @@ async function msSearch() {
     } else {
       const ud = { uid: snap.docs[0].id, ...snap.docs[0].data() };
       const inGroup = (State.currentGroup?.members||[]).includes(ud.uid);
-      document.getElementById('ms-result-avatar').textContent = ud.avatar || '🧑';
+      document.getElementById('ms-result-avatar').textContent = ud.avatar || '';
       document.getElementById('ms-result-name').textContent = ud.displayName || email;
       document.getElementById('ms-result-email-disp').textContent = email;
       const ab = document.getElementById('ms-add-btn');
@@ -3273,7 +3314,7 @@ async function msSearch() {
         ab.textContent = '+ Ajouter'; ab.disabled = false;
         ab.dataset.uid = ud.uid;
         ab.dataset.name = ud.displayName || email;
-        ab.dataset.avatar = ud.avatar || '🧑';
+        ab.dataset.avatar = ud.avatar || '';
       }
       resEl.style.display = 'flex';
     }
@@ -3285,12 +3326,12 @@ async function msAddMember() {
   const btn = document.getElementById('ms-add-btn');
   const { uid, name, avatar } = btn.dataset;
   if (!uid || !State.currentGroup?.id) return;
-  btn.disabled = true; btn.textContent = '⏳';
+  btn.disabled = true; btn.textContent = '…';
   try {
     const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
     const nm = [...(State.currentGroup.members||[]), uid];
     const nn = [...(State.currentGroup.memberNames||[]), name];
-    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), avatar || '🧑'];
+    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), avatar || ''];
     await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn, memberAvatars:na });
     State.currentGroup.members = nm;
     State.currentGroup.memberNames = nn;
@@ -3303,12 +3344,12 @@ async function msAddMember() {
     }
     document.getElementById('chat-members-count').textContent = `${nm.length} membre(s)`;
     await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
-      type:'system', text:`${name} a rejoint le groupe 👋`, createdAt:serverTimestamp()
+      type:'system', text:`${name} a rejoint le groupe`, createdAt:serverTimestamp()
     });
     document.getElementById('ms-result').style.display = 'none';
     document.getElementById('ms-email').value = '';
     msFillCurrentMembers(); renderGroups();
-    toast(`${name} ajouté(e) ✅`, 'success');
+    toast(`${name} ajouté(e)`, 'success');
   } catch(e) { toast('Erreur lors de l\'ajout.','error'); }
   finally { btn.disabled = false; btn.textContent = '+ Ajouter'; }
 }
@@ -3397,7 +3438,7 @@ function msSearchPseudo(value) {
       }
       el.innerHTML = results.map(u => `
         <div class="pseudo-result-item">
-          <span class="pseudo-result-avatar">${u.avatar || '🧑'}</span>
+          <span class="pseudo-result-avatar">${u.avatar || ''}</span>
           <div style="flex:1;min-width:0;">
             <div class="pseudo-result-name">${u.displayName || '?'}</div>
           </div>
@@ -3445,7 +3486,7 @@ function cgSearchPseudo(value) {
       }
       el.innerHTML = results.map(u => `
         <div class="pseudo-result-item">
-          <span class="pseudo-result-avatar">${u.avatar || '🧑'}</span>
+          <span class="pseudo-result-avatar">${u.avatar || ''}</span>
           <div style="flex:1;min-width:0;">
             <div class="pseudo-result-name">${u.displayName || '?'}</div>
           </div>
@@ -3467,7 +3508,7 @@ function cgSearchPseudo(value) {
           }
           State.cgPendingMembers.push({ uid, name, avatar, email: '' });
           cgRenderPendingMembers();
-          toast(`${name} ajouté(e) ✅`, 'success');
+          toast(`${name} ajouté(e)`, 'success');
           const inp = document.getElementById('cg-pseudo'); if (inp) inp.value = '';
           el.innerHTML = '';
         });
@@ -3514,14 +3555,14 @@ async function leaveGroup() {
     await updateDoc(doc(db,'groups',g.id), { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
     await addDoc(collection(db,'groups',g.id,'messages'), {
       type:'system',
-      text:`${State.profile.displayName||'Quelqu\'un'} a quitté le groupe 🚪`,
+      text:`${State.profile.displayName||'Quelqu\'un'} a quitté le groupe`,
       createdAt:serverTimestamp()
     });
     State.groups = State.groups.filter(gr => gr.id !== g.id);
     State.currentGroup = null;
     closeMembersModal(); closeChat(); renderGroups();
     toast(`Vous avez quitté "${g.name}" 🚪`, 'success');
-    addNotification('🚪', `Vous avez quitté le groupe "${g.name}"`);
+    addNotification('leave', `Vous avez quitté le groupe "${g.name}"`);
   } catch(e) { console.error('leaveGroup:', e); toast('Erreur lors du départ.','error'); }
 }
 
@@ -3536,7 +3577,7 @@ async function _deleteGroupById(groupId, groupName) {
     delete State.unread[groupId];
     renderGroups(); updateGroupsBadge();
     toast(`Groupe "${groupName}" supprimé.`,'success');
-    addNotification('🗑', `Groupe "${groupName}" supprimé`);
+    addNotification('trash', `Groupe "${groupName}" supprimé`);
   } catch(e) { console.error('deleteGroup:', e); toast('Erreur lors de la suppression.','error'); }
 }
 
@@ -3605,7 +3646,7 @@ function buildMessageGroups(messages) {
         mine,
         isSpecial: false,
         displayName: m.displayName || 'Anonyme',
-        avatar: m.avatar || '🧑',
+        avatar: m.avatar || '',
         messages: [{ id, data: m }]
       };
       groups.push(currentGroup);
@@ -3877,7 +3918,7 @@ async function sendChatMsg() {
       text,
       uid: State.user.uid,
       displayName: State.profile.displayName || 'Anonyme',
-      avatar: State.profile.avatar || '🧑',
+      avatar: State.profile.avatar || '',
       createdAt: serverTimestamp(),
       likes: {}
     });
@@ -3915,7 +3956,7 @@ async function _initDashboard(user, profile) {
 
   State.dark = profile.darkMode !== false;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
-  const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
+  const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '○' : '●';
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
 
@@ -3964,7 +4005,7 @@ async function _initDashboard(user, profile) {
         // Ajouter l'utilisateur au groupe
         const newMembers  = [...(gData.members  || []), State.user.uid];
         const newNames    = [...(gData.memberNames  || []), State.profile.displayName || 'Anonyme'];
-        const newAvatars  = [...(gData.memberAvatars || []), State.profile.avatar || '🧑'];
+        const newAvatars  = [...(gData.memberAvatars || []), State.profile.avatar || ''];
 
         await updateDoc(doc(db, 'groups', joinGroupId), {
           members: newMembers, memberNames: newNames, memberAvatars: newAvatars
@@ -3992,7 +4033,7 @@ async function _initDashboard(user, profile) {
     }, 1800);
   }
 
-  toast(`Bienvenue ${profile.displayName} `, 'success');
+  toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
 
   // Afficher le bandeau si l'email n'est pas encore vérifié
   if (window._fb?.auth?.currentUser) {
@@ -4092,7 +4133,7 @@ const App = {
         };
         await sendEmailVerification(cred.user, actionCodeSettings);
         showVerifyBanner(cred.user);
-        toast('📧 Email de vérification envoyé ! Vérifiez vos spams si besoin.', 'info', 6000);
+        toast('Email de vérification envoyé. Vérifiez vos spams si besoin.', 'info', 6000);
       } catch(verifyErr) {
         console.warn('sendEmailVerification:', verifyErr.message);
       }
@@ -4215,13 +4256,13 @@ const App = {
       await addDoc(collection(db,'statuses'), {
         uid: State.user.uid,
         displayName: State.profile.displayName || 'Anonyme',
-        avatar: State.profile.avatar || '🧑',
+        avatar: State.profile.avatar || '',
         tags, message, createdAt: serverTimestamp()
       });
 
       if (State.groups?.length) {
         const tagStr = tags.join(' · ');
-        const avatar = State.profile.avatar || '🧑';
+        const avatar = State.profile.avatar || '';
         const name = State.profile.displayName || 'Quelqu\'un';
         const txt = message
           ? `${avatar} ${name} : ${tagStr} — "${message}"`
@@ -4233,8 +4274,8 @@ const App = {
         ));
       }
 
-      toast('Statut partagé ','success');
-      addNotification('Votre statut a été partagé !');
+      toast('Statut partagé 🌊','success');
+      addNotification('wave', 'Votre statut a été partagé !');
 
       State.selectedStatus.clear();
       document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
@@ -4245,7 +4286,7 @@ const App = {
     } catch(e) {
       console.error('publishStatus:', e); toast('Erreur lors du partage.','error');
     } finally {
-      btn.disabled = false; btn.textContent = 'Partager mon état';
+      btn.disabled = false; btn.textContent = 'Partager mon état 🌊';
     }
   },
 
@@ -4277,7 +4318,7 @@ const App = {
       State.cgPendingMembers = [];
       closeCreateGroup();
       toast('Groupe créé ! 🎉','success');
-      addNotification('👥', `Groupe "${name}" créé`);
+      addNotification('group', `Groupe "${name}" créé`);
       renderGroups();
       renderProfileHeader();
       loadGroups();
@@ -4318,7 +4359,7 @@ const App = {
           const newAvatars = [...(g.memberAvatars||[])]; newAvatars.splice(idx,1);
           await updateDoc(gDoc.ref, { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
           await addDoc(collection(db,'groups',gDoc.id,'messages'), {
-            type:'system', text:`${displayName} a quitté l'application 👋`, createdAt:serverTimestamp()
+            type:'system', text:`${displayName} a quitté l'application`, createdAt:serverTimestamp()
           });
         }
       }));
@@ -4370,7 +4411,7 @@ window.addEventListener('fb-ready', () => {
           displayName: user.displayName || user.email?.split('@')[0] || 'Utilisateur',
           email: user.email || '',
           bio: '',
-          avatar: profile?.avatar || '🧑',
+          avatar: profile?.avatar || '',
           darkMode: profile?.darkMode !== false
         };
       }
