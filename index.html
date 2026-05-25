@@ -2576,7 +2576,7 @@ function renderStatusHistory() {
   const el = document.getElementById('status-history-list'); if (!el) return;
   const items = State.statusHistory.slice(0, 8);
   if (!items.length) {
-    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. 🌊</div>';
+    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. </div>';
     return;
   }
   el.innerHTML = '<div class="history-list">' + items.map(s => {
@@ -3992,7 +3992,7 @@ async function _initDashboard(user, profile) {
     }, 1800);
   }
 
-  toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
+  toast(`Bienvenue ${profile.displayName} `, 'success');
 
   // Afficher le bandeau si l'email n'est pas encore vérifié
   if (window._fb?.auth?.currentUser) {
@@ -4233,8 +4233,8 @@ const App = {
         ));
       }
 
-      toast('Statut partagé 🌊','success');
-      addNotification('🌊', 'Votre statut a été partagé !');
+      toast('Statut partagé ','success');
+      addNotification('Votre statut a été partagé !');
 
       State.selectedStatus.clear();
       document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
@@ -4245,7 +4245,7 @@ const App = {
     } catch(e) {
       console.error('publishStatus:', e); toast('Erreur lors du partage.','error');
     } finally {
-      btn.disabled = false; btn.textContent = 'Partager mon état 🌊';
+      btn.disabled = false; btn.textContent = 'Partager mon état';
     }
   },
 
