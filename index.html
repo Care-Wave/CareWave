@@ -548,11 +548,15 @@ body {
 .header-right { display: flex; align-items: center; gap: 6px; }
 .icon-btn {
   width: 36px; height: 36px; border-radius: 50%;
-  background: var(--glass); border: 1px solid var(--border);
+  background: var(--glass2); border: 1px solid var(--border2);
   display: flex; align-items: center; justify-content: center;
   font-size: .95rem; position: relative; transition: all var(--t); cursor: pointer;
+  color: var(--text); /* hérite sur les SVG enfants */
 }
-.icon-btn:hover { background: var(--glass2); border-color: rgba(129,140,248,.3); transform: scale(1.05); }
+/* Force la couleur du stroke SVG en mode nuit */
+.icon-btn svg { stroke: var(--text); }
+.icon-btn:hover { background: var(--glass3); border-color: var(--accent2); transform: scale(1.05); }
+.icon-btn:hover svg { stroke: var(--accent2); }
 .icon-btn:active { transform: scale(.95); }
 .notif-badge {
   position: absolute; top: -3px; right: -3px; min-width: 16px; height: 16px;
@@ -688,62 +692,48 @@ body {
 .status-opt svg { flex-shrink: 0; display: block; }
 .status-opt span { line-height: 1; }
 
-/* Base pill — UN SEUL bloc de base, rien d'autre */
+/* Base pill — état OFF : visible mais clairement non sélectionné */
 .status-opt {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 15px; border-radius: 100px;
-  font-size: .82rem; font-weight: 600; letter-spacing: -.01em;
-  border: 1.5px solid transparent;
+  padding: 9px 16px; border-radius: 100px;
+  font-size: .83rem; font-weight: 600; letter-spacing: -.01em;
+  border: 1.5px solid;
   cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
   -webkit-tap-highlight-color: transparent;
-  /* Transitions simples, pas de filter, pas de will-change */
-  transition: opacity .1s ease, transform .1s ease, background-color .1s ease, border-color .1s ease, box-shadow .1s ease;
-  /* État par défaut : désactivé */
-  opacity: .45;
-  transform: none;
+  transition: background-color .08s ease, border-color .08s ease, box-shadow .08s ease, transform .08s ease;
+  user-select: none;
 }
 
-/* Hover — toutes variantes, immédiat */
-.status-opt:hover { opacity: .85; transform: translateY(-1px); }
-
-/* Sélectionné */
-.status-opt.selected { opacity: 1; transform: translateY(-1px); font-weight: 800; }
+/* État ON : sélectionné — pleinement visible */
+.status-opt.selected { font-weight: 800; transform: translateY(-1px); }
 
 /* Press */
-.status-opt:active { transform: scale(.96) !important; opacity: .8; }
+.status-opt:active { transform: scale(.95) !important; }
 
-/* ── Variantes couleur : base, hover, selected ── */
-.opt-green  { background: rgba(34,197,94,.08);  color: #4ade80; border-color: rgba(74,222,128,.12); }
-.opt-green:hover    { background: rgba(34,197,94,.18); border-color: rgba(74,222,128,.35); }
-.opt-green.selected { background: rgba(34,197,94,.22); border-color: #4ade80; box-shadow: 0 0 0 2px rgba(74,222,128,.2); }
+/* ── Variantes : couleur texte + bordure toujours visible, fond renforcé si sélectionné ── */
+.opt-green  { color: #4ade80; border-color: rgba(74,222,128,.4);  background: rgba(34,197,94,.08); }
+.opt-green.selected  { background: rgba(34,197,94,.3);  border-color: #4ade80; box-shadow: 0 0 0 2px rgba(74,222,128,.25), 0 2px 10px rgba(74,222,128,.2); }
 
-.opt-yellow { background: rgba(234,179,8,.08);  color: #facc15; border-color: rgba(250,204,21,.12); }
-.opt-yellow:hover    { background: rgba(234,179,8,.18); border-color: rgba(250,204,21,.35); }
-.opt-yellow.selected { background: rgba(234,179,8,.22); border-color: #facc15; box-shadow: 0 0 0 2px rgba(250,204,21,.2); }
+.opt-yellow { color: #facc15; border-color: rgba(250,204,21,.4);  background: rgba(234,179,8,.08); }
+.opt-yellow.selected { background: rgba(234,179,8,.3);  border-color: #facc15; box-shadow: 0 0 0 2px rgba(250,204,21,.25), 0 2px 10px rgba(250,204,21,.2); }
 
-.opt-orange { background: rgba(249,115,22,.08); color: #fb923c; border-color: rgba(251,146,60,.12); }
-.opt-orange:hover    { background: rgba(249,115,22,.18); border-color: rgba(251,146,60,.35); }
-.opt-orange.selected { background: rgba(249,115,22,.22); border-color: #fb923c; box-shadow: 0 0 0 2px rgba(251,146,60,.2); }
+.opt-orange { color: #fb923c; border-color: rgba(251,146,60,.4);  background: rgba(249,115,22,.08); }
+.opt-orange.selected { background: rgba(249,115,22,.3); border-color: #fb923c; box-shadow: 0 0 0 2px rgba(251,146,60,.25), 0 2px 10px rgba(251,146,60,.2); }
 
-.opt-red    { background: rgba(239,68,68,.08);  color: #f87171; border-color: rgba(248,113,113,.12); }
-.opt-red:hover    { background: rgba(239,68,68,.18); border-color: rgba(248,113,113,.35); }
-.opt-red.selected { background: rgba(239,68,68,.22); border-color: #f87171; box-shadow: 0 0 0 2px rgba(244,63,94,.2); }
+.opt-red    { color: #f87171; border-color: rgba(248,113,113,.4); background: rgba(239,68,68,.08); }
+.opt-red.selected    { background: rgba(239,68,68,.3);  border-color: #f87171; box-shadow: 0 0 0 2px rgba(244,63,94,.25), 0 2px 10px rgba(244,63,94,.2); }
 
-.opt-purple { background: rgba(139,92,246,.08); color: #a78bfa; border-color: rgba(167,139,250,.12); }
-.opt-purple:hover    { background: rgba(139,92,246,.18); border-color: rgba(167,139,250,.35); }
-.opt-purple.selected { background: rgba(139,92,246,.22); border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167,139,250,.2); }
+.opt-purple { color: #a78bfa; border-color: rgba(167,139,250,.4); background: rgba(139,92,246,.08); }
+.opt-purple.selected { background: rgba(139,92,246,.3); border-color: #a78bfa; box-shadow: 0 0 0 2px rgba(167,139,250,.25), 0 2px 10px rgba(139,92,246,.2); }
 
-.opt-blue   { background: rgba(59,130,246,.08); color: #60a5fa; border-color: rgba(96,165,250,.12); }
-.opt-blue:hover    { background: rgba(59,130,246,.18); border-color: rgba(96,165,250,.35); }
-.opt-blue.selected { background: rgba(59,130,246,.22); border-color: #60a5fa; box-shadow: 0 0 0 2px rgba(96,165,250,.2); }
+.opt-blue   { color: #60a5fa; border-color: rgba(96,165,250,.4);  background: rgba(59,130,246,.08); }
+.opt-blue.selected   { background: rgba(59,130,246,.3); border-color: #60a5fa; box-shadow: 0 0 0 2px rgba(96,165,250,.25), 0 2px 10px rgba(59,130,246,.2); }
 
-.opt-teal   { background: rgba(45,212,191,.08); color: #2dd4bf; border-color: rgba(45,212,191,.12); }
-.opt-teal:hover    { background: rgba(45,212,191,.18); border-color: rgba(45,212,191,.35); }
-.opt-teal.selected { background: rgba(45,212,191,.22); border-color: #2dd4bf; box-shadow: 0 0 0 2px rgba(45,212,191,.2); }
+.opt-teal   { color: #2dd4bf; border-color: rgba(45,212,191,.4);  background: rgba(45,212,191,.08); }
+.opt-teal.selected   { background: rgba(45,212,191,.3); border-color: #2dd4bf; box-shadow: 0 0 0 2px rgba(45,212,191,.25), 0 2px 10px rgba(45,212,191,.2); }
 
-.opt-gray   { background: var(--glass); color: var(--text2); border-color: var(--border2); }
-.opt-gray:hover    { background: var(--glass2); border-color: var(--border3); color: var(--text); }
-.opt-gray.selected { background: rgba(148,163,184,.15); border-color: rgba(148,163,184,.45); box-shadow: 0 0 0 2px rgba(148,163,184,.12); }
+.opt-gray   { color: var(--text2); border-color: var(--border3); background: var(--glass2); }
+.opt-gray.selected   { color: var(--text); background: rgba(148,163,184,.2); border-color: rgba(148,163,184,.7); box-shadow: 0 0 0 2px rgba(148,163,184,.15); }
 
 .msg-area-wrap { position: relative; }
 .msg-textarea {
@@ -2594,7 +2584,7 @@ function renderStatusHistory() {
   const el = document.getElementById('status-history-list'); if (!el) return;
   const items = State.statusHistory.slice(0, 8);
   if (!items.length) {
-    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. </div>';
+    el.innerHTML = '<div class="history-empty">Aucun statut partagé pour l\'instant. 🌊</div>';
     return;
   }
   el.innerHTML = '<div class="history-list">' + items.map(s => {
