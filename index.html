@@ -1382,9 +1382,12 @@ body {
 
 /* ══ EMPTY & LOADING ══ */
 .empty-state { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text3); }
-.empty-icon { font-size: 2.6rem; }
+.empty-icon { font-size: 2.6rem; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; }
+.empty-icon svg { width: 42px; height: 42px; stroke: var(--text3); }
 .empty-title { font-weight: 700; font-size: .92rem; color: var(--text2); }
 .empty-sub { font-size: .8rem; max-width: 200px; line-height: 1.5; }
+.groups-empty-icon { font-size: 3.2rem; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.groups-empty-icon svg { width: 52px; height: 52px; stroke: var(--text3); }
 
 /* ══ RESPONSIVE ══ */
 @media (max-width: 480px) {
@@ -1686,7 +1689,7 @@ body {
   <header class="app-header" role="banner">
     <div class="app-logo"><span style="display:inline-flex;align-items:center;gap:6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg> CareWave</span></div>
     <div class="header-right">
-      <button class="icon-btn" id="dark-toggle" onclick="toggleDark()" title="Thème" aria-label="Basculer le thème"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></button>
+      <button class="icon-btn" id="dark-toggle" onclick="toggleDark()" title="Thème" aria-label="Basculer le thème">🌙</button>
       <button class="icon-btn" onclick="openNotifs()" title="Notifications" aria-label="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span class="notif-badge" id="notif-badge" style="display:none" aria-live="polite">0</span>
@@ -1854,7 +1857,7 @@ body {
     <button class="icon-btn" style="margin-left:6px;" onclick="closeNotifs()" aria-label="Fermer">✕</button>
   </div>
   <div class="notif-list" id="notif-list" aria-live="polite">
-    <div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>
+    <div class="empty-state"><div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="empty-title">Aucune notification</div></div>
   </div>
 </div>
 
@@ -1876,11 +1879,11 @@ body {
       <div class="chat-loading"><div class="chat-loading-spinner"></div><span>Chargement…</span></div>
     </div>
     <div class="quick-reactions">
-      <button class="quick-reaction" onclick="sendQuick('Je pense à toi')">Je pense à toi</button>
-      <button class="quick-reaction" onclick="sendQuick('Courage !')">Courage !</button>
-      <button class="quick-reaction" onclick="sendQuick('Tu assures !')">Tu assures !</button>
-      <button class="quick-reaction" onclick="sendQuick('Gros câlin')">Gros câlin</button>
-      <button class="quick-reaction" onclick="sendQuick('Pris en charge')">Pris en charge</button>
+      <button class="quick-reaction" onclick="sendQuick('💙 Je pense à toi')">💙 Je pense à toi</button>
+      <button class="quick-reaction" onclick="sendQuick('💪 Courage !')">💪 Courage !</button>
+      <button class="quick-reaction" onclick="sendQuick('🌟 Tu assures !')">🌟 Tu assures !</button>
+      <button class="quick-reaction" onclick="sendQuick('🤗 Gros câlin')">🤗 Gros câlin</button>
+      <button class="quick-reaction" onclick="sendQuick('✅ Pris en charge')">✅ Pris en charge</button>
     </div>
     <div class="chat-input-row">
       <input class="chat-input" type="text" id="chat-input" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChatMsg()" aria-label="Écrire un message" maxlength="500" />
@@ -2063,14 +2066,14 @@ async function resendVerificationEmail() {
   try { await user.reload(); } catch(e) {}
   if (user.emailVerified) { hideVerifyBanner(); return; }
 
-  btn.disabled = true; btn.textContent = 'Envoi…';
+  btn.disabled = true; btn.textContent = '⏳ Envoi…';
   try {
     await window._fb.sendEmailVerification(user, {
       url: 'https://care-wave.github.io/CareWave/',
       handleCodeInApp: false
     });
     toast('📧 Email de vérification renvoyé !', 'success', 5000);
-    btn.textContent = 'Envoyé !';
+    btn.textContent = '✅ Envoyé !';
     setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Renvoyer l\'email'; } }, 60000);
   } catch(e) {
     console.error('resendVerification:', e.code);
@@ -2094,7 +2097,7 @@ function startVerifyCheck() {
       if (user.emailVerified) {
         stopVerifyCheck();
         hideVerifyBanner();
-        toast('Email vérifié. Votre compte est pleinement actif.', 'success', 6000);
+        toast('✅ Email vérifié ! Votre compte est pleinement actif.', 'success', 6000);
       }
     } catch(e) { /* silencieux */ }
   }, 8000); // toutes les 8 secondes
@@ -2320,12 +2323,12 @@ const STATUS_OPTS = {
   ],
 };
 const QUICK_MSGS = [
-  'Recharge en cours…',
-  'Besoin de calme aujourd\'hui',
-  'Je lis vos messages',
-  'Une journée à la fois',
-  'Merci pour votre soutien',
-  'Ça va aller'
+  'Recharge en cours… ⚡',
+  'Besoin de calme aujourd\'hui 🤍',
+  'Je lis vos messages 💙',
+  'Une journée à la fois 🌿',
+  'Merci pour votre soutien 🙏',
+  'Ça va aller 🌈'
 ];
 
 /* ════════════════════════════════════════════════
@@ -2372,7 +2375,7 @@ function resetAppState() {
   safe('groups-list', el => el.innerHTML='');
   safe('status-history-list', el => el.innerHTML='');
   safe('notif-badge', el => el.style.display='none');
-  safe('notif-list', el => el.innerHTML='<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>');
+  safe('notif-list', el => el.innerHTML='<div class="empty-state"><div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="empty-title">Aucune notification</div></div>');
   safe('profile-current-status', el => el.style.display='none');
   safe('profile-cs-message', el => { el.style.display='none'; el.textContent=''; });
   safe('nav-groups-badge', el => el.style.display='none');
@@ -2443,7 +2446,10 @@ function togglePw(id, btn) {
   const inp = document.getElementById(id);
   if (!inp) return;
   inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+  const isVisible = inp.type === 'text';
+  btn.innerHTML = isVisible
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
 }
 
 function updatePwStrength(pw) {
@@ -2472,7 +2478,7 @@ function toggleDark() {
   State.dark = !State.dark;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
   const dt = document.getElementById('dark-toggle');
-  if (dt) dt.textContent = State.dark ? '○' : '●';
+  if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
   saveSettings();
@@ -2628,7 +2634,7 @@ function renderStatusHistory() {
     try { ts = s.createdAt?.toDate?.() || new Date(s.createdAt || 0); } catch(e) { ts = new Date(0); }
     const timeStr = ts.toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' });
     const deleteBtn = docId
-      ? `<button class="history-delete-btn" onclick="deleteStatus('${docId}')" title="Supprimer ce statut" aria-label="Supprimer">🗑</button>`
+      ? `<button class="history-delete-btn" onclick="deleteStatus('${docId}')" title="Supprimer ce statut" aria-label="Supprimer"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`
       : '';
     return `<div class="history-item">
       <div class="history-dot"></div>
@@ -2649,7 +2655,7 @@ async function deleteStatus(docId) {
     const fb = window._fb;
     const ref = fb.doc(fb.db, 'statuses', docId);
     await fb.deleteDoc(ref);
-    toast('Statut supprimé', 'success');
+    toast('✅ Statut supprimé', 'success');
     // onSnapshot se charge de rafraîchir l'historique automatiquement
   } catch(e) {
     console.error('deleteStatus error:', e.code, e.message);
@@ -2695,7 +2701,7 @@ function listenLatestStatus() {
     if (docs.length > 0) updateCurrentStatusCard(docs[0]);
     renderStatusHistory();
     const ssEl = document.getElementById('stat-streak');
-    if (ssEl) ssEl.textContent = State.streak > 0 ? State.streak : '0';
+    if (ssEl) ssEl.textContent = State.streak > 0 ? `🔥 ${State.streak}` : '0';
   }, err => console.warn('Status listener:', err.message));
   _unsubs.push(unsub);
 }
@@ -2714,7 +2720,7 @@ function renderNotifications() {
   if (badge) { badge.style.display = unread > 0 ? 'flex' : 'none'; badge.textContent = unread > 9 ? '9+' : unread; }
   const list = document.getElementById('notif-list'); if (!list) return;
   if (!State.notifications.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon"></div><div class="empty-title">Aucune notification</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="empty-title">Aucune notification</div></div>';
     return;
   }
   list.innerHTML = State.notifications.slice(0,20).map((n, i) => `
@@ -2735,18 +2741,18 @@ function closeNotifs() { document.getElementById('notif-drawer').classList.remov
 function renderProfileHeader() {
   const p = State.profile || {};
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
-  safe('profile-avatar-display', el => el.textContent = p.avatar || '');
+  safe('profile-avatar-display', el => { if (p.avatar) { el.textContent = p.avatar; } else { el.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'; } });
   safe('profile-name-display', el => el.textContent = p.displayName || 'Sans nom');
   safe('profile-bio-display', el => el.textContent = p.bio || '');
   safe('stat-groups', el => el.textContent = State.groups.length);
-  safe('stat-streak', el => el.textContent = State.streak > 0 ? State.streak : '0');
+  safe('stat-streak', el => el.textContent = State.streak > 0 ? `🔥 ${State.streak}` : '0');
 }
 
 async function loadProfileStats() {
   if (!State.user || !window._fb) return;
   const safe = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
   safe('stat-total', State.statusHistory.length);
-  safe('stat-streak', State.streak > 0 ? State.streak : '0');
+  safe('stat-streak', State.streak > 0 ? `🔥 ${State.streak}` : '0');
   safe('stat-groups', State.groups.length);
 }
 
@@ -2781,7 +2787,7 @@ async function saveProfile() {
   const bio = document.getElementById('edit-bio').value.trim();
   if (!name) { toast('Le pseudo est requis','error'); return; }
   const btn = document.getElementById('save-profile-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Enregistrement…'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
   const {db, doc, updateDoc} = window._fb;
   try {
     const newAvatar = State.profile.avatar || '';
@@ -2808,7 +2814,7 @@ async function saveProfile() {
     }
     renderProfileHeader();
     closeEditModal();
-    toast('Profil mis à jour','success');
+    toast('✅ Profil mis à jour','success');
   } catch(e) {
     console.error('saveProfile:', e);
     toast('Erreur lors de la sauvegarde','error');
@@ -2854,7 +2860,7 @@ function listenGroupNotifications(groups) {
         let notifText, notifIcon;
         if (isStatus) {
           notifText = `Nouveau statut dans "${group.name}"`;
-          notifIcon = 'wave';
+          notifIcon = '🌊';
         } else if (isSystem) {
           notifText = `${msg.text} (${group.name})`;
           notifIcon = 'ℹ️';
@@ -2862,7 +2868,7 @@ function listenGroupNotifications(groups) {
           // Regular chat message notification
           const senderName = msg.displayName || 'Quelqu\'un';
           notifText = `Nouveau message de ${senderName} dans "${group.name}"`;
-          notifIcon = 'msg';
+          notifIcon = '💬';
         }
 
         addNotification(notifIcon, notifText);
@@ -2903,7 +2909,7 @@ async function loadGroups() {
     renderProfileHeader(); loadProfileStats();
   } catch(e) {
     console.error('loadGroups:', e);
-    if (glEl) glEl.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de chargement</div></div>';
+    if (glEl) glEl.innerHTML = '<div class="empty-state"><div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="empty-title">Erreur de chargement</div></div>';
   }
 }
 
@@ -2923,7 +2929,7 @@ function renderGroups() {
 
   if (storiesEl) {
     storiesEl.innerHTML = `<div class="story-item story-new" onclick="openCreateGroup()">
-      <div class="story-ring"><div class="story-inner">+</div></div>
+      <div class="story-ring"><div class="story-inner" style="display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></div>
       <div class="story-label">Nouveau</div>
     </div>` + State.groups.map(g => {
       const hasUnread = (State.unread[g.id] || 0) > 0;
@@ -2937,7 +2943,7 @@ function renderGroups() {
 
   if (!State.groups.length) {
     feedEl.innerHTML = `<div class="groups-empty">
-      <div class="groups-empty-icon"></div>
+      <div class="groups-empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
       <div class="groups-empty-title">Aucun groupe encore</div>
       <div class="groups-empty-sub">Créez un groupe famille, amis ou soignants pour rester connectés.</div>
       <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openCreateGroup()">✨ Créer un groupe</button>
@@ -2952,7 +2958,7 @@ function renderGroups() {
     const uc = State.unread[g.id] || 0;
     const unreadBadge = uc > 0 ? `<span class="group-unread-badge" aria-label="${uc} non lu${uc>1?'s':''}">${uc>9?'9+':uc}</span>` : '';
     const deleteBtn = isCreator
-      ? `<button class="group-row-delete" title="Supprimer" onclick="event.stopPropagation();confirmDeleteGroup('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')">🗑</button>`
+      ? `<button class="group-row-delete" title="Supprimer" onclick="event.stopPropagation();confirmDeleteGroup('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`
       : '';
     return `<div class="group-row" onclick='openChat(${JSON.stringify(g).replace(/'/g,"&#39;")})' role="button" tabindex="0" aria-label="Ouvrir ${g.name}">
       <div class="group-row-avatar">${g.emoji||''}</div>
@@ -3016,7 +3022,7 @@ async function cgSearchMember() {
     errEl.textContent = 'Cette personne est déjà dans la liste.'; errEl.style.display = 'block'; return;
   }
 
-  const btn = document.getElementById('cg-search-btn'); btn.disabled = true; btn.textContent = '…';
+  const btn = document.getElementById('cg-search-btn'); btn.disabled = true; btn.textContent = '⏳';
   try {
     const {db, collection, query, where, getDocs} = window._fb;
     const q = query(collection(db,'users'), where('email','==',email));
@@ -3047,7 +3053,7 @@ function cgAddMember() {
   document.getElementById('cg-member-result').style.display = 'none';
   document.getElementById('cg-member-email').value = '';
   cgRenderPendingMembers();
-  toast(`${name} ajouté(e)`, 'success');
+  toast(`✅ ${name} ajouté(e)`, 'success');
 }
 
 function cgRemovePendingMember(uid) {
@@ -3100,14 +3106,14 @@ async function copyGroupInviteLink() {
   try {
     await navigator.clipboard.writeText(inviteUrl);
     if (btn) {
-      btn.textContent = 'Copié ✓';
+      btn.textContent = '✅ Copié';
       btn.classList.add('copied');
       setTimeout(() => {
         btn.textContent = 'Copier';
         btn.classList.remove('copied');
       }, 2500);
     }
-    toast('Lien copié ! Partagez-le avec vos proches.', 'success', 4000);
+    toast('🔗 Lien copié ! Partagez-le avec vos proches.', 'success', 4000);
   } catch(e) {
     // Fallback pour navigateurs sans clipboard API
     const ta = document.createElement('textarea');
@@ -3118,11 +3124,11 @@ async function copyGroupInviteLink() {
     document.execCommand('copy');
     document.body.removeChild(ta);
     if (btn) {
-      btn.textContent = 'Copié ✓';
+      btn.textContent = '✅ Copié';
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 2500);
     }
-    toast('Lien copié !', 'success', 4000);
+    toast('🔗 Lien copié !', 'success', 4000);
   }
 }
 function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
@@ -3138,7 +3144,7 @@ function msFillCurrentMembers() {
   if (!names.length) { el.innerHTML='<div style="color:var(--text3);font-size:.83rem;">Aucun membre.</div>'; return; }
   el.innerHTML = names.map((n, i) => {
     const uid = ids[i];
-    const avatar = avatars[i] || '';
+    const avatar = avatars[i] || '';  // no emoji fallback, SVG used in display
     const isMe = uid === State.user?.uid;
     const isCreator = uid === State.currentGroup.createdBy;
     let roleEl = '';
@@ -3146,7 +3152,7 @@ function msFillCurrentMembers() {
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
 
     // View profile button (not for self)
-    const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}">👁 Voir</button>` : '';
+    const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Voir</button>` : '';
 
     // Kick button: only creator can kick, and only on non-creator members, and not themselves
     const canKick = isCurrentUserCreator && !isCreator && !isMe;
@@ -3226,8 +3232,8 @@ async function kickMember(uid, name) {
 
     msFillCurrentMembers();
     renderGroups();
-    toast(`${name} retiré(e) du groupe`, 'success');
-    addNotification('info', `${name} a été retiré(e) de "${State.currentGroup.name}"`);
+    toast(`${name} retiré(e) du groupe ✓`, 'success');
+    addNotification('ℹ️', `${name} a été retiré(e) de "${State.currentGroup.name}"`);
   } catch(e) {
     console.error('kickMember:', e);
     toast('Erreur lors de la suppression du membre.', 'error');
@@ -3296,7 +3302,7 @@ async function msSearch() {
   if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
     errEl.textContent = 'Entrez un email valide.'; errEl.className = 'ms-error show'; return;
   }
-  const btn = document.getElementById('ms-search-btn'); btn.disabled = true; btn.textContent = '…';
+  const btn = document.getElementById('ms-search-btn'); btn.disabled = true; btn.textContent = '⏳';
   try {
     const {db, collection, query, where, getDocs} = window._fb;
     const snap = await getDocs(query(collection(db,'users'), where('email','==',email)));
@@ -3326,12 +3332,12 @@ async function msAddMember() {
   const btn = document.getElementById('ms-add-btn');
   const { uid, name, avatar } = btn.dataset;
   if (!uid || !State.currentGroup?.id) return;
-  btn.disabled = true; btn.textContent = '…';
+  btn.disabled = true; btn.textContent = '⏳';
   try {
     const {db, doc, updateDoc, collection, addDoc, serverTimestamp} = window._fb;
     const nm = [...(State.currentGroup.members||[]), uid];
     const nn = [...(State.currentGroup.memberNames||[]), name];
-    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'🧑')), avatar || ''];
+    const na = [...(State.currentGroup.memberAvatars || State.currentGroup.members.map(()=>'')), avatar || ''];
     await updateDoc(doc(db,'groups',State.currentGroup.id), { members:nm, memberNames:nn, memberAvatars:na });
     State.currentGroup.members = nm;
     State.currentGroup.memberNames = nn;
@@ -3344,12 +3350,12 @@ async function msAddMember() {
     }
     document.getElementById('chat-members-count').textContent = `${nm.length} membre(s)`;
     await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
-      type:'system', text:`${name} a rejoint le groupe`, createdAt:serverTimestamp()
+      type:'system', text:`${name} a rejoint le groupe 👋`, createdAt:serverTimestamp()
     });
     document.getElementById('ms-result').style.display = 'none';
     document.getElementById('ms-email').value = '';
     msFillCurrentMembers(); renderGroups();
-    toast(`${name} ajouté(e)`, 'success');
+    toast(`✅ ${name} ajouté(e)`, 'success');
   } catch(e) { toast('Erreur lors de l\'ajout.','error'); }
   finally { btn.disabled = false; btn.textContent = '+ Ajouter'; }
 }
@@ -3508,7 +3514,7 @@ function cgSearchPseudo(value) {
           }
           State.cgPendingMembers.push({ uid, name, avatar, email: '' });
           cgRenderPendingMembers();
-          toast(`${name} ajouté(e)`, 'success');
+          toast(`✅ ${name} ajouté(e)`, 'success');
           const inp = document.getElementById('cg-pseudo'); if (inp) inp.value = '';
           el.innerHTML = '';
         });
@@ -3555,14 +3561,14 @@ async function leaveGroup() {
     await updateDoc(doc(db,'groups',g.id), { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
     await addDoc(collection(db,'groups',g.id,'messages'), {
       type:'system',
-      text:`${State.profile.displayName||'Quelqu\'un'} a quitté le groupe`,
+      text:`${State.profile.displayName||'Quelqu\'un'} a quitté le groupe 🚪`,
       createdAt:serverTimestamp()
     });
     State.groups = State.groups.filter(gr => gr.id !== g.id);
     State.currentGroup = null;
     closeMembersModal(); closeChat(); renderGroups();
     toast(`Vous avez quitté "${g.name}" 🚪`, 'success');
-    addNotification('leave', `Vous avez quitté le groupe "${g.name}"`);
+    addNotification('🚪', `Vous avez quitté le groupe "${g.name}"`);
   } catch(e) { console.error('leaveGroup:', e); toast('Erreur lors du départ.','error'); }
 }
 
@@ -3577,7 +3583,7 @@ async function _deleteGroupById(groupId, groupName) {
     delete State.unread[groupId];
     renderGroups(); updateGroupsBadge();
     toast(`Groupe "${groupName}" supprimé.`,'success');
-    addNotification('trash', `Groupe "${groupName}" supprimé`);
+    addNotification('🗑', `Groupe "${groupName}" supprimé`);
   } catch(e) { console.error('deleteGroup:', e); toast('Erreur lors de la suppression.','error'); }
 }
 
@@ -3718,7 +3724,7 @@ function loadChatMessages(groupId) {
     msgsEl.innerHTML = '';
     if (allMessages.length === 0) {
       msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
-        <div class="empty-icon">💬</div>
+        <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
         <div class="empty-title">Aucun message encore</div>
         <div class="empty-sub">Soyez le premier à écrire !</div>
       </div>`;
@@ -3766,7 +3772,7 @@ function loadChatMessages(groupId) {
   }, err => {
     console.warn('Chat listener:', err.message);
     msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
-      <div class="empty-icon">⚠️</div>
+      <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
       <div class="empty-title">Erreur de chargement</div>
       <div class="empty-sub">Vérifiez votre connexion</div>
     </div>`;
@@ -3956,7 +3962,7 @@ async function _initDashboard(user, profile) {
 
   State.dark = profile.darkMode !== false;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
-  const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '○' : '●';
+  const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
 
@@ -4013,7 +4019,7 @@ async function _initDashboard(user, profile) {
         // Message système dans le chat
         await addDoc(collection(db, 'groups', joinGroupId, 'messages'), {
           type: 'system',
-          text: `${State.profile.displayName || 'Quelqu\'un'} a rejoint le groupe via un lien d\'invitation 👋`,
+          text: `${State.profile.displayName || 'Quelqu\'un'} a rejoint le groupe 👋 via un lien d\'invitation 👋`,
           createdAt: serverTimestamp()
         });
 
@@ -4024,7 +4030,7 @@ async function _initDashboard(user, profile) {
         State.groups.push(gData);
         renderGroups();
 
-        toast(`Vous avez rejoint "${gData.name}" !`, 'success', 4000);
+        toast(`✅ Vous avez rejoint "${gData.name}" !`, 'success', 4000);
         openChat(gData);
       } catch(e) {
         console.error('auto-join:', e);
@@ -4133,7 +4139,7 @@ const App = {
         };
         await sendEmailVerification(cred.user, actionCodeSettings);
         showVerifyBanner(cred.user);
-        toast('Email de vérification envoyé. Vérifiez vos spams si besoin.', 'info', 6000);
+        toast('📧 Email de vérification envoyé. Vérifiez vos spams si besoin.', 'info', 6000);
       } catch(verifyErr) {
         console.warn('sendEmailVerification:', verifyErr.message);
       }
@@ -4275,7 +4281,7 @@ const App = {
       }
 
       toast('Statut partagé 🌊','success');
-      addNotification('wave', 'Votre statut a été partagé !');
+      addNotification('🌊', 'Votre statut a été partagé !');
 
       State.selectedStatus.clear();
       document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
@@ -4318,7 +4324,7 @@ const App = {
       State.cgPendingMembers = [];
       closeCreateGroup();
       toast('Groupe créé ! 🎉','success');
-      addNotification('group', `Groupe "${name}" créé`);
+      addNotification('👥', `Groupe "${name}" créé`);
       renderGroups();
       renderProfileHeader();
       loadGroups();
@@ -4359,7 +4365,7 @@ const App = {
           const newAvatars = [...(g.memberAvatars||[])]; newAvatars.splice(idx,1);
           await updateDoc(gDoc.ref, { members:newMembers, memberNames:newNames, memberAvatars:newAvatars });
           await addDoc(collection(db,'groups',gDoc.id,'messages'), {
-            type:'system', text:`${displayName} a quitté l'application`, createdAt:serverTimestamp()
+            type:'system', text:`${displayName} a quitté l'application 👋`, createdAt:serverTimestamp()
           });
         }
       }));
