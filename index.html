@@ -1372,7 +1372,108 @@ body {
 .mp-status-time { font-size: .7rem; color: var(--text3); margin-top: 3px; }
 .mp-loading { text-align: center; padding: 14px; color: var(--text3); font-size: .83rem; }
 
-/* ══ SKELETON LOADERS ══ */
+/* ══ ONBOARDING ══ */
+.onboarding-overlay {
+  position: fixed; inset: 0; z-index: 8000;
+  background: rgba(0,0,0,.8); backdrop-filter: blur(14px);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.onboarding-overlay.open { display: flex; }
+.onboarding-card {
+  background: var(--c1); border: 1px solid var(--border2);
+  border-radius: var(--r3); padding: 36px 28px 28px;
+  width: 100%; max-width: 380px;
+  box-shadow: var(--shadow-lg), 0 0 60px rgba(99,102,241,.2);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative;
+}
+.onboarding-skip {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text3);
+  font-size: .76rem; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700;
+  padding: 4px 8px; border-radius: 100px;
+  transition: color var(--t), background var(--t);
+}
+.onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
+.onboarding-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent3), rgba(45,212,191,.15));
+  border: 1px solid rgba(99,102,241,.25);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; color: var(--accent2);
+}
+.onboarding-step-lbl {
+  font-size: .66rem; font-weight: 800; color: var(--accent2);
+  letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px;
+}
+.onboarding-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.25rem; font-weight: 700; letter-spacing: -.03em;
+  line-height: 1.2; margin-bottom: 10px;
+}
+.onboarding-desc {
+  font-size: .86rem; color: var(--text2); line-height: 1.65;
+  margin-bottom: 28px; max-width: 300px;
+}
+.onboarding-dots { display: flex; gap: 7px; margin-bottom: 22px; }
+.onboarding-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border2); transition: all .3s var(--t-spring);
+}
+.onboarding-dot.active { background: var(--accent2); width: 22px; border-radius: 4px; }
+.onboarding-footer { display: flex; gap: 10px; width: 100%; }
+
+/* ══ THEME COLOR PICKER ══ */
+.theme-color-grid {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
+}
+.theme-color-swatch {
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: all .2s var(--t-spring);
+  position: relative; flex-shrink: 0;
+}
+.theme-color-swatch:hover { transform: scale(1.15); }
+.theme-color-swatch.active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--c1), 0 0 0 4px currentColor;
+}
+.theme-color-swatch.active::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(255,255,255,.25);
+}
+
+/* ══ STATUS REACTIONS ══ */
+.status-reactions-section {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.status-reactions-label {
+  font-size: .62rem; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+}
+.status-reactions-bar { display: flex; flex-wrap: wrap; gap: 6px; }
+.reaction-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 100px;
+  background: var(--glass); border: 1px solid var(--border2);
+  font-size: .8rem; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif; color: var(--text2);
+  transition: background .1s, border-color .1s, transform .1s;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.reaction-btn.reacted {
+  background: rgba(99,102,241,.15); border-color: rgba(129,140,248,.4);
+  color: var(--accent2); font-weight: 700;
+}
+.reaction-count { font-size: .72rem; font-weight: 700; }
+@media (hover: hover) and (pointer: fine) {
+  .reaction-btn:hover { background: var(--glass2); border-color: var(--border3); transform: scale(1.04); }
+  .reaction-btn.reacted:hover { background: rgba(99,102,241,.22); }
+  .theme-color-swatch:hover { transform: scale(1.15); }
+  .onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
+}
 .skeleton { background: var(--border); border-radius: 6px; animation: skeleton-pulse 1.6s ease-in-out infinite; }
 @keyframes skeleton-pulse { 0%,100%{opacity:.5;}50%{opacity:1;} }
 .skeleton-row { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); align-items: center; }
@@ -1966,6 +2067,10 @@ body {
     <div class="avatar-picker" id="avatar-picker" role="radiogroup"></div>
     <div class="form-group" style="margin-top:14px;"><label class="form-label" for="edit-name">Pseudo</label><input class="form-input" type="text" id="edit-name" placeholder="Votre prénom" maxlength="30" /></div>
     <div class="form-group"><label class="form-label" for="edit-bio">Bio <span style="color:var(--text3);font-weight:400;text-transform:none;">(optionnelle)</span></label><input class="form-input" type="text" id="edit-bio" placeholder="En quelques mots…" maxlength="100" /></div>
+    <div class="form-group">
+      <label class="form-label">Couleur du thème</label>
+      <div class="theme-color-grid" id="theme-color-grid"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-full" onclick="closeEditModal()">Annuler</button>
       <button class="btn btn-primary btn-full" onclick="saveProfile()" id="save-profile-btn">Sauvegarder</button>
@@ -2805,7 +2910,7 @@ async function saveProfile() {
         if (idx === -1) return;
         const newNames = [...(g.memberNames || [])];
         newNames[idx] = name;
-        const newAvatars = [...(g.memberAvatars || g.members.map(() => '🧑'))];
+        const newAvatars = [...(g.memberAvatars || g.members.map(() => ''))];
         newAvatars[idx] = newAvatar;
         await updateDoc(doc(db,'groups',g.id), { memberNames: newNames, memberAvatars: newAvatars });
         g.memberNames = newNames;
@@ -4075,7 +4180,7 @@ const App = {
       globalErr.textContent = msgs[e.code] || 'Email ou mot de passe incorrect.';
       globalErr.classList.add('show');
     } finally {
-      btn.disabled = false; btn.textContent = 'Se connecter 🚀';
+      btn.disabled = false; btn.textContent = 'Se connecter';
     }
   },
 
@@ -4478,6 +4583,185 @@ function addSwipeClose(sheetId, closeFn) {
   }, { passive: true });
 }
 /* ════════════════════════════════════════════════
+   THEME COLOR SYSTEM
+════════════════════════════════════════════════ */
+const THEME_COLORS = [
+  { name: 'Indigo',   accent: '#6366f1', accent2: '#818cf8', teal: '#2dd4bf' },
+  { name: 'Violet',   accent: '#7c3aed', accent2: '#a78bfa', teal: '#2dd4bf' },
+  { name: 'Rose',     accent: '#e11d48', accent2: '#fb7185', teal: '#2dd4bf' },
+  { name: 'Emerald',  accent: '#059669', accent2: '#34d399', teal: '#06b6d4' },
+  { name: 'Amber',    accent: '#d97706', accent2: '#fbbf24', teal: '#2dd4bf' },
+  { name: 'Sky',      accent: '#0284c7', accent2: '#38bdf8', teal: '#2dd4bf' },
+  { name: 'Pink',     accent: '#db2777', accent2: '#f472b6', teal: '#2dd4bf' },
+  { name: 'Teal',     accent: '#0d9488', accent2: '#2dd4bf', teal: '#818cf8' },
+];
+
+function applyThemeColor(idx) {
+  const t = THEME_COLORS[idx] || THEME_COLORS[0];
+  const root = document.documentElement;
+  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent2', t.accent2);
+  root.style.setProperty('--teal', t.teal);
+  root.style.setProperty('--teal2', t.teal2 || t.teal);
+  root.style.setProperty('--accent3', t.accent + '26');
+  root.style.setProperty('--shadow-accent', `0 0 32px ${t.accent}59`);
+  State.themeColorIdx = idx;
+}
+
+function renderThemeColorGrid() {
+  const el = document.getElementById('theme-color-grid'); if (!el) return;
+  const current = State.themeColorIdx ?? 0;
+  el.innerHTML = THEME_COLORS.map((t, i) =>
+    `<div class="theme-color-swatch ${i === current ? 'active' : ''}"
+       style="background:linear-gradient(135deg,${t.accent},${t.accent2});"
+       title="${t.name}"
+       onclick="selectThemeColor(${i},this)"></div>`
+  ).join('');
+}
+
+function selectThemeColor(idx, el) {
+  document.querySelectorAll('.theme-color-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  applyThemeColor(idx);
+}
+
+async function saveThemeColor(idx) {
+  if (!State.user || !window._fb) return;
+  const {db, doc, updateDoc} = window._fb;
+  try { await updateDoc(doc(db,'users',State.user.uid), { themeColorIdx: idx }); } catch(e) {}
+}
+
+// Extend saveProfile to also save theme color
+const _origSaveProfile = saveProfile;
+async function saveProfile() {
+  await _origSaveProfile();
+  if (State.themeColorIdx !== undefined) await saveThemeColor(State.themeColorIdx);
+}
+
+/* ════════════════════════════════════════════════
+   ONBOARDING
+════════════════════════════════════════════════ */
+const OB_STEPS = [
+  {
+    icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l1.5-3 2 4.5 1.5-3H21"/></svg>`,
+    title: 'Partagez votre état',
+    desc: 'En quelques secondes, dites à vos proches comment vous vous sentez — sans appel, sans pression. Un tap suffit.'
+  },
+  {
+    icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    title: 'Créez votre groupe',
+    desc: 'Invitez votre famille ou vos proches dans un groupe privé. Seuls les membres invités voient vos statuts.'
+  },
+  {
+    icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+    title: 'Restez connectés',
+    desc: 'Chattez, réagissez aux statuts, recevez des notifications en temps réel. Tout ça dans un espace bienveillant.'
+  }
+];
+
+let _obStep = 0;
+
+function showOnboarding() {
+  _obStep = 0;
+  renderObStep();
+  document.getElementById('onboarding-overlay').classList.add('open');
+}
+
+function skipOnboarding() {
+  document.getElementById('onboarding-overlay').classList.remove('open');
+  try { localStorage.setItem('cw_onboarded', '1'); } catch(e) {}
+}
+
+function obNext() {
+  if (_obStep < OB_STEPS.length - 1) {
+    _obStep++;
+    renderObStep();
+  } else {
+    skipOnboarding();
+  }
+}
+
+function obPrev() {
+  if (_obStep > 0) { _obStep--; renderObStep(); }
+}
+
+function renderObStep() {
+  const s = OB_STEPS[_obStep];
+  const iconEl = document.getElementById('ob-icon'); if (iconEl) iconEl.innerHTML = s.icon;
+  const titleEl = document.getElementById('ob-title'); if (titleEl) titleEl.textContent = s.title;
+  const descEl = document.getElementById('ob-desc'); if (descEl) descEl.textContent = s.desc;
+  const stepEl = document.getElementById('ob-step'); if (stepEl) stepEl.textContent = `Étape ${_obStep + 1} / ${OB_STEPS.length}`;
+  // Dots
+  document.querySelectorAll('#ob-dots .onboarding-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === _obStep);
+  });
+  // Buttons
+  const backBtn = document.getElementById('ob-back');
+  const nextBtn = document.getElementById('ob-next');
+  if (backBtn) backBtn.style.display = _obStep > 0 ? '' : 'none';
+  if (nextBtn) nextBtn.textContent = _obStep === OB_STEPS.length - 1 ? 'Commencer' : 'Suivant →';
+}
+
+/* ════════════════════════════════════════════════
+   STATUS REACTIONS
+════════════════════════════════════════════════ */
+const REACTION_TYPES = [
+  { emoji: '👍', label: 'Pouce' },
+  { emoji: '❤️', label: 'Cœur' },
+  { emoji: '💪', label: 'Courage' },
+  { emoji: '🌿', label: 'Sérénité' },
+];
+
+// Called when rendering groups feed or chat status updates
+// We attach reactions to status documents in Firestore
+async function toggleStatusReaction(statusId, emoji) {
+  if (!State.user || !window._fb) return;
+  const {db, doc, updateDoc} = window._fb;
+  const uid = State.user.uid;
+  const fieldPath = `reactions.${emoji.codePointAt(0)}_${uid}`;
+  try {
+    const {getDoc} = window._fb;
+    const snap = await getDoc(doc(db, 'statuses', statusId));
+    if (!snap.exists()) return;
+    const reactions = snap.data().reactions || {};
+    const key = `${emoji.codePointAt(0)}_${uid}`;
+    if (reactions[key]) {
+      // remove - use deleteField
+      const {deleteField} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      await updateDoc(doc(db,'statuses',statusId), { [`reactions.${key}`]: deleteField() });
+    } else {
+      await updateDoc(doc(db,'statuses',statusId), { [`reactions.${key}`]: { uid, emoji } });
+    }
+  } catch(e) { console.warn('reaction:', e.message); }
+}
+
+function buildReactionsBar(statusId, reactions = {}) {
+  // Count per emoji
+  const counts = {};
+  const myReactions = new Set();
+  Object.values(reactions).forEach(r => {
+    if (!counts[r.emoji]) counts[r.emoji] = 0;
+    counts[r.emoji]++;
+    if (r.uid === State.user?.uid) myReactions.add(r.emoji);
+  });
+  // Build HTML
+  return `<div class="status-reactions-section">
+    <div class="status-reactions-label">Réactions</div>
+    <div class="status-reactions-bar">
+      ${REACTION_TYPES.map(rt => {
+        const count = counts[rt.emoji] || 0;
+        const reacted = myReactions.has(rt.emoji);
+        return `<button class="reaction-btn ${reacted ? 'reacted' : ''}"
+          onclick="toggleStatusReaction('${statusId}','${rt.emoji}')"
+          title="${rt.label}">
+          ${rt.emoji}${count > 0 ? `<span class="reaction-count">${count}</span>` : ''}
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════
    PROFILE COVER WAVE (Canvas + gyroscope)
 ════════════════════════════════════════════════ */
 (function initProfileWave() {
@@ -4592,5 +4876,25 @@ function addSwipeClose(sheetId, closeFn) {
   }
 })();
 </script>
+<!-- ════ ONBOARDING ════ -->
+<div class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-modal="true">
+  <div class="onboarding-card">
+    <button class="onboarding-skip" onclick="skipOnboarding()">Passer</button>
+    <div class="onboarding-icon" id="ob-icon"></div>
+    <div class="onboarding-step-lbl" id="ob-step">Étape 1 / 3</div>
+    <div class="onboarding-title" id="ob-title">Bienvenue sur CareWave</div>
+    <div class="onboarding-desc" id="ob-desc">Restez connectés avec vos proches sans pression. Partagez votre état en quelques secondes.</div>
+    <div class="onboarding-dots" id="ob-dots">
+      <div class="onboarding-dot active"></div>
+      <div class="onboarding-dot"></div>
+      <div class="onboarding-dot"></div>
+    </div>
+    <div class="onboarding-footer">
+      <button class="btn btn-ghost btn-full" id="ob-back" onclick="obPrev()" style="display:none">← Retour</button>
+      <button class="btn btn-primary btn-full" id="ob-next" onclick="obNext()">Suivant →</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
