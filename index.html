@@ -2455,7 +2455,8 @@ const State = {
   streak: 0,
   _isRegistering: false,
   _pendingProfile: null,
-  _memberColorMap: {}  // uid -> color index
+  _memberColorMap: {},
+  themeColorIdx: 0
 };
 let _unsubs = [];
 
@@ -2747,6 +2748,7 @@ function renderStatusHistory() {
         <div class="history-tags">${tags.map(t=>`<span class="history-tag">${t}</span>`).join('')}</div>
         ${msg ? `<div class="history-msg">"${msg}"</div>` : ''}
         <div class="history-time">${timeStr}</div>
+        ${docId ? buildReactionsBar(docId, s.reactions || {}) : ''}
       </div>
       ${deleteBtn}
     </div>`;
@@ -2867,8 +2869,8 @@ function openEditProfile() {
   if (nameEl) nameEl.value = State.profile.displayName || '';
   if (bioEl) bioEl.value = State.profile.bio || '';
   renderAvatarPicker();
+  renderThemeColorGrid();
   document.getElementById('edit-modal').classList.add('open');
-  if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('edit-modal'));
 }
 function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
 function closeEditOutside(e) { if (e.target.id === 'edit-modal') closeEditModal(); }
@@ -2896,14 +2898,17 @@ async function saveProfile() {
   const {db, doc, updateDoc} = window._fb;
   try {
     const newAvatar = State.profile.avatar || '';
+    const themeIdx = State.themeColorIdx ?? 0;
     await updateDoc(doc(db,'users',State.user.uid), {
       displayName: name,
       displayNameLower: name.toLowerCase(),
       bio,
-      avatar: newAvatar
+      avatar: newAvatar,
+      themeColorIdx: themeIdx
     });
     State.profile.displayName = name;
     State.profile.bio = bio;
+    State.profile.themeColorIdx = themeIdx;
     if (State.groups.length > 0) {
       await Promise.all(State.groups.map(async g => {
         const idx = (g.members || []).indexOf(State.user.uid);
@@ -2917,6 +2922,7 @@ async function saveProfile() {
         g.memberAvatars = newAvatars;
       }));
     }
+    applyThemeColor(themeIdx);
     renderProfileHeader();
     closeEditModal();
     toast('✅ Profil mis à jour','success');
@@ -4071,6 +4077,10 @@ async function _initDashboard(user, profile) {
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
 
+  // Appliquer la couleur de thème sauvegardée
+  const savedTheme = profile.themeColorIdx ?? 0;
+  applyThemeColor(savedTheme);
+
   renderProfileHeader();
   renderStatusOptions();
   renderQuickMsgs();
@@ -4145,6 +4155,12 @@ async function _initDashboard(user, profile) {
   }
 
   toast(`Bienvenue ${profile.displayName} 🌊`, 'success');
+
+  // Onboarding pour les nouveaux utilisateurs
+  try {
+    const isNew = !localStorage.getItem('cw_onboarded');
+    if (isNew) setTimeout(showOnboarding, 800);
+  } catch(e) {}
 
   // Afficher le bandeau si l'email n'est pas encore vérifié
   if (window._fb?.auth?.currentUser) {
@@ -4629,13 +4645,6 @@ async function saveThemeColor(idx) {
   if (!State.user || !window._fb) return;
   const {db, doc, updateDoc} = window._fb;
   try { await updateDoc(doc(db,'users',State.user.uid), { themeColorIdx: idx }); } catch(e) {}
-}
-
-// Extend saveProfile to also save theme color
-const _origSaveProfile = saveProfile;
-async function saveProfile() {
-  await _origSaveProfile();
-  if (State.themeColorIdx !== undefined) await saveThemeColor(State.themeColorIdx);
 }
 
 /* ════════════════════════════════════════════════
