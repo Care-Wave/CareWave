@@ -206,7 +206,11 @@ body {
   background: rgba(255,255,255,.08);
   opacity: 0; transition: opacity .25s;
 }
-.btn:active { transform: scale(.97) !important; }
+.btn:active { transform: scale(.96) !important; opacity: .85; }
+.btn-primary:active { box-shadow: 0 0 16px rgba(99,102,241,.3) !important; }
+.status-opt:active { transform: scale(.94) !important; }
+.reaction-btn:active { transform: scale(.93) !important; }
+.icon-btn:active { transform: scale(.9) !important; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
 .btn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; box-shadow: var(--shadow-accent); }
 .btn-teal { background: linear-gradient(135deg, var(--teal), #0d9488); color: #fff; box-shadow: var(--shadow-teal); }
@@ -1376,32 +1380,30 @@ body {
 .onboarding-overlay {
   position: fixed; inset: 0; z-index: 8000;
   background: rgba(0,0,0,.8); backdrop-filter: blur(14px);
-  display: none; align-items: center; justify-content: center; padding: 24px;
+  display: none; align-items: center; justify-content: center; padding: 20px;
 }
 .onboarding-overlay.open { display: flex; }
 .onboarding-card {
   background: var(--c1); border: 1px solid var(--border2);
-  border-radius: var(--r3); padding: 36px 28px 28px;
-  width: 100%; max-width: 380px;
+  border-radius: var(--r3); padding: 36px 24px 24px;
+  width: min(380px, 100%);           /* jamais plus large que l'écran */
   box-shadow: var(--shadow-lg), 0 0 60px rgba(99,102,241,.2);
   display: flex; flex-direction: column; align-items: center; text-align: center;
-  position: relative;
+  position: relative; overflow: hidden;  /* empêche tout débordement */
 }
 .onboarding-skip {
-  position: absolute; top: 16px; right: 16px;
+  position: absolute; top: 14px; right: 14px;
   background: none; border: none; color: var(--text3);
   font-size: .76rem; cursor: pointer;
   font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700;
   padding: 4px 8px; border-radius: 100px;
-  transition: color var(--t), background var(--t);
 }
-.onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
 .onboarding-icon {
-  width: 72px; height: 72px; border-radius: 50%;
+  width: 68px; height: 68px; border-radius: 50%;
   background: linear-gradient(135deg, var(--accent3), rgba(45,212,191,.15));
   border: 1px solid rgba(99,102,241,.25);
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 20px; color: var(--accent2);
+  margin-bottom: 18px; color: var(--accent2); flex-shrink: 0;
 }
 .onboarding-step-lbl {
   font-size: .66rem; font-weight: 800; color: var(--accent2);
@@ -1409,20 +1411,25 @@ body {
 }
 .onboarding-title {
   font-family: 'Clash Display', sans-serif;
-  font-size: 1.25rem; font-weight: 700; letter-spacing: -.03em;
-  line-height: 1.2; margin-bottom: 10px;
+  font-size: 1.2rem; font-weight: 700; letter-spacing: -.03em;
+  line-height: 1.25; margin-bottom: 10px;
 }
 .onboarding-desc {
-  font-size: .86rem; color: var(--text2); line-height: 1.65;
-  margin-bottom: 28px; max-width: 300px;
+  font-size: .85rem; color: var(--text2); line-height: 1.6;
+  margin-bottom: 24px;
 }
-.onboarding-dots { display: flex; gap: 7px; margin-bottom: 22px; }
+.onboarding-dots { display: flex; gap: 7px; margin-bottom: 20px; }
 .onboarding-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--border2); transition: all .3s var(--t-spring);
 }
 .onboarding-dot.active { background: var(--accent2); width: 22px; border-radius: 4px; }
-.onboarding-footer { display: flex; gap: 10px; width: 100%; }
+/* Footer DANS la carte, pas de débordement */
+.onboarding-footer {
+  display: flex; gap: 8px;
+  width: 100%;   /* 100% de la carte, pas de l'écran */
+  flex-shrink: 0;
+}
 
 /* ══ THEME COLOR PICKER ══ */
 .theme-color-grid {
@@ -2748,7 +2755,6 @@ function renderStatusHistory() {
         <div class="history-tags">${tags.map(t=>`<span class="history-tag">${t}</span>`).join('')}</div>
         ${msg ? `<div class="history-msg">"${msg}"</div>` : ''}
         <div class="history-time">${timeStr}</div>
-        ${docId ? buildReactionsBar(docId, s.reactions || {}) : ''}
       </div>
       ${deleteBtn}
     </div>`;
@@ -2872,7 +2878,14 @@ function openEditProfile() {
   renderThemeColorGrid();
   document.getElementById('edit-modal').classList.add('open');
 }
-function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); }
+function closeEditModal() {
+  // Restaurer le thème si annulation
+  if (_pendingThemeIdx !== null && _pendingThemeIdx !== (State.themeColorIdx ?? 0)) {
+    applyThemeColor(State.themeColorIdx ?? 0);
+  }
+  _pendingThemeIdx = null;
+  document.getElementById('edit-modal').classList.remove('open');
+}
 function closeEditOutside(e) { if (e.target.id === 'edit-modal') closeEditModal(); }
 
 function renderAvatarPicker() {
@@ -2898,7 +2911,7 @@ async function saveProfile() {
   const {db, doc, updateDoc} = window._fb;
   try {
     const newAvatar = State.profile.avatar || '';
-    const themeIdx = State.themeColorIdx ?? 0;
+    const themeIdx = _pendingThemeIdx !== null ? _pendingThemeIdx : (State.themeColorIdx ?? 0);
     await updateDoc(doc(db,'users',State.user.uid), {
       displayName: name,
       displayNameLower: name.toLowerCase(),
@@ -2923,6 +2936,7 @@ async function saveProfile() {
       }));
     }
     applyThemeColor(themeIdx);
+    _pendingThemeIdx = null;
     renderProfileHeader();
     closeEditModal();
     toast('✅ Profil mis à jour','success');
@@ -4615,14 +4629,22 @@ const THEME_COLORS = [
 function applyThemeColor(idx) {
   const t = THEME_COLORS[idx] || THEME_COLORS[0];
   const root = document.documentElement;
-  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent',  t.accent);
   root.style.setProperty('--accent2', t.accent2);
-  root.style.setProperty('--teal', t.teal);
-  root.style.setProperty('--teal2', t.teal2 || t.teal);
+  root.style.setProperty('--teal',    t.teal);
+  root.style.setProperty('--teal2',   t.teal2 || t.teal);
   root.style.setProperty('--accent3', t.accent + '26');
   root.style.setProperty('--shadow-accent', `0 0 32px ${t.accent}59`);
   State.themeColorIdx = idx;
+
+  // Mettre à jour le bandeau de profil avec les nouvelles couleurs
+  const cover = document.querySelector('.profile-cover');
+  if (cover) {
+    cover.style.background = `linear-gradient(135deg, ${t.accent}cc 0%, ${t.accent2}99 45%, ${t.teal}cc 100%)`;
+  }
 }
+
+let _pendingThemeIdx = null; // prévisualisation en cours, pas encore sauvegardé
 
 function renderThemeColorGrid() {
   const el = document.getElementById('theme-color-grid'); if (!el) return;
@@ -4631,14 +4653,21 @@ function renderThemeColorGrid() {
     `<div class="theme-color-swatch ${i === current ? 'active' : ''}"
        style="background:linear-gradient(135deg,${t.accent},${t.accent2});"
        title="${t.name}"
-       onclick="selectThemeColor(${i},this)"></div>`
+       onclick="previewThemeColor(${i},this)"></div>`
   ).join('');
 }
 
-function selectThemeColor(idx, el) {
+function previewThemeColor(idx, el) {
+  // Marquer visuellement la sélection
   document.querySelectorAll('.theme-color-swatch').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
+  // Prévisualiser sans écrire dans State.themeColorIdx
+  _pendingThemeIdx = idx;
   applyThemeColor(idx);
+}
+
+function selectThemeColor(idx, el) {
+  previewThemeColor(idx, el);
 }
 
 async function saveThemeColor(idx) {
