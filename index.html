@@ -4644,31 +4644,29 @@ function applyThemeColor(idx) {
   }
 }
 
-let _pendingThemeIdx = null; // prévisualisation en cours, pas encore sauvegardé
+let _pendingThemeIdx = null;
 
 function renderThemeColorGrid() {
   const el = document.getElementById('theme-color-grid'); if (!el) return;
   const current = State.themeColorIdx ?? 0;
+  _pendingThemeIdx = current; // initialiser avec la valeur actuelle
   el.innerHTML = THEME_COLORS.map((t, i) =>
     `<div class="theme-color-swatch ${i === current ? 'active' : ''}"
        style="background:linear-gradient(135deg,${t.accent},${t.accent2});"
        title="${t.name}"
-       onclick="previewThemeColor(${i},this)"></div>`
+       onclick="selectPendingTheme(${i},this)"></div>`
   ).join('');
 }
 
-function previewThemeColor(idx, el) {
-  // Marquer visuellement la sélection
+function selectPendingTheme(idx, el) {
+  // Marquer visuellement SEULEMENT — ne pas appliquer au thème
   document.querySelectorAll('.theme-color-swatch').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
-  // Prévisualiser sans écrire dans State.themeColorIdx
-  _pendingThemeIdx = idx;
-  applyThemeColor(idx);
+  _pendingThemeIdx = idx; // stocker en attente
 }
 
-function selectThemeColor(idx, el) {
-  previewThemeColor(idx, el);
-}
+function previewThemeColor(idx, el) { selectPendingTheme(idx, el); }
+function selectThemeColor(idx, el) { selectPendingTheme(idx, el); }
 
 async function saveThemeColor(idx) {
   if (!State.user || !window._fb) return;
