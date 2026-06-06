@@ -209,7 +209,6 @@ body {
 .btn:active { transform: scale(.96) !important; opacity: .85; }
 .btn-primary:active { box-shadow: 0 0 16px rgba(99,102,241,.3) !important; }
 .status-opt:active { transform: scale(.94) !important; }
-.reaction-btn:active { transform: scale(.93) !important; }
 .icon-btn:active { transform: scale(.9) !important; }
 .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
 .btn-primary { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; box-shadow: var(--shadow-accent); }
@@ -445,6 +444,44 @@ body {
 }
 .step-title { font-weight: 800; font-size: .95rem; margin-bottom: 6px; }
 .step-desc { font-size: .82rem; color: var(--text2); line-height: 1.55; }
+
+/* ══ FAQ SECTION ══ */
+.faq-section { padding: 90px 40px; max-width: 760px; margin: 0 auto; }
+.faq-list { margin-top: 52px; display: flex; flex-direction: column; gap: 10px; }
+.faq-item {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: var(--r2); overflow: hidden;
+  transition: border-color var(--t);
+}
+.faq-item.open { border-color: var(--border2); }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 24px; cursor: pointer;
+  font-weight: 700; font-size: .93rem; line-height: 1.4;
+  -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.faq-q-text { flex: 1; }
+.faq-chevron {
+  flex-shrink: 0; width: 20px; height: 20px;
+  color: var(--text3); transition: transform var(--t);
+}
+.faq-item.open .faq-chevron { transform: rotate(180deg); color: var(--accent2); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .35s cubic-bezier(.4,0,.2,1), padding .35s;
+  font-size: .875rem; color: var(--text2); line-height: 1.65;
+  padding: 0 24px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 0 24px 20px; }
+@media (hover: hover) and (pointer: fine) {
+  .faq-item:hover { border-color: var(--border2); }
+  .faq-q:hover .faq-q-text { color: var(--accent2); }
+}
+@media (max-width: 600px) {
+  .faq-section { padding: 60px 20px; }
+  .faq-q { padding: 16px 18px; font-size: .88rem; }
+  .faq-item.open .faq-a { padding: 0 18px 16px; }
+}
 
 /* ══ LANDING FOOTER ══ */
 .land-footer {
@@ -1092,6 +1129,31 @@ body {
   border-radius: 100px; padding: 6px 14px; max-width: 92%;
 }
 
+/* ══ STATUS REACTIONS (in chat status_update bubbles) ══ */
+.status-reactions {
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 5px;
+  margin-top: 7px;
+}
+.sreact-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 100px;
+  background: var(--glass); border: 1px solid var(--border2);
+  font-size: .78rem; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif; color: var(--text2);
+  transition: background .1s, border-color .1s, transform .08s;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.sreact-btn.reacted {
+  background: rgba(99,102,241,.15); border-color: rgba(129,140,248,.4);
+  color: var(--accent2); font-weight: 700;
+}
+.sreact-btn:active { transform: scale(.93) !important; }
+.sreact-count { font-size: .7rem; font-weight: 700; }
+@media (hover: hover) and (pointer: fine) {
+  .sreact-btn:hover { background: var(--glass2); border-color: var(--border3); transform: scale(1.05); }
+  .sreact-btn.reacted:hover { background: rgba(99,102,241,.22); }
+}
+
 /* Timestamp on bubble hover */
 .bubble-time {
   font-size: .6rem; opacity: 0; margin-top: 3px;
@@ -1452,32 +1514,8 @@ body {
 }
 
 /* ══ STATUS REACTIONS ══ */
-.status-reactions-section {
-  margin-top: 12px; padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-.status-reactions-label {
-  font-size: .62rem; font-weight: 800; color: var(--text3);
-  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
-}
-.status-reactions-bar { display: flex; flex-wrap: wrap; gap: 6px; }
-.reaction-btn {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 5px 12px; border-radius: 100px;
-  background: var(--glass); border: 1px solid var(--border2);
-  font-size: .8rem; cursor: pointer;
-  font-family: 'Cabinet Grotesk', sans-serif; color: var(--text2);
-  transition: background .1s, border-color .1s, transform .1s;
-  user-select: none; -webkit-tap-highlight-color: transparent;
-}
-.reaction-btn.reacted {
-  background: rgba(99,102,241,.15); border-color: rgba(129,140,248,.4);
-  color: var(--accent2); font-weight: 700;
-}
-.reaction-count { font-size: .72rem; font-weight: 700; }
+
 @media (hover: hover) and (pointer: fine) {
-  .reaction-btn:hover { background: var(--glass2); border-color: var(--border3); transform: scale(1.04); }
-  .reaction-btn.reacted:hover { background: rgba(99,102,241,.22); }
   .theme-color-swatch:hover { transform: scale(1.15); }
   .onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
 }
@@ -1714,6 +1752,62 @@ body {
       <div class="step-card"><div class="step-num">01</div><div class="step-title">Créez votre compte</div><div class="step-desc">Inscription gratuite en 30 secondes. Email + mot de passe, c'est tout.</div></div>
       <div class="step-card"><div class="step-num">02</div><div class="step-title">Rejoignez un groupe</div><div class="step-desc">Créez un groupe famille ou rejoignez celui d'un proche via son invitation.</div></div>
       <div class="step-card"><div class="step-num">03</div><div class="step-title">Partagez votre état</div><div class="step-desc">Sélectionnez comment vous vous sentez. Vos proches sont informés instantanément.</div></div>
+    </div>
+  </section>
+
+  <section class="faq-section" aria-label="Questions fréquentes">
+    <div class="section-eyebrow">FAQ</div>
+    <h2 class="section-title">Questions fréquentes.</h2>
+    <div class="faq-list" id="faq-list">
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">CareWave est-il gratuit ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Oui, entièrement gratuit. Créez un compte, rejoignez ou créez des groupes, partagez vos statuts — sans abonnement, sans publicité.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Mes données sont-elles privées ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Vos statuts ne sont visibles que par les membres des groupes auxquels vous appartenez. Aucune donnée n'est revendue ni partagée avec des tiers. Chaque compte est strictement isolé par identifiant.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Comment inviter quelqu'un dans un groupe ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Depuis le groupe, partagez le lien d'invitation ou recherchez un membre par pseudo ou email. Le destinataire rejoint automatiquement le groupe en cliquant sur le lien.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Faut-il une application à télécharger ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Non. CareWave fonctionne directement dans votre navigateur, sur mobile comme sur ordinateur. Vous pouvez aussi l'ajouter à votre écran d'accueil pour un accès rapide, sans passer par un store.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Puis-je utiliser CareWave pour suivre l'état de santé d'un proche ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Oui, c'est exactement l'usage pensé. Un parent, un ami en convalescence ou un proche qui traverse une période difficile partage son état quotidien. Vous restez informé sans avoir à appeler ou envoyer des messages répétitifs.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Que se passe-t-il si je supprime mon compte ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">La suppression est définitive et complète : votre profil, vos statuts et votre appartenance aux groupes sont effacés immédiatement. Les messages de chat que vous avez envoyés restent visibles dans les groupes, mais sans lien avec votre identité.</div>
+      </div>
+
     </div>
   </section>
 
@@ -3918,13 +4012,20 @@ function renderMessageGroup(group, container) {
   }
 
   if (group.type === 'status') {
-    const [{ data: m }] = group.messages;
+    const [{ id: msgId, data: m }] = group.messages;
     const el = document.createElement('div');
     el.className = 'msg-group status-group';
+    el.dataset.statusMsgId = msgId;
+
     const bubble = document.createElement('div');
     bubble.className = 'chat-bubble status-update';
     bubble.textContent = m.text;
     el.appendChild(bubble);
+
+    // Reactions bar
+    const reactBar = buildStatusReactionsBar(msgId, m.reactions || {});
+    el.appendChild(reactBar);
+
     container.appendChild(el);
     return;
   }
@@ -4703,6 +4804,24 @@ function showOnboarding() {
   document.getElementById('onboarding-overlay').classList.add('open');
 }
 
+/* ════════════════════════════════════════════════
+   FAQ TOGGLE
+════════════════════════════════════════════════ */
+function toggleFaq(qEl) {
+  const item = qEl.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+  });
+  // Open clicked if it was closed
+  if (!isOpen) {
+    item.classList.add('open');
+    qEl.setAttribute('aria-expanded', 'true');
+  }
+}
+
 function skipOnboarding() {
   document.getElementById('onboarding-overlay').classList.remove('open');
   try { localStorage.setItem('cw_onboarded', '1'); } catch(e) {}
@@ -4739,62 +4858,110 @@ function renderObStep() {
 }
 
 /* ════════════════════════════════════════════════
-   STATUS REACTIONS
+   STATUS REACTIONS (dans les bulles status_update du chat)
 ════════════════════════════════════════════════ */
-const REACTION_TYPES = [
+const STATUS_REACTIONS = [
   { emoji: '👍', label: 'Pouce' },
   { emoji: '❤️', label: 'Cœur' },
   { emoji: '💪', label: 'Courage' },
   { emoji: '🌿', label: 'Sérénité' },
 ];
 
-// Called when rendering groups feed or chat status updates
-// We attach reactions to status documents in Firestore
-async function toggleStatusReaction(statusId, emoji) {
-  if (!State.user || !window._fb) return;
-  const {db, doc, updateDoc} = window._fb;
-  const uid = State.user.uid;
-  const fieldPath = `reactions.${emoji.codePointAt(0)}_${uid}`;
-  try {
-    const {getDoc} = window._fb;
-    const snap = await getDoc(doc(db, 'statuses', statusId));
-    if (!snap.exists()) return;
-    const reactions = snap.data().reactions || {};
-    const key = `${emoji.codePointAt(0)}_${uid}`;
-    if (reactions[key]) {
-      // remove - use deleteField
-      const {deleteField} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-      await updateDoc(doc(db,'statuses',statusId), { [`reactions.${key}`]: deleteField() });
-    } else {
-      await updateDoc(doc(db,'statuses',statusId), { [`reactions.${key}`]: { uid, emoji } });
-    }
-  } catch(e) { console.warn('reaction:', e.message); }
-}
-
-function buildReactionsBar(statusId, reactions = {}) {
-  // Count per emoji
+function buildStatusReactionsBar(msgId, reactions) {
+  // Count per emoji and detect user's own reactions
   const counts = {};
   const myReactions = new Set();
   Object.values(reactions).forEach(r => {
-    if (!counts[r.emoji]) counts[r.emoji] = 0;
-    counts[r.emoji]++;
+    counts[r.emoji] = (counts[r.emoji] || 0) + 1;
     if (r.uid === State.user?.uid) myReactions.add(r.emoji);
   });
-  // Build HTML
-  return `<div class="status-reactions-section">
-    <div class="status-reactions-label">Réactions</div>
-    <div class="status-reactions-bar">
-      ${REACTION_TYPES.map(rt => {
-        const count = counts[rt.emoji] || 0;
-        const reacted = myReactions.has(rt.emoji);
-        return `<button class="reaction-btn ${reacted ? 'reacted' : ''}"
-          onclick="toggleStatusReaction('${statusId}','${rt.emoji}')"
-          title="${rt.label}">
-          ${rt.emoji}${count > 0 ? `<span class="reaction-count">${count}</span>` : ''}
-        </button>`;
-      }).join('')}
-    </div>
-  </div>`;
+
+  const bar = document.createElement('div');
+  bar.className = 'status-reactions';
+  bar.dataset.reactBar = msgId;
+
+  STATUS_REACTIONS.forEach(({ emoji, label }) => {
+    const count = counts[emoji] || 0;
+    const reacted = myReactions.has(emoji);
+    const btn = document.createElement('button');
+    btn.className = 'sreact-btn' + (reacted ? ' reacted' : '');
+    btn.title = label;
+    btn.dataset.emoji = emoji;
+    btn.dataset.msgId = msgId;
+    btn.innerHTML = `${emoji}${count > 0 ? `<span class="sreact-count">${count}</span>` : ''}`;
+    btn._reacted = reacted;
+    btn.addEventListener('click', () => toggleStatusReaction(msgId, emoji, !!btn._reacted, btn));
+    bar.appendChild(btn);
+  });
+
+  return bar;
+}
+
+// Update an already-rendered reaction bar in-place (no full re-render needed)
+function refreshStatusReactionsBar(msgId, reactions) {
+  const bar = document.querySelector(`[data-react-bar="${msgId}"]`);
+  if (!bar) return;
+
+  const counts = {};
+  const myReactions = new Set();
+  Object.values(reactions).forEach(r => {
+    counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+    if (r.uid === State.user?.uid) myReactions.add(r.emoji);
+  });
+
+  bar.querySelectorAll('.sreact-btn').forEach(btn => {
+    const emoji = btn.dataset.emoji;
+    const count = counts[emoji] || 0;
+    const reacted = myReactions.has(emoji);
+    btn.className = 'sreact-btn' + (reacted ? ' reacted' : '');
+    const countEl = btn.querySelector('.sreact-count');
+    if (count > 0) {
+      if (countEl) countEl.textContent = count;
+      else btn.innerHTML = `${emoji}<span class="sreact-count">${count}</span>`;
+    } else {
+      btn.innerHTML = emoji;
+    }
+  });
+}
+
+async function toggleStatusReaction(msgId, emoji, currentlyReacted, btnEl) {
+  if (!State.currentGroup || !State.user || !window._fb) return;
+  // Prevent double-tap while request is in-flight
+  if (btnEl && btnEl.dataset.pending === '1') return;
+  if (btnEl) btnEl.dataset.pending = '1';
+
+  const { db, doc, updateDoc } = window._fb;
+  const uid = State.user.uid;
+  const key = `${emoji.codePointAt(0)}_${uid}`;
+  const msgRef = doc(db, 'groups', State.currentGroup.id, 'messages', msgId);
+  const willReact = !currentlyReacted;
+
+  // Optimistic UI
+  if (btnEl) {
+    btnEl.className = 'sreact-btn' + (willReact ? ' reacted' : '');
+    const countEl = btnEl.querySelector('.sreact-count');
+    const currentCount = countEl ? (parseInt(countEl.textContent, 10) || 0) : 0;
+    const newCount = willReact ? currentCount + 1 : Math.max(0, currentCount - 1);
+    btnEl.innerHTML = newCount > 0
+      ? `${emoji}<span class="sreact-count">${newCount}</span>`
+      : emoji;
+    // Update the stored state on the element for next click
+    btnEl._reacted = willReact;
+  }
+
+  try {
+    if (currentlyReacted) {
+      const { deleteField } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      await updateDoc(msgRef, { [`reactions.${key}`]: deleteField() });
+    } else {
+      await updateDoc(msgRef, { [`reactions.${key}`]: { uid, emoji } });
+    }
+  } catch (e) {
+    console.warn('toggleStatusReaction:', e.message);
+    toast("Impossible d'enregistrer la réaction.", 'error');
+  } finally {
+    if (btnEl) delete btnEl.dataset.pending;
+  }
 }
 
 /* ════════════════════════════════════════════════
