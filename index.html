@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -20,6 +21,22 @@
   const db = getFirestore(app);
   window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
   window.dispatchEvent(new Event('fb-ready'));
+</script>
+
+<script>
+/* ════════════════════════════════════════════════
+   EMAILJS CONFIG — À remplir avec vos identifiants
+   https://www.emailjs.com/
+════════════════════════════════════════════════ */
+const EMAILJS_PUBLIC_KEY    = '4Y7Z6qUclvA2m367R';
+const EMAILJS_SERVICE_ID    = 'service_CareWave';
+const EMAILJS_TPL_MESSAGE   = 'template_xj7xsql';
+const EMAILJS_TPL_STATUS    = 'template_62kzhcp';
+
+// Init EmailJS (ne plante pas si les clés sont vides)
+if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'VOTRE_PUBLIC_KEY') {
+  try { emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY }); } catch(e) {}
+}
 </script>
 
 <style>
@@ -2014,6 +2031,10 @@ body {
           <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> Mode sombre</div><div class="settings-sub">Interface en thème nuit</div></div>
           <div class="toggle on" id="dark-toggle-profile" onclick="toggleDark()" role="switch" aria-checked="true" tabindex="0"></div>
         </div>
+        <div class="settings-row">
+          <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Notifications email</div><div class="settings-sub" id="notif-email-sub">Recevoir un email pour les nouveaux messages et statuts</div></div>
+          <div class="toggle" id="notif-email-toggle" onclick="toggleNotifEmail()" role="switch" aria-checked="false" tabindex="0"></div>
+        </div>
         <div class="settings-row clickable" onclick="openEditProfile()">
           <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modifier le profil</div><div class="settings-sub">Pseudo, bio et avatar</div></div>
           <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -2953,6 +2974,7 @@ function renderProfileHeader() {
   safe('profile-bio-display', el => el.textContent = p.bio || '');
   safe('stat-groups', el => el.textContent = State.groups.length);
   safe('stat-streak', el => el.textContent = State.streak > 0 ? `🔥 ${State.streak}` : '0');
+  syncNotifEmailToggle();
 }
 
 async function loadProfileStats() {
@@ -4154,6 +4176,12 @@ async function sendChatMsg() {
       createdAt: serverTimestamp(),
       likes: {}
     });
+    // Notifs email — best-effort, non-bloquant
+    const g = State.currentGroup;
+    notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_MESSAGE, {
+      from_name: State.profile.displayName || 'Quelqu\'un',
+      message_preview: text.length > 80 ? text.slice(0, 80) + '\u2026' : text,
+    }).catch(() => {});
   } catch(e) { inp.value = text; toast('Impossible d\'envoyer le message.','error'); }
 }
 
@@ -4187,6 +4215,7 @@ async function _initDashboard(user, profile) {
   }
 
   State.dark = profile.darkMode !== false;
+  State.profile.notifEmail = !!profile.notifEmail;
   document.documentElement.setAttribute('data-theme', State.dark ? 'dark' : 'light');
   const dt = document.getElementById('dark-toggle'); if (dt) dt.textContent = State.dark ? '☀️' : '🌙';
   const dtp = document.getElementById('dark-toggle-profile');
@@ -4519,6 +4548,18 @@ const App = {
       toast('Statut partagé 🌊','success');
       addNotification('🌊', 'Votre statut a été partagé !');
 
+      // Notifs email — best-effort, non-bloquant
+      if (State.groups?.length) {
+        const senderName = State.profile.displayName || 'Quelqu\'un';
+        const statusText = tags.join(' · ') + (message ? ` — "${message}"` : '');
+        State.groups.forEach(g => {
+          notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_STATUS, {
+            from_name: senderName,
+            status_text: statusText,
+          }).catch(() => {});
+        });
+      }
+
       State.selectedStatus.clear();
       document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
       document.getElementById('status-msg').value = '';
@@ -4802,6 +4843,97 @@ function showOnboarding() {
   _obStep = 0;
   renderObStep();
   document.getElementById('onboarding-overlay').classList.add('open');
+}
+
+/* ════════════════════════════════════════════════
+   EMAIL NOTIFICATIONS (EmailJS — best-effort, côté client)
+════════════════════════════════════════════════ */
+
+// Cache email+notifEmail par UID pour éviter les re-fetch Firestore
+const _emailCache = {};
+
+async function _getMemberNotifInfo(uid) {
+  if (_emailCache[uid]) return _emailCache[uid];
+  try {
+    const { db, doc, getDoc } = window._fb;
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (!snap.exists()) return null;
+    const d = snap.data();
+    const info = { email: d.email || null, notifEmail: !!d.notifEmail, name: d.displayName || 'Quelqu\'un' };
+    _emailCache[uid] = info;
+    return info;
+  } catch(e) { return null; }
+}
+
+// Envoie un email via EmailJS — silencieux en cas d'erreur
+async function _sendNotifEmail(templateId, params) {
+  if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') return;
+  if (!EMAILJS_SERVICE_ID || templateId === 'VOTRE_TEMPLATE_MSG' || templateId === 'VOTRE_TEMPLATE_STATUS') return;
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, templateId, params);
+  } catch(e) {
+    console.warn('EmailJS send error:', e);
+  }
+}
+
+// Notifie les membres d'un groupe (sauf l'émetteur) selon leur préférence
+async function notifyGroupMembers(groupId, groupName, memberUids, templateId, templateParams) {
+  if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') return;
+  const myUid = State.user?.uid;
+  const othersUids = memberUids.filter(uid => uid !== myUid);
+  if (!othersUids.length) return;
+
+  await Promise.allSettled(othersUids.map(async uid => {
+    const info = await _getMemberNotifInfo(uid);
+    if (!info?.email || !info.notifEmail) return;
+    await _sendNotifEmail(templateId, {
+      ...templateParams,
+      to_email: info.email,
+      to_name: info.name,
+      group_name: groupName,
+      app_url: 'https://care-wave.github.io/CareWave/',
+    });
+  }));
+}
+
+// Toggle côté UI + sauvegarde Firestore
+async function toggleNotifEmail() {
+  if (!State.user || !window._fb) return;
+  const current = !!(State.profile.notifEmail);
+  const next = !current;
+  State.profile.notifEmail = next;
+  // Invalider le cache pour soi-même
+  delete _emailCache[State.user.uid];
+
+  const toggleEl = document.getElementById('notif-email-toggle');
+  if (toggleEl) {
+    toggleEl.classList.toggle('on', next);
+    toggleEl.setAttribute('aria-checked', next);
+  }
+  const subEl = document.getElementById('notif-email-sub');
+  if (subEl) subEl.textContent = next
+    ? 'Activé — vous recevrez les nouvelles activités par email'
+    : 'Recevoir un email pour les nouveaux messages et statuts';
+
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'users', State.user.uid), { notifEmail: next });
+    toast(next ? '📧 Notifications email activées' : 'Notifications email désactivées', 'success');
+  } catch(e) {
+    console.warn('toggleNotifEmail:', e);
+    toast('Erreur lors de la sauvegarde', 'error');
+  }
+}
+
+// Sync toggle UI avec le profil chargé (appelé dans renderProfileHeader)
+function syncNotifEmailToggle() {
+  const on = !!(State.profile?.notifEmail);
+  const toggleEl = document.getElementById('notif-email-toggle');
+  if (toggleEl) { toggleEl.classList.toggle('on', on); toggleEl.setAttribute('aria-checked', on); }
+  const subEl = document.getElementById('notif-email-sub');
+  if (subEl) subEl.textContent = on
+    ? 'Activé — vous recevrez les nouvelles activités par email'
+    : 'Recevoir un email pour les nouveaux messages et statuts';
 }
 
 /* ════════════════════════════════════════════════
