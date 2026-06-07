@@ -14,12 +14,12 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   const firebaseConfig = { apiKey:"AIzaSyAt245YXg-80Q0aHolRUNS3M2iZ1q4Jfx0",authDomain:"carew-95ee4.firebaseapp.com",projectId:"carew-95ee4",storageBucket:"carew-95ee4.firebasestorage.app",messagingSenderId:"443664388194",appId:"1:443664388194:web:477905a47e2e2f9aaac13b" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch };
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 
@@ -608,6 +608,7 @@ body {
 
 .app-content {
   flex: 1; overflow-y: auto; padding: 18px 18px calc(var(--nav) + 20px);
+  position: relative;
   position: relative; z-index: 1;
 }
 .app-nav {
@@ -656,9 +657,30 @@ body {
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-/* ══ TAB PANELS ══ */
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
+/* ══ PULL TO REFRESH ══ */
+.ptr-indicator {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  height: 0; overflow: hidden; pointer-events: none;
+  font-size: .78rem; font-weight: 700; color: var(--text3);
+  transition: height .2s cubic-bezier(.4,0,.2,1), opacity .2s;
+  opacity: 0; z-index: 10; visibility: hidden;
+}
+.ptr-indicator.visible { height: 52px; opacity: 1; visibility: visible; }
+.ptr-indicator.releasing { color: var(--accent2); }
+.ptr-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border2); border-top-color: var(--accent2);
+  animation: ptr-spin .7s linear infinite; display: none;
+}
+.ptr-indicator.loading .ptr-spinner { display: block; }
+.ptr-indicator.loading .ptr-arrow { display: none; }
+.ptr-arrow {
+  width: 16px; height: 16px; color: var(--text3);
+  transition: transform .2s, color .2s;
+}
+.ptr-indicator.releasing .ptr-arrow { transform: rotate(180deg); color: var(--accent2); }
+@keyframes ptr-spin { to { transform: rotate(360deg); } }
 
 /* ══ INVITE LINK ══ */
 .invite-link-row {
@@ -1021,12 +1043,15 @@ body {
   align-self: center;
 }
 /* Desktop: révèle au survol de l'item */
+@media (hover: hover) and (pointer: fine) {
+  .history-item:hover .history-delete-btn { opacity: .7; }
+  .history-delete-btn:hover { background: var(--rose); color: #fff; transform: scale(1.1); opacity: 1 !important; }
 }
 /* Mobile / touch: toujours visible */
 @media (hover: none) {
   .history-delete-btn { opacity: .55; }
 }
-.history-delete-btn:hover, .history-delete-btn:active { background: var(--rose); color: #fff; transform: scale(1.1); opacity: 1; }
+.history-delete-btn:active { background: var(--rose); color: #fff; transform: scale(1.1); opacity: 1; }
 
 /* ══ CHAT MODAL ══ */
 .modal-overlay {
@@ -1063,6 +1088,21 @@ body {
 }
 
 /* Loading state for chat */
+.load-more-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 8px auto 4px; padding: 7px 18px;
+  background: var(--glass); border: 1px solid var(--border2);
+  border-radius: 100px; font-size: .78rem; font-weight: 700;
+  color: var(--text2); cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: background .1s, border-color .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.load-more-btn:active { transform: scale(.96); }
+.load-more-btn:disabled { opacity: .45; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .load-more-btn:hover { background: var(--glass2); border-color: var(--border3); }
+}
 .chat-loading {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; flex: 1; gap: 12px;
@@ -1145,6 +1185,29 @@ body {
   border: 1px solid rgba(129,140,248,.2);
   border-radius: 100px; padding: 6px 14px; max-width: 92%;
 }
+
+/* ══ ONLINE PRESENCE ══ */
+.member-presence {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.presence-dot {
+  position: absolute; bottom: -1px; right: -1px;
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 2px solid var(--card-bg, var(--bg));
+  background: var(--border2);          /* offline par défaut */
+  transition: background .3s;
+}
+.presence-dot.online { background: #22c55e; }
+.ms-last-seen {
+  font-size: .72rem; color: var(--text3); margin-top: 2px;
+  display: flex; align-items: center; gap: 4px;
+}
+.ms-last-seen .dot-inline {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border2); flex-shrink: 0;
+}
+.ms-last-seen .dot-inline.online { background: #22c55e; }
 
 /* ══ STATUS REACTIONS (in chat status_update bubbles) ══ */
 .status-reactions {
@@ -1253,6 +1316,47 @@ body {
 
 .quick-reactions { display: flex; gap: 5px; padding: 0 14px 8px; flex-wrap: wrap; }
 .quick-reaction { padding: 5px 10px; border-radius: 100px; background: var(--glass); border: 1px solid var(--border); font-size: .74rem; color: var(--text2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; }
+
+.chat-reply-bar {
+  display: none; align-items: center; gap: 10px;
+  padding: 8px 14px 0;
+  border-top: 1px solid var(--border);
+}
+.chat-reply-bar.visible { display: flex; }
+.chat-reply-preview {
+  flex: 1; min-width: 0;
+  padding: 6px 10px;
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 6px 6px 0;
+  background: var(--glass);
+  font-size: .75rem; line-height: 1.4;
+}
+.chat-reply-name { font-weight: 800; color: var(--accent2); margin-bottom: 1px; }
+.chat-reply-text { color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-reply-cancel {
+  flex-shrink: 0; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--glass2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text3);
+  transition: background .1s;
+}
+.chat-reply-cancel:active { transform: scale(.9); }
+
+/* Citation dans les bulles */
+.bubble-reply {
+  padding: 5px 9px; margin-bottom: 5px;
+  border-left: 3px solid var(--accent2);
+  border-radius: 0 6px 6px 0;
+  background: rgba(99,102,241,.08);
+  font-size: .72rem; line-height: 1.4;
+  cursor: pointer;
+}
+.bubble-reply-name { font-weight: 800; color: var(--accent2); }
+.bubble-reply-text { color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mine .bubble-reply { border-left-color: rgba(255,255,255,.5); background: rgba(255,255,255,.1); }
+.mine .bubble-reply-name { color: rgba(255,255,255,.8); }
+.mine .bubble-reply-text { color: rgba(255,255,255,.65); }
 
 .chat-input-row { display: flex; gap: 9px; padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
 .chat-input {
@@ -1509,6 +1613,7 @@ body {
   width: 100%;   /* 100% de la carte, pas de l'écran */
   flex-shrink: 0;
 }
+.onboarding-footer .btn { flex: 1; min-width: 0; width: auto !important; }
 
 /* ══ THEME COLOR PICKER ══ */
 .theme-color-grid {
@@ -1537,11 +1642,29 @@ body {
   .onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
 }
 .skeleton { background: var(--border); border-radius: 6px; animation: skeleton-pulse 1.6s ease-in-out infinite; }
-@keyframes skeleton-pulse { 0%,100%{opacity:.5;}50%{opacity:1;} }
+@keyframes skeleton-pulse { 0%,100%{opacity:.4;}50%{opacity:.85;} }
 .skeleton-row { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); align-items: center; }
 .skeleton-avatar { width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; }
 .skeleton-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .skeleton-line { height: 12px; border-radius: 6px; }
+
+/* Skeleton statut */
+.skeleton-status-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: var(--r2); padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px;
+}
+.skeleton-status-card .skeleton-line { height: 10px; }
+.skeleton-history { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+.skeleton-history-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.skeleton-history-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.skeleton-history-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+
+/* Skeleton profil stats */
+.skeleton-stat { width: 40px; height: 20px; border-radius: 6px; display: inline-block; }
 
 /* ══ EMPTY & LOADING ══ */
 .empty-state { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text3); }
@@ -1567,7 +1690,7 @@ body {
   #cursor, #cursor-ring { display: none; }
 }
 @media (min-width: 640px) {
-  .app-content { max-width: 640px; margin: 0 auto; }
+  .app-content { max-width: 860px; margin: 0 auto; }
   .chat-modal { border-radius: var(--r2); height: 78dvh; margin-bottom: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1930,6 +2053,11 @@ body {
   </div>
 
   <main class="app-content" role="main" id="app-content">
+    <div class="ptr-indicator" id="ptr-indicator" aria-hidden="true">
+      <svg class="ptr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+      <div class="ptr-spinner"></div>
+      <span id="ptr-label">Tirer pour rafraîchir</span>
+    </div>
 
     <!-- STATUS TAB -->
     <div class="tab-panel" id="tab-status" role="tabpanel">
@@ -1969,7 +2097,13 @@ body {
       </button>
 
       <div class="section-header" style="margin-top:28px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Historique récent</div>
-      <div id="status-history-list"></div>
+      <div id="status-history-list">
+        <div class="skeleton-history" id="status-skeleton">
+          <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:35%"></div></div></div>
+          <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:65%"></div><div class="skeleton skeleton-line" style="width:40%"></div></div></div>
+          <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:30%"></div></div></div>
+        </div>
+      </div>
     </div>
 
     <!-- GROUPS TAB -->
@@ -2108,6 +2242,15 @@ body {
       <button class="quick-reaction" onclick="sendQuick('🤗 Gros câlin')">🤗 Gros câlin</button>
       <button class="quick-reaction" onclick="sendQuick('✅ Pris en charge')">✅ Pris en charge</button>
     </div>
+    <div class="chat-reply-bar" id="chat-reply-bar">
+      <div class="chat-reply-preview">
+        <div class="chat-reply-name" id="reply-preview-name"></div>
+        <div class="chat-reply-text" id="reply-preview-text"></div>
+      </div>
+      <button class="chat-reply-cancel" onclick="cancelReply()" aria-label="Annuler la réponse">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <div class="chat-input-row">
       <input class="chat-input" type="text" id="chat-input" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChatMsg()" aria-label="Écrire un message" maxlength="500" />
       <button class="chat-send" onclick="sendChatMsg()" aria-label="Envoyer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -2171,6 +2314,7 @@ body {
         <div class="ms-profile-cover"></div>
         <div class="ms-profile-avatar-row"><div class="ms-profile-avatar" id="ms-profile-avatar" style="display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
         <div class="ms-profile-name" id="ms-profile-name">Chargement…</div>
+        <div class="ms-last-seen" id="ms-profile-lastseen" style="display:none;margin-bottom:4px;"></div>
         <div class="ms-profile-bio" id="ms-profile-bio"></div>
         <div class="ms-status-section">
           <div class="ms-status-label">État actuel</div>
@@ -2918,6 +3062,17 @@ function computeStreak(statuses) {
 
 function listenLatestStatus() {
   if (!State.user || !window._fb) return;
+
+  // Afficher skeleton en attendant le premier snapshot
+  const histEl = document.getElementById('status-history-list');
+  if (histEl && !State.statusHistory.length) {
+    histEl.innerHTML = `<div class="skeleton-history">
+      <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:55%"></div><div class="skeleton skeleton-line" style="width:35%"></div></div></div>
+      <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:65%"></div><div class="skeleton skeleton-line" style="width:40%"></div></div></div>
+      <div class="skeleton-history-item"><div class="skeleton skeleton-history-dot"></div><div class="skeleton-history-lines"><div class="skeleton skeleton-line" style="width:45%"></div><div class="skeleton skeleton-line" style="width:30%"></div></div></div>
+    </div>`;
+  }
+
   const {db, collection, query, where, onSnapshot} = window._fb;
   const q = query(collection(db, 'statuses'), where('uid', '==', State.user.uid));
   const unsub = onSnapshot(q, snap => {
@@ -3401,8 +3556,12 @@ function msFillCurrentMembers() {
       ? `<button class="ms-kick-btn" data-uid="${uid}" data-name="${n}" aria-label="Retirer ${n}">✕ Retirer</button>`
       : '';
 
+    const presenceDotId = `pdot-${uid}`;
     return `<div class="ms-member-row">
-      <span class="ms-member-avatar">${avatar}</span>
+      <span class="member-presence">
+        <span class="ms-member-avatar">${avatar}</span>
+        <span class="presence-dot" id="${presenceDotId}"></span>
+      </span>
       <span class="ms-member-name">${n}</span>
       ${roleEl}${viewBtn}${kickBtn}
     </div>`;
@@ -3417,6 +3576,16 @@ function msFillCurrentMembers() {
   });
 
   if (window._applyHoverListeners) window._applyHoverListeners(el);
+
+  // Lancer les watchers de présence pour chaque membre
+  if (window._fb) {
+    ids.forEach(uid => {
+      watchPresence(uid, info => {
+        const dot = document.getElementById(`pdot-${uid}`);
+        if (dot) dot.classList.toggle('online', !!info.online);
+      });
+    });
+  }
 }
 
 /* ════════════════════════════════════════════════
@@ -3491,8 +3660,11 @@ async function openMemberProfile(uid) {
   const nmEl = document.getElementById('ms-profile-name');
   const bioEl = document.getElementById('ms-profile-bio');
   const stEl = document.getElementById('ms-profile-status-content');
-  if(avEl) avEl.textContent = '⏳'; if(nmEl) nmEl.textContent = 'Chargement…'; if(bioEl) bioEl.textContent = '';
-  if(stEl) stEl.innerHTML = '<div style="color:var(--text3);font-size:.8rem;">⏳ Chargement…</div>';
+  // Skeleton pendant le chargement
+  if(avEl) avEl.innerHTML = '<div class="skeleton" style="width:48px;height:48px;border-radius:50%;"></div>';
+  if(nmEl) nmEl.innerHTML = '<div class="skeleton skeleton-line" style="width:120px;height:14px;margin:4px 0;"></div>';
+  if(bioEl) bioEl.innerHTML = '<div class="skeleton skeleton-line" style="width:80%;height:11px;"></div>';
+  if(stEl) stEl.innerHTML = '<div class="skeleton-status-card"><div class="skeleton skeleton-line" style="width:60%"></div><div class="skeleton skeleton-line" style="width:40%"></div></div>';
   try {
     const {db, doc, getDoc, collection, query, where, getDocs} = window._fb;
     const [us, statSnap] = await Promise.all([
@@ -3504,6 +3676,17 @@ async function openMemberProfile(uid) {
       if(avEl) avEl.textContent = u.avatar || '';
       if(nmEl) nmEl.textContent = u.displayName || 'Utilisateur';
       if(bioEl) bioEl.textContent = u.bio || '';
+      // Afficher le statut de présence
+      const lsInfo = formatLastSeen(u.lastSeen || null);
+      const lsEl = document.getElementById('ms-profile-lastseen');
+      if (lsEl) {
+        if (lsInfo) {
+          lsEl.innerHTML = `<span class="dot-inline${lsInfo.online ? ' online' : ''}"></span>${lsInfo.text}`;
+          lsEl.style.display = 'flex';
+        } else {
+          lsEl.style.display = 'none';
+        }
+      }
     }
     const statuses = [];
     statSnap.forEach(d => statuses.push(d.data()));
@@ -3846,6 +4029,18 @@ function openChat(group) {
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
   document.getElementById('chat-overlay').classList.add('open');
 
+  // Effacer notifSent pour ce groupe (on l'a ouvert → prochaines notifs autorisées)
+  if (State.user && window._fb) {
+    const gid = freshGroup.id;
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+      .then(({ deleteField }) => {
+        const { db, doc, updateDoc } = window._fb;
+        return updateDoc(doc(db, 'users', State.user.uid), { [`notifSent.${gid}`]: deleteField() });
+      })
+      .then(() => { delete _emailCache[State.user?.uid]; })
+      .catch(() => {});
+  }
+
   // Show loading state immediately
   const msgsEl = document.getElementById('chat-messages');
   msgsEl.innerHTML = `<div class="chat-loading">
@@ -3859,6 +4054,7 @@ function openChat(group) {
 function closeChat() {
   document.getElementById('chat-overlay').classList.remove('open');
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
+  cancelReply();
 }
 function closeChatOutside(e) { if (e.target.id === 'chat-overlay') closeChat(); }
 
@@ -3945,79 +4141,187 @@ function spawnHeartBurst(x, y) {
   setTimeout(() => heart.remove(), 700);
 }
 
+const CHAT_PAGE_SIZE = 30;
+let _oldestDoc = null;      // curseur pour "charger plus"
+let _hasMoreMsgs = false;   // true si d'autres messages existent avant les chargés
+
+// Construit et insère les bulles pour un tableau de messages (ordre chronologique)
+function _renderMessagesInto(messages, container, prepend = false) {
+  const frag = document.createDocumentFragment();
+  let dayMessages = [];
+  let currentDayStr = '';
+
+  function flushDay() {
+    if (!dayMessages.length) return;
+    buildMessageGroups(dayMessages).forEach(g => renderMessageGroup(g, frag));
+    dayMessages = [];
+  }
+
+  messages.forEach(({ id, data: m }) => {
+    let ts = null;
+    try { ts = m.createdAt?.toDate?.(); } catch(e) {}
+    const dayStr = ts ? ts.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }) : '';
+    const capDay = dayStr ? dayStr.charAt(0).toUpperCase() + dayStr.slice(1) : '';
+    if (capDay && capDay !== currentDayStr) {
+      flushDay();
+      currentDayStr = capDay;
+      const div = document.createElement('div');
+      div.className = 'chat-day-divider';
+      div.innerHTML = `<span>${capDay}</span>`;
+      frag.appendChild(div);
+    }
+    dayMessages.push({ id, data: m });
+  });
+  flushDay();
+
+  if (prepend) {
+    container.prepend(frag);
+  } else {
+    container.appendChild(frag);
+  }
+}
+
 function loadChatMessages(groupId) {
-  const {db, collection, query, orderBy, onSnapshot} = window._fb;
+  const {db, collection, query, orderBy, onSnapshot, limit} = window._fb;
   const msgsEl = document.getElementById('chat-messages');
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} }
+  _oldestDoc = null;
+  _hasMoreMsgs = false;
 
   let firstLoad = true;
 
-  const q = query(collection(db, 'groups', groupId, 'messages'), orderBy('createdAt', 'asc'));
+  // Écoute les CHAT_PAGE_SIZE derniers messages en temps réel
+  const q = query(
+    collection(db, 'groups', groupId, 'messages'),
+    orderBy('createdAt', 'asc')
+  );
 
-  State.chatUnsub = onSnapshot(q, snap => {
-    const wasAtBottom = firstLoad || (msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 100);
+  // On utilise limit côté desc pour connaître le curseur, mais on écoute asc pour l'affichage.
+  // Stratégie : on charge d'abord les N derniers via getDocs desc pour trouver _oldestDoc,
+  // puis on souscrit via onSnapshot asc limité à partir de ce curseur.
+  const {getDocs, query: q2, orderBy: ob, limit: lim, startAfter, startAt} = window._fb;
 
-    // Collect all messages with their IDs
-    const allMessages = [];
-    snap.forEach(d => allMessages.push({ id: d.id, data: d.data() }));
+  async function init() {
+    // 1. Charger les N derniers pour trouver le curseur
+    const {query: fq, orderBy: fob, limit: flim, getDocs: fget} = window._fb;
+    const firstQ = fq(
+      collection(db, 'groups', groupId, 'messages'),
+      fob('createdAt', 'desc'),
+      flim(CHAT_PAGE_SIZE)
+    );
+    let initDocs = [];
+    try {
+      const snap = await fget(firstQ);
+      snap.forEach(d => initDocs.push(d));
+      _hasMoreMsgs = snap.size === CHAT_PAGE_SIZE;
+      if (initDocs.length) _oldestDoc = initDocs[initDocs.length - 1]; // oldest = last in desc
+    } catch(e) { console.warn('init chat:', e.message); }
 
-    // Build day-separated and grouped DOM
-    msgsEl.innerHTML = '';
-    if (allMessages.length === 0) {
-      msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
-        <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
-        <div class="empty-title">Aucun message encore</div>
-        <div class="empty-sub">Soyez le premier à écrire !</div>
-      </div>`;
+    // 2. Souscrire en asc à partir du plus ancien chargé
+    const liveQ = _oldestDoc
+      ? query(collection(db,'groups',groupId,'messages'), orderBy('createdAt','asc'), startAt(_oldestDoc))
+      : query(collection(db,'groups',groupId,'messages'), orderBy('createdAt','asc'));
+
+    State.chatUnsub = onSnapshot(liveQ, snap => {
+      const wasAtBottom = firstLoad || (msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 100);
+      const allMessages = [];
+      snap.forEach(d => allMessages.push({ id: d.id, data: d.data() }));
+
+      msgsEl.innerHTML = '';
+
+      if (allMessages.length === 0 && !_hasMoreMsgs) {
+        msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
+          <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
+          <div class="empty-title">Aucun message encore</div>
+          <div class="empty-sub">Soyez le premier à écrire !</div>
+        </div>`;
+        firstLoad = false;
+        return;
+      }
+
+      // Bouton "Charger plus" si historique dispo
+      if (_hasMoreMsgs) {
+        const btn = document.createElement('button');
+        btn.className = 'load-more-btn';
+        btn.id = 'load-more-btn';
+        btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> Charger plus`;
+        btn.addEventListener('click', () => loadMoreMessages(groupId));
+        msgsEl.appendChild(btn);
+      }
+
+      _renderMessagesInto(allMessages, msgsEl);
+
+      if (wasAtBottom) msgsEl.scrollTop = msgsEl.scrollHeight;
       firstLoad = false;
+    }, err => {
+      console.warn('Chat listener:', err.message);
+      msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
+        <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="empty-title">Erreur de chargement</div>
+        <div class="empty-sub">Vérifiez votre connexion</div>
+      </div>`;
+    });
+  }
+
+  init();
+}
+
+async function loadMoreMessages(groupId) {
+  if (!_oldestDoc || !window._fb) return;
+  const btn = document.getElementById('load-more-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Chargement…'; }
+
+  const {db, collection, query, orderBy, limit, getDocs, endBefore} = window._fb;
+  const msgsEl = document.getElementById('chat-messages');
+
+  try {
+    const q = query(
+      collection(db, 'groups', groupId, 'messages'),
+      orderBy('createdAt', 'desc'),
+      limit(CHAT_PAGE_SIZE),
+      endBefore(_oldestDoc)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      _hasMoreMsgs = false;
+      if (btn) btn.remove();
       return;
     }
 
-    let lastDay = '';
+    // Reverse pour ordre chronologique
+    const older = [];
+    snap.forEach(d => older.unshift({ id: d.id, data: d.data() }));
 
-    // Group messages by day first, then by sender within each day section
-    let dayMessages = [];
-    let currentDayStr = '';
+    _hasMoreMsgs = snap.size === CHAT_PAGE_SIZE;
+    _oldestDoc = snap.docs[snap.docs.length - 1]; // nouveau plus vieux (desc → dernier = plus vieux)
 
-    function flushDayMessages() {
-      if (!dayMessages.length) return;
-      const groups = buildMessageGroups(dayMessages);
-      groups.forEach(group => renderMessageGroup(group, msgsEl));
-      dayMessages = [];
+    // Garde le scroll stable : note la hauteur avant prepend
+    const prevHeight = msgsEl.scrollHeight;
+
+    // Remplace ou retire le bouton
+    if (btn) btn.remove();
+    const frag = document.createDocumentFragment();
+    if (_hasMoreMsgs) {
+      const newBtn = document.createElement('button');
+      newBtn.className = 'load-more-btn';
+      newBtn.id = 'load-more-btn';
+      newBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> Charger plus`;
+      newBtn.addEventListener('click', () => loadMoreMessages(groupId));
+      frag.appendChild(newBtn);
     }
+    // Render les messages plus anciens dans le fragment
+    const tempDiv = document.createElement('div');
+    _renderMessagesInto(older, tempDiv);
+    while (tempDiv.firstChild) frag.appendChild(tempDiv.firstChild);
 
-    allMessages.forEach(({ id, data: m }) => {
-      let ts = null;
-      try { ts = m.createdAt?.toDate?.(); } catch(e) {}
-      const dayStr = ts
-        ? ts.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
-        : '';
-      const capDay = dayStr ? dayStr.charAt(0).toUpperCase() + dayStr.slice(1) : '';
+    msgsEl.prepend(frag);
 
-      if (capDay && capDay !== currentDayStr) {
-        flushDayMessages();
-        currentDayStr = capDay;
-        const div = document.createElement('div');
-        div.className = 'chat-day-divider';
-        div.innerHTML = `<span>${capDay}</span>`;
-        msgsEl.appendChild(div);
-      }
-      dayMessages.push({ id, data: m });
-    });
-    flushDayMessages();
-
-    if (wasAtBottom) {
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-    }
-    firstLoad = false;
-  }, err => {
-    console.warn('Chat listener:', err.message);
-    msgsEl.innerHTML = `<div class="empty-state" style="flex:1;">
-      <div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-      <div class="empty-title">Erreur de chargement</div>
-      <div class="empty-sub">Vérifiez votre connexion</div>
-    </div>`;
-  });
+    // Restaurer la position de scroll (pas de saut)
+    msgsEl.scrollTop = msgsEl.scrollHeight - prevHeight;
+  } catch(e) {
+    console.warn('loadMoreMessages:', e.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> Charger plus`; }
+  }
 }
 
 function renderMessageGroup(group, container) {
@@ -4093,6 +4397,16 @@ function renderMessageGroup(group, container) {
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${group.mine ? 'mine' : 'theirs'}`;
     bubble.dataset.msgId = id;
+
+    // Citation si reply
+    if (m.replyTo?.msgId) {
+      const cite = document.createElement('div');
+      cite.className = 'bubble-reply';
+      cite.innerHTML = `<div class="bubble-reply-name">${m.replyTo.displayName || ''}</div><div class="bubble-reply-text">${(m.replyTo.text || '').slice(0, 80)}</div>`;
+      cite.addEventListener('click', (e) => { e.stopPropagation(); scrollToMsg(m.replyTo.msgId); });
+      bubble.appendChild(cite);
+    }
+
     bubble.appendChild(document.createTextNode(m.text || ''));
 
     // Timestamp (hidden, fades in on row hover via CSS on bubble)
@@ -4140,9 +4454,29 @@ function renderMessageGroup(group, container) {
       }
     });
 
-    // Touch double-tap
+    // Touch double-tap → like | long press → reply
     let lastTap = 0;
+    let longPressTimer = null;
+    let touchStartX = 0;
+
+    bubble.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        // Long press → reply
+        navigator.vibrate?.(30);
+        setReply(id, m.text || '', group.displayName || 'Quelqu\'un');
+      }, 500);
+    }, { passive: true });
+
+    bubble.addEventListener('touchmove', (e) => {
+      if (!longPressTimer) return;
+      const dx = e.touches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 10) { clearTimeout(longPressTimer); longPressTimer = null; }
+    }, { passive: true });
+
     bubble.addEventListener('touchend', (e) => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
       const now = Date.now();
       if (now - lastTap < 300) {
         e.preventDefault();
@@ -4161,6 +4495,39 @@ function renderMessageGroup(group, container) {
   container.appendChild(groupEl);
 }
 
+/* ════════════════════════════════════════════════
+   REPLY TO MESSAGE
+════════════════════════════════════════════════ */
+let _replyTo = null; // { msgId, text, displayName }
+
+function setReply(msgId, text, displayName) {
+  _replyTo = { msgId, text, displayName };
+  const bar = document.getElementById('chat-reply-bar');
+  const nameEl = document.getElementById('reply-preview-name');
+  const textEl = document.getElementById('reply-preview-text');
+  if (bar) bar.classList.add('visible');
+  if (nameEl) nameEl.textContent = displayName;
+  if (textEl) textEl.textContent = text.length > 80 ? text.slice(0, 80) + '…' : text;
+  document.getElementById('chat-input')?.focus();
+}
+
+function cancelReply() {
+  _replyTo = null;
+  const bar = document.getElementById('chat-reply-bar');
+  if (bar) bar.classList.remove('visible');
+}
+
+// Scroll jusqu'au message original quand on clique sur une citation
+function scrollToMsg(msgId) {
+  const el = document.querySelector(`[data-msg-id="${msgId}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Flash highlight
+  el.style.transition = 'background .1s';
+  el.style.background = 'rgba(99,102,241,.18)';
+  setTimeout(() => { el.style.background = ''; }, 900);
+}
+
 async function sendChatMsg() {
   const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
@@ -4168,14 +4535,17 @@ async function sendChatMsg() {
   inp.value = '';
   const {db, collection, addDoc, serverTimestamp} = window._fb;
   try {
-    await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), {
+    const msgData = {
       text,
       uid: State.user.uid,
       displayName: State.profile.displayName || 'Anonyme',
       avatar: State.profile.avatar || '',
       createdAt: serverTimestamp(),
       likes: {}
-    });
+    };
+    if (_replyTo) msgData.replyTo = { ..._replyTo };
+    await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), msgData);
+    cancelReply();
     // Notifs email — best-effort, non-bloquant
     const g = State.currentGroup;
     notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_MESSAGE, {
@@ -4229,6 +4599,7 @@ async function _initDashboard(user, profile) {
   renderStatusOptions();
   renderQuickMsgs();
   listenLatestStatus();
+  startPresenceHeartbeat();
   UI.show('dashboard');
 
   // Restaurer le dernier onglet visité
@@ -4504,6 +4875,8 @@ const App = {
 
   async logout() {
     const {auth, signOut} = window._fb;
+    stopPresenceHeartbeat();
+    clearPresenceWatchers();
     stopVerifyCheck();
     try { sessionStorage.removeItem('cw_verify_dismissed'); } catch(e) {}
     resetAppState();
@@ -4846,6 +5219,83 @@ function showOnboarding() {
 }
 
 /* ════════════════════════════════════════════════
+   PRESENCE / LAST SEEN
+════════════════════════════════════════════════ */
+
+const PRESENCE_INTERVAL_MS = 60_000;   // écriture lastSeen toutes les 60s
+const ONLINE_THRESHOLD_MS  =  3 * 60_000;  // < 3 min → en ligne
+const NOTIF_SUPPRESS_MS    =  5 * 60_000;  // < 5 min → pas de notif email
+let _presenceTimer = null;
+
+// Formate lastSeen en texte lisible
+function formatLastSeen(ts) {
+  if (!ts) return null;
+  const date = ts.toDate ? ts.toDate() : new Date(ts);
+  const diff = Date.now() - date.getTime();
+  if (diff < ONLINE_THRESHOLD_MS) return { online: true, text: 'En ligne' };
+  if (diff < 60_000 * 60) return { online: false, text: `Il y a ${Math.floor(diff / 60_000)} min` };
+  if (diff < 86_400_000) return { online: false, text: `Il y a ${Math.floor(diff / 3_600_000)} h` };
+  return { online: false, text: `Il y a ${Math.floor(diff / 86_400_000)} j` };
+}
+
+// Écriture de lastSeen dans Firestore pour l'utilisateur courant
+async function _writeLastSeen() {
+  if (!State.user || !window._fb) return;
+  try {
+    const { db, doc, updateDoc, serverTimestamp } = window._fb;
+    await updateDoc(doc(db, 'users', State.user.uid), { lastSeen: serverTimestamp() });
+  } catch(e) { /* silencieux */ }
+}
+
+// Démarre le heartbeat lastSeen (appelé à la connexion)
+function startPresenceHeartbeat() {
+  stopPresenceHeartbeat();
+  _writeLastSeen(); // écriture immédiate
+  _presenceTimer = setInterval(_writeLastSeen, PRESENCE_INTERVAL_MS);
+
+  // Écriture à la fermeture de l'onglet (best-effort)
+  window.addEventListener('beforeunload', _writeLastSeen, { once: true });
+
+  // Pause si onglet caché, reprise si visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      _writeLastSeen();
+      if (!_presenceTimer) _presenceTimer = setInterval(_writeLastSeen, PRESENCE_INTERVAL_MS);
+    } else {
+      clearInterval(_presenceTimer); _presenceTimer = null;
+    }
+  });
+}
+
+function stopPresenceHeartbeat() {
+  if (_presenceTimer) { clearInterval(_presenceTimer); _presenceTimer = null; }
+}
+
+// Cache presence par uid : { lastSeen, online, text, unsub }
+const _presenceCache = {};
+
+// Souscrit au lastSeen d'un uid en temps réel, appelle callback(info) à chaque update
+function watchPresence(uid, callback) {
+  if (_presenceCache[uid]?.unsub) return; // déjà souscrit
+  const { db, doc, onSnapshot } = window._fb;
+  const unsub = onSnapshot(doc(db, 'users', uid), snap => {
+    if (!snap.exists()) return;
+    const ls = snap.data().lastSeen || null;
+    const info = formatLastSeen(ls) || { online: false, text: null };
+    _presenceCache[uid] = { ...info, lastSeen: ls, unsub };
+    callback(info);
+  }, () => {});
+  if (!_presenceCache[uid]) _presenceCache[uid] = { unsub };
+  else _presenceCache[uid].unsub = unsub;
+}
+
+// Arrête tous les listeners de présence (appelé à la déconnexion / fermeture chat)
+function clearPresenceWatchers() {
+  Object.values(_presenceCache).forEach(v => v?.unsub?.());
+  Object.keys(_presenceCache).forEach(k => delete _presenceCache[k]);
+}
+
+/* ════════════════════════════════════════════════
    EMAIL NOTIFICATIONS (EmailJS — best-effort, côté client)
 ════════════════════════════════════════════════ */
 
@@ -4859,7 +5309,7 @@ async function _getMemberNotifInfo(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
     if (!snap.exists()) return null;
     const d = snap.data();
-    const info = { email: d.email || null, notifEmail: !!d.notifEmail, name: d.displayName || 'Quelqu\'un' };
+    const info = { email: d.email || null, notifEmail: !!d.notifEmail, name: d.displayName || 'Quelqu\'un', lastSeen: d.lastSeen || null };
     _emailCache[uid] = info;
     return info;
   } catch(e) { return null; }
@@ -4869,14 +5319,18 @@ async function _getMemberNotifInfo(uid) {
 async function _sendNotifEmail(templateId, params) {
   if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') return;
   if (!EMAILJS_SERVICE_ID || templateId === 'VOTRE_TEMPLATE_MSG' || templateId === 'VOTRE_TEMPLATE_STATUS') return;
+  console.log('[EmailJS] Sending', templateId, 'to', params.to_email, 'params:', params);
   try {
-    await emailjs.send(EMAILJS_SERVICE_ID, templateId, params);
+    const result = await emailjs.send(EMAILJS_SERVICE_ID, templateId, params);
+    console.log('[EmailJS] Success:', result.status, result.text);
   } catch(e) {
-    console.warn('EmailJS send error:', e);
+    console.error('[EmailJS] Error:', e?.text || e?.message || e);
   }
 }
 
-// Notifie les membres d'un groupe (sauf l'émetteur) selon leur préférence
+// Notifie les membres d'un groupe (sauf l'émetteur) selon leur préférence.
+// Si l'utilisateur est actif (lastSeen < NOTIF_SUPPRESS_MS), on diffère l'envoi
+// de NOTIF_SUPPRESS_MS et on re-vérifie : si toujours inactif → on envoie.
 async function notifyGroupMembers(groupId, groupName, memberUids, templateId, templateParams) {
   if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') return;
   const myUid = State.user?.uid;
@@ -4884,15 +5338,75 @@ async function notifyGroupMembers(groupId, groupName, memberUids, templateId, te
   if (!othersUids.length) return;
 
   await Promise.allSettled(othersUids.map(async uid => {
-    const info = await _getMemberNotifInfo(uid);
+    // Lire les infos fraîches depuis Firestore (pas le cache) pour notifSent
+    const { db, doc, getDoc, updateDoc } = window._fb;
+    let freshData = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      if (!snap.exists()) return;
+      freshData = snap.data();
+      // Mettre à jour le cache
+      _emailCache[uid] = {
+        email: freshData.email || null,
+        notifEmail: !!freshData.notifEmail,
+        name: freshData.displayName || 'Quelqu\'un',
+        lastSeen: freshData.lastSeen || null,
+      };
+    } catch(e) { return; }
+
+    const info = _emailCache[uid];
     if (!info?.email || !info.notifEmail) return;
-    await _sendNotifEmail(templateId, {
+
+    // ── Rate limiting : déjà une notif en attente pour ce groupe ? ──
+    const notifSent = freshData.notifSent || {};
+    if (notifSent[groupId]) return; // notif déjà envoyée, groupe pas encore ouvert
+
+    const finalParams = {
       ...templateParams,
       to_email: info.email,
       to_name: info.name,
       group_name: groupName,
       app_url: 'https://care-wave.github.io/CareWave/',
-    });
+    };
+
+    // Marque immédiatement notifSent pour ce groupe (avant l'envoi pour éviter les doublons)
+    const markSent = async () => {
+      try {
+        await updateDoc(doc(db, 'users', uid), { [`notifSent.${groupId}`]: Date.now() });
+        delete _emailCache[uid]; // invalider le cache
+      } catch(e) { /* silencieux */ }
+    };
+
+    // Vérifie si l'utilisateur est actif en ce moment
+    const isActive = () => {
+      if (!info.lastSeen) return false;
+      const ls = info.lastSeen.toDate ? info.lastSeen.toDate() : new Date(info.lastSeen);
+      return Date.now() - ls.getTime() < NOTIF_SUPPRESS_MS;
+    };
+
+    if (!isActive()) {
+      await markSent();
+      await _sendNotifEmail(templateId, finalParams);
+    } else {
+      // Actif → on attend NOTIF_SUPPRESS_MS puis on re-vérifie
+      setTimeout(async () => {
+        try {
+          const snap2 = await getDoc(doc(db, 'users', uid));
+          if (!snap2.exists()) return;
+          const d2 = snap2.data();
+          // Si le groupe a été ouvert entre-temps → notifSent effacé → ne pas envoyer
+          if (!(d2.notifSent?.[groupId])) {
+            const freshLastSeen = d2.lastSeen || null;
+            if (!freshLastSeen) { await markSent(); await _sendNotifEmail(templateId, finalParams); return; }
+            const ls = freshLastSeen.toDate ? freshLastSeen.toDate() : new Date(freshLastSeen);
+            if (Date.now() - ls.getTime() >= NOTIF_SUPPRESS_MS) {
+              await markSent();
+              await _sendNotifEmail(templateId, finalParams);
+            }
+          }
+        } catch(e) { /* silencieux */ }
+      }, NOTIF_SUPPRESS_MS);
+    }
   }));
 }
 
@@ -4935,6 +5449,101 @@ function syncNotifEmailToggle() {
     ? 'Activé — vous recevrez les nouvelles activités par email'
     : 'Recevoir un email pour les nouveaux messages et statuts';
 }
+
+/* ════════════════════════════════════════════════
+   PULL TO REFRESH
+════════════════════════════════════════════════ */
+(function initPullToRefresh() {
+  const THRESHOLD = 72;   // px à tirer pour déclencher
+  const MAX_PULL   = 100; // px max de résistance
+
+  let startY = 0, currentY = 0, pulling = false, loading = false;
+
+  const el    = () => document.getElementById('app-content');
+  const ind   = () => document.getElementById('ptr-indicator');
+  const label = () => document.getElementById('ptr-label');
+
+  function onTouchStart(e) {
+    if (loading) return;
+    const c = el();
+    if (!c || c.scrollTop > 0) return; // pas en haut du scroll
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }
+
+  function onTouchMove(e) {
+    if (!pulling || loading) return;
+    const c = el(); const i = ind();
+    if (!c || !i) return;
+    if (c.scrollTop > 0) { pulling = false; return; }
+
+    currentY = e.touches[0].clientY;
+    const dy = Math.max(0, currentY - startY);
+    if (dy < 8) return;
+
+    // Résistance logarithmique
+    const pull = Math.min(MAX_PULL, dy * 0.5);
+
+    i.classList.add('visible');
+    i.classList.toggle('releasing', pull >= THRESHOLD / 2);
+
+    const lbl = label();
+    if (lbl) lbl.textContent = pull >= THRESHOLD / 2 ? 'Relâcher pour rafraîchir' : 'Tirer pour rafraîchir';
+
+    // Empêche le scroll natif seulement si on tire vraiment vers le bas
+    if (dy > 12) e.preventDefault();
+  }
+
+  function onTouchEnd() {
+    if (!pulling || loading) return;
+    pulling = false;
+    const dy = Math.max(0, currentY - startY);
+    const pull = Math.min(MAX_PULL, dy * 0.5);
+    const i = ind();
+
+    if (pull >= THRESHOLD / 2) {
+      triggerRefresh();
+    } else {
+      if (i) i.classList.remove('visible', 'releasing');
+    }
+    startY = 0; currentY = 0;
+  }
+
+  async function triggerRefresh() {
+    if (loading) return;
+    loading = true;
+    const i = ind(); const lbl = label();
+    if (i) { i.classList.add('loading'); i.classList.remove('releasing'); }
+    if (lbl) lbl.textContent = 'Mise à jour…';
+
+    try {
+      const tab = State.currentTab || 'status';
+      if (tab === 'status') {
+        // Re-souscrit au listener (déjà en temps réel mais ça force un re-render)
+        listenLatestStatus();
+      } else if (tab === 'groups') {
+        await loadGroups();
+      } else if (tab === 'profile') {
+        renderProfileHeader();
+        await loadProfileStats();
+      }
+    } catch(e) { /* silencieux */ }
+
+    await new Promise(r => setTimeout(r, 600)); // min 600ms pour le feedback
+    loading = false;
+    if (i) i.classList.remove('visible', 'loading', 'releasing');
+  }
+
+  // Init dès que le DOM est prêt
+  function attach() {
+    const c = document.getElementById('app-content');
+    if (!c) { setTimeout(attach, 200); return; }
+    c.addEventListener('touchstart', onTouchStart, { passive: true });
+    c.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    c.addEventListener('touchend',   onTouchEnd,   { passive: true });
+  }
+  attach();
+})();
 
 /* ════════════════════════════════════════════════
    FAQ TOGGLE
