@@ -2204,7 +2204,7 @@ body {
         </div>
         <div class="schedule-custom-row" id="schedule-custom-row">
           <input type="datetime-local" class="schedule-datetime" id="schedule-datetime" />
-          <button class="schedule-btn active" onclick="confirmCustomSchedule()">Programmer</button>
+          <button class="schedule-btn active" onclick="confirmCustomSchedule()">Confirmer</button>
         </div>
         <div class="scheduled-list" id="scheduled-list"></div>
       </div>
@@ -4710,11 +4710,26 @@ function initSchedulePresets() {
           _pendingScheduleTime = ts;
           btn.classList.add('active');
           _selectedScheduleBtn = btn;
-          scheduleStatus();
+          updatePublishBtn();
         }
       }
     });
   });
+}
+
+// Met à jour le bouton publish selon si une heure est programmée ou non
+function updatePublishBtn() {
+  const btn = document.getElementById('publish-btn');
+  if (!btn) return;
+  if (_pendingScheduleTime) {
+    const d = new Date(_pendingScheduleTime);
+    const label = d.toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Programmer · ${label}`;
+    btn.style.background = 'linear-gradient(135deg, #0d9488, #0891b2)';
+  } else {
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Partager mon état`;
+    btn.style.background = '';
+  }
 }
 
 function confirmCustomSchedule() {
@@ -4722,8 +4737,8 @@ function confirmCustomSchedule() {
   if (!dt.value) { toast('Choisissez une date et une heure', 'error'); return; }
   _pendingScheduleTime = new Date(dt.value).getTime();
   if (_pendingScheduleTime <= Date.now()) { toast('La date doit être dans le futur', 'error'); return; }
-  scheduleStatus();
   document.getElementById('schedule-custom-row').classList.remove('visible');
+  updatePublishBtn();
 }
 
 async function scheduleStatus() {
@@ -4756,7 +4771,7 @@ async function scheduleStatus() {
     document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
     if (document.getElementById('status-msg')) document.getElementById('status-msg').value = '';
     updateMsgCounter?.();
-
+    updatePublishBtn();
     renderScheduledList();
   } catch(e) {
     console.error('scheduleStatus:', e);
@@ -5326,6 +5341,8 @@ const App = {
 
   async publishStatus() {
     if (State.selectedStatus.size === 0) { toast('Sélectionne au moins un état 👆','error'); return; }
+    // Si une heure est programmée → déléguer à scheduleStatus
+    if (_pendingScheduleTime) { await scheduleStatus(); return; }
     const tags = [...State.selectedStatus];
     const message = document.getElementById('status-msg').value.trim();
 
