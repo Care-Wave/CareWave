@@ -617,7 +617,8 @@ body {
   backdrop-filter: blur(28px) saturate(200%);
   border-top: 1px solid var(--border);
   display: flex; z-index: 300;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: content-box;
 }
 [data-theme="light"] .app-nav { background: rgba(245,247,255,.96); }
 .nav-item {
@@ -1343,6 +1344,42 @@ body {
 }
 .chat-reply-cancel:active { transform: scale(.9); }
 
+/* Menu contextuel long press */
+.bubble-ctx-menu {
+  position: fixed; z-index: 9999;
+  background: var(--card-bg, var(--c1));
+  border: 1px solid var(--border2);
+  border-radius: var(--r); overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+  display: flex; flex-direction: column;
+  min-width: 160px;
+  animation: ctx-pop .15s cubic-bezier(.16,1,.3,1);
+}
+@keyframes ctx-pop { from { opacity:0; transform: scale(.9); } to { opacity:1; transform: scale(1); } }
+.bubble-ctx-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; font-size: .85rem; font-weight: 700;
+  color: var(--text); cursor: pointer;
+  transition: background .1s;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.bubble-ctx-item:active { background: var(--glass2); }
+@media (hover: hover) and (pointer: fine) {
+  .bubble-ctx-item:hover { background: var(--glass2); }
+}
+
+/* Swipe reply indicator */
+.bubble-row { position: relative; }
+.swipe-reply-icon {
+  position: absolute; top: 50%; right: 100%;
+  transform: translateY(-50%) translateX(20px);
+  opacity: 0; pointer-events: none;
+  color: var(--accent2); transition: opacity .15s, transform .15s;
+  margin-right: 6px;
+}
+.bubble-row.swiping .swipe-reply-icon { opacity: 1; transform: translateY(-50%) translateX(0); }
+
 /* Citation dans les bulles */
 .bubble-reply {
   padding: 5px 9px; margin-bottom: 5px;
@@ -1691,6 +1728,7 @@ body {
 }
 @media (min-width: 640px) {
   .app-content { max-width: 860px; margin: 0 auto; }
+  .tab-panel.active { max-width: 600px; margin-left: auto; margin-right: auto; }
   .chat-modal { border-radius: var(--r2); height: 78dvh; margin-bottom: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4393,6 +4431,12 @@ function renderMessageGroup(group, container) {
     const row = document.createElement('div');
     row.className = 'bubble-row';
 
+    // Icône reply visible pendant le swipe
+    const swipeIcon = document.createElement('div');
+    swipeIcon.className = 'swipe-reply-icon';
+    swipeIcon.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>`;
+    row.appendChild(swipeIcon);
+
     // Bubble
     const bubble = document.createElement('div');
     bubble.className = `chat-bubble ${group.mine ? 'mine' : 'theirs'}`;
@@ -4454,29 +4498,74 @@ function renderMessageGroup(group, container) {
       }
     });
 
-    // Touch double-tap → like | long press → reply
+    // ── Touch : double-tap → like | long press → menu | swipe droite → reply ──
     let lastTap = 0;
     let longPressTimer = null;
-    let touchStartX = 0;
+    let touchStartX = 0, touchStartY = 0;
+    let swipeTriggered = false;
+    const SWIPE_THRESHOLD = 60; // px pour déclencher reply
+    const SWIPE_MAX_VERTICAL = 30; // px max en vertical pour que ce soit un swipe
+
+    bubble.style.userSelect = 'none';
+    bubble.style.webkitUserSelect = 'none';
 
     bubble.addEventListener('touchstart', (e) => {
       touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      swipeTriggered = false;
+
       longPressTimer = setTimeout(() => {
         longPressTimer = null;
-        // Long press → reply
-        navigator.vibrate?.(30);
-        setReply(id, m.text || '', group.displayName || 'Quelqu\'un');
+        navigator.vibrate?.(40);
+        showBubbleMenu(e, id, m.text || '', group.displayName || 'Quelqu\'un', group.mine);
       }, 500);
     }, { passive: true });
 
     bubble.addEventListener('touchmove', (e) => {
-      if (!longPressTimer) return;
       const dx = e.touches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 10) { clearTimeout(longPressTimer); longPressTimer = null; }
+      const dy = Math.abs(e.touches[0].clientY - touchStartY);
+
+      // Annuler long press si mouvement
+      if ((Math.abs(dx) > 8 || dy > 8) && longPressTimer) {
+        clearTimeout(longPressTimer); longPressTimer = null;
+      }
+
+      // Swipe droite : seulement sur les messages des autres (theirs)
+      if (!group.mine && dx > 0 && dy < SWIPE_MAX_VERTICAL && !swipeTriggered) {
+        const progress = Math.min(1, dx / SWIPE_THRESHOLD);
+        bubble.style.transform = `translateX(${Math.min(dx * 0.4, SWIPE_THRESHOLD * 0.4)}px)`;
+        bubble.style.transition = 'none';
+        row.classList.toggle('swiping', progress > 0.5);
+        if (dx >= SWIPE_THRESHOLD) {
+          swipeTriggered = true;
+          navigator.vibrate?.(30);
+          setReply(id, m.text || '', group.displayName || 'Quelqu\'un');
+        }
+      }
+      // Swipe gauche sur ses propres messages aussi
+      if (group.mine && dx < 0 && dy < SWIPE_MAX_VERTICAL && !swipeTriggered) {
+        const progress = Math.min(1, Math.abs(dx) / SWIPE_THRESHOLD);
+        bubble.style.transform = `translateX(${Math.max(dx * 0.4, -SWIPE_THRESHOLD * 0.4)}px)`;
+        bubble.style.transition = 'none';
+        if (Math.abs(dx) >= SWIPE_THRESHOLD) {
+          swipeTriggered = true;
+          navigator.vibrate?.(30);
+          setReply(id, m.text || '', group.displayName || 'Moi');
+        }
+      }
     }, { passive: true });
 
     bubble.addEventListener('touchend', (e) => {
       if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+
+      // Reset swipe
+      bubble.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1)';
+      bubble.style.transform = '';
+      row.classList.remove('swiping');
+
+      if (swipeTriggered) { swipeTriggered = false; return; }
+
+      // Double tap → like
       const now = Date.now();
       if (now - lastTap < 300) {
         e.preventDefault();
@@ -4489,10 +4578,77 @@ function renderMessageGroup(group, container) {
       } else { lastTap = now; }
     });
 
+    // Desktop : clic droit → menu contextuel
+    bubble.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showBubbleMenu(e, id, m.text || '', group.displayName || 'Quelqu\'un', group.mine);
+    });
+
     if (window._applyHoverListeners) window._applyHoverListeners(likeArea);
   });
 
   container.appendChild(groupEl);
+}
+
+/* ════════════════════════════════════════════════
+   BUBBLE CONTEXT MENU
+════════════════════════════════════════════════ */
+let _ctxMenu = null;
+
+function closeBubbleMenu() {
+  if (_ctxMenu) { _ctxMenu.remove(); _ctxMenu = null; }
+}
+
+function showBubbleMenu(e, msgId, text, displayName, isMine) {
+  closeBubbleMenu();
+
+  const menu = document.createElement('div');
+  menu.className = 'bubble-ctx-menu';
+  _ctxMenu = menu;
+
+  // Position : près du doigt ou du curseur
+  const x = e.touches ? e.touches[0].clientX : e.clientX;
+  const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+  // Répondre
+  const replyBtn = document.createElement('button');
+  replyBtn.className = 'bubble-ctx-item';
+  replyBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg> Répondre`;
+  replyBtn.addEventListener('click', () => {
+    closeBubbleMenu();
+    setReply(msgId, text, isMine ? (State.profile?.displayName || 'Moi') : displayName);
+  });
+  menu.appendChild(replyBtn);
+
+  // Copier
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'bubble-ctx-item';
+  copyBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Copier`;
+  copyBtn.addEventListener('click', () => {
+    closeBubbleMenu();
+    navigator.clipboard?.writeText(text).then(() => toast('📋 Copié', 'success')).catch(() => toast('Impossible de copier', 'error'));
+  });
+  menu.appendChild(copyBtn);
+
+  document.body.appendChild(menu);
+
+  // Positionner en évitant les bords
+  const mw = menu.offsetWidth || 170;
+  const mh = menu.offsetHeight || 90;
+  let left = Math.min(x, window.innerWidth - mw - 10);
+  let top  = Math.min(y, window.innerHeight - mh - 10);
+  if (top < 10) top = 10;
+  menu.style.left = `${left}px`;
+  menu.style.top  = `${top}px`;
+
+  // Fermer au prochain tap/clic hors menu
+  const close = (ev) => {
+    if (!menu.contains(ev.target)) { closeBubbleMenu(); document.removeEventListener('click', close); document.removeEventListener('touchstart', close); }
+  };
+  setTimeout(() => {
+    document.addEventListener('click', close);
+    document.addEventListener('touchstart', close);
+  }, 50);
 }
 
 /* ════════════════════════════════════════════════
