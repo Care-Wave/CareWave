@@ -838,6 +838,53 @@ body {
 .publish-btn:active { transform: scale(.99); }
 .publish-btn:disabled { opacity: .5; transform: none; }
 
+/* ══ SCHEDULE PICKER ══ */
+.schedule-row {
+  display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+}
+.schedule-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 100px;
+  background: var(--glass); border: 1px solid var(--border2);
+  font-size: .78rem; font-weight: 700; color: var(--text2);
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+  transition: background .1s, border-color .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.schedule-btn:active { transform: scale(.96); }
+.schedule-btn.active { background: rgba(99,102,241,.15); border-color: rgba(129,140,248,.4); color: var(--accent2); }
+@media (hover: hover) and (pointer: fine) {
+  .schedule-btn:hover { background: var(--glass2); border-color: var(--border3); }
+}
+.schedule-custom-row {
+  display: none; margin-top: 8px; gap: 8px; align-items: center;
+}
+.schedule-custom-row.visible { display: flex; }
+.schedule-datetime {
+  flex: 1; padding: 8px 12px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border2);
+  color: var(--text); font-size: .82rem; font-family: 'Cabinet Grotesk', sans-serif;
+  outline: none;
+}
+.schedule-datetime:focus { border-color: var(--accent2); }
+.scheduled-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.scheduled-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border2);
+  font-size: .8rem;
+}
+.scheduled-item-info { flex: 1; min-width: 0; }
+.scheduled-item-tags { font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scheduled-item-time { font-size: .72rem; color: var(--accent2); margin-top: 2px; }
+.scheduled-item-cancel {
+  flex-shrink: 0; padding: 4px 10px; border-radius: 100px;
+  background: rgba(244,63,94,.08); border: 1px solid rgba(244,63,94,.2);
+  color: var(--rose); font-size: .72rem; font-weight: 700; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.scheduled-item-cancel:active { transform: scale(.95); }
+
 /* ══ GROUPS TAB ══ */
 .groups-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .groups-title { font-family: 'Clash Display', sans-serif; font-size: 1.35rem; font-weight: 700; letter-spacing: -.03em; }
@@ -2140,6 +2187,27 @@ body {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         Partager mon état
       </button>
+
+      <!-- Programmer un statut -->
+      <div style="margin-top:14px;">
+        <div class="section-header" style="margin-bottom:8px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Programmer un statut
+        </div>
+        <div class="schedule-row" id="schedule-presets">
+          <button class="schedule-btn" data-offset="3600000">Dans 1h</button>
+          <button class="schedule-btn" data-offset="7200000">Dans 2h</button>
+          <button class="schedule-btn" data-offset="14400000">Dans 4h</button>
+          <button class="schedule-btn" data-tonight>Ce soir 20h</button>
+          <button class="schedule-btn" data-tomorrow>Demain 8h</button>
+          <button class="schedule-btn" data-custom>Choisir…</button>
+        </div>
+        <div class="schedule-custom-row" id="schedule-custom-row">
+          <input type="datetime-local" class="schedule-datetime" id="schedule-datetime" />
+          <button class="schedule-btn active" onclick="confirmCustomSchedule()">Programmer</button>
+        </div>
+        <div class="scheduled-list" id="scheduled-list"></div>
+      </div>
 
       <div class="section-header" style="margin-top:28px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Historique récent</div>
       <div id="status-history-list">
@@ -4600,6 +4668,206 @@ function renderMessageGroup(group, container) {
 }
 
 /* ════════════════════════════════════════════════
+   SCHEDULED STATUSES
+════════════════════════════════════════════════ */
+let _scheduleTimer = null;
+let _selectedScheduleBtn = null;
+let _pendingScheduleTime = null; // timestamp ms
+
+function initSchedulePresets() {
+  const row = document.getElementById('schedule-presets');
+  if (!row) return;
+  row.querySelectorAll('.schedule-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Désélectionner l'ancien
+      if (_selectedScheduleBtn) _selectedScheduleBtn.classList.remove('active');
+      document.getElementById('schedule-custom-row').classList.remove('visible');
+
+      if (btn.dataset.custom !== undefined) {
+        // Picker date/heure
+        btn.classList.add('active');
+        _selectedScheduleBtn = btn;
+        _pendingScheduleTime = null;
+        const customRow = document.getElementById('schedule-custom-row');
+        customRow.classList.add('visible');
+        // Pré-remplir avec now + 1h
+        const dt = document.getElementById('schedule-datetime');
+        const d = new Date(Date.now() + 3600000);
+        dt.value = new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      } else {
+        let ts;
+        if (btn.dataset.offset !== undefined) {
+          ts = Date.now() + parseInt(btn.dataset.offset);
+        } else if (btn.dataset.tonight !== undefined) {
+          const d = new Date(); d.setHours(20, 0, 0, 0);
+          if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1);
+          ts = d.getTime();
+        } else if (btn.dataset.tomorrow !== undefined) {
+          const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(8, 0, 0, 0);
+          ts = d.getTime();
+        }
+        if (ts) {
+          _pendingScheduleTime = ts;
+          btn.classList.add('active');
+          _selectedScheduleBtn = btn;
+          scheduleStatus();
+        }
+      }
+    });
+  });
+}
+
+function confirmCustomSchedule() {
+  const dt = document.getElementById('schedule-datetime');
+  if (!dt.value) { toast('Choisissez une date et une heure', 'error'); return; }
+  _pendingScheduleTime = new Date(dt.value).getTime();
+  if (_pendingScheduleTime <= Date.now()) { toast('La date doit être dans le futur', 'error'); return; }
+  scheduleStatus();
+  document.getElementById('schedule-custom-row').classList.remove('visible');
+}
+
+async function scheduleStatus() {
+  if (!_pendingScheduleTime) return;
+  if (State.selectedStatus.size === 0) { toast('Sélectionne au moins un état 👆', 'error'); return; }
+  if (!State.user || !window._fb) return;
+
+  const tags = [...State.selectedStatus];
+  const message = document.getElementById('status-msg')?.value.trim() || '';
+  const scheduledAt = _pendingScheduleTime;
+
+  const { db, collection, addDoc } = window._fb;
+  try {
+    await addDoc(collection(db, 'scheduled_statuses'), {
+      uid: State.user.uid,
+      displayName: State.profile.displayName || 'Anonyme',
+      avatar: State.profile.avatar || '',
+      tags, message, scheduledAt,
+      status: 'pending'
+    });
+
+    const d = new Date(scheduledAt);
+    const label = d.toLocaleString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    toast(`⏰ Statut programmé pour ${label}`, 'success');
+
+    // Reset
+    _pendingScheduleTime = null;
+    if (_selectedScheduleBtn) { _selectedScheduleBtn.classList.remove('active'); _selectedScheduleBtn = null; }
+    State.selectedStatus.clear();
+    document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
+    if (document.getElementById('status-msg')) document.getElementById('status-msg').value = '';
+    updateMsgCounter?.();
+
+    renderScheduledList();
+  } catch(e) {
+    console.error('scheduleStatus:', e);
+    toast('Erreur lors de la programmation', 'error');
+  }
+}
+
+async function renderScheduledList() {
+  const el = document.getElementById('scheduled-list');
+  if (!el || !State.user || !window._fb) return;
+  const { db, collection, query, where, getDocs, orderBy } = window._fb;
+
+  try {
+    const q = query(
+      collection(db, 'scheduled_statuses'),
+      where('uid', '==', State.user.uid),
+      where('status', '==', 'pending'),
+      orderBy('scheduledAt', 'asc')
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) { el.innerHTML = ''; return; }
+
+    el.innerHTML = '';
+    snap.forEach(d => {
+      const data = d.data();
+      const dt = new Date(data.scheduledAt);
+      const label = dt.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const item = document.createElement('div');
+      item.className = 'scheduled-item';
+      item.innerHTML = `
+        <div class="scheduled-item-info">
+          <div class="scheduled-item-tags">${data.tags.join(' · ')}${data.message ? ` — "${data.message}"` : ''}</div>
+          <div class="scheduled-item-time">⏰ ${label}</div>
+        </div>
+        <button class="scheduled-item-cancel" onclick="cancelScheduled('${d.id}')">Annuler</button>`;
+      el.appendChild(item);
+    });
+  } catch(e) { /* silencieux */ }
+}
+
+async function cancelScheduled(docId) {
+  if (!window._fb) return;
+  const { db, doc, deleteDoc } = window._fb;
+  try {
+    await deleteDoc(doc(db, 'scheduled_statuses', docId));
+    toast('Statut programmé annulé', 'success');
+    renderScheduledList();
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+// Vérification toutes les minutes des statuts à publier
+async function checkScheduledStatuses() {
+  if (!State.user || !window._fb) return;
+  const { db, collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp, orderBy } = window._fb;
+  const now = Date.now();
+
+  try {
+    const q = query(
+      collection(db, 'scheduled_statuses'),
+      where('uid', '==', State.user.uid),
+      where('status', '==', 'pending')
+    );
+    const snap = await getDocs(q);
+    snap.forEach(async d => {
+      const data = d.data();
+      if (data.scheduledAt > now) return;
+
+      // Marquer comme publié d'abord
+      await updateDoc(doc(db, 'scheduled_statuses', d.id), { status: 'published' });
+
+      // Publier le statut
+      await addDoc(collection(db, 'statuses'), {
+        uid: data.uid,
+        displayName: data.displayName,
+        avatar: data.avatar,
+        tags: data.tags,
+        message: data.message,
+        createdAt: serverTimestamp()
+      });
+
+      // Message dans les groupes
+      if (State.groups?.length) {
+        const avatar = data.avatar || '';
+        const name = data.displayName || 'Quelqu\'un';
+        const tagStr = data.tags.join(' · ');
+        const txt = data.message
+          ? `${avatar} ${name} : ${tagStr} — "${data.message}"`
+          : `${avatar} ${name} a mis à jour son état : ${tagStr}`;
+        await Promise.all(State.groups.map(g =>
+          addDoc(collection(db, 'groups', g.id, 'messages'), {
+            type: 'status_update', text: txt, uid: data.uid, createdAt: serverTimestamp()
+          })
+        ));
+      }
+
+      toast('⏰ Statut programmé publié !', 'success');
+      renderScheduledList();
+    });
+  } catch(e) { /* silencieux */ }
+}
+
+function startScheduleChecker() {
+  checkScheduledStatuses();
+  _scheduleTimer = setInterval(checkScheduledStatuses, 60_000);
+}
+
+function stopScheduleChecker() {
+  if (_scheduleTimer) { clearInterval(_scheduleTimer); _scheduleTimer = null; }
+}
+
+/* ════════════════════════════════════════════════
    BUBBLE CONTEXT MENU
 ════════════════════════════════════════════════ */
 let _ctxMenu = null;
@@ -4765,6 +5033,9 @@ async function _initDashboard(user, profile) {
   renderQuickMsgs();
   listenLatestStatus();
   startPresenceHeartbeat();
+  startScheduleChecker();
+  initSchedulePresets();
+  renderScheduledList();
   UI.show('dashboard');
 
   // Restaurer le dernier onglet visité
@@ -5042,6 +5313,7 @@ const App = {
     const {auth, signOut} = window._fb;
     stopPresenceHeartbeat();
     clearPresenceWatchers();
+    stopScheduleChecker();
     stopVerifyCheck();
     try { sessionStorage.removeItem('cw_verify_dismissed'); } catch(e) {}
     resetAppState();
