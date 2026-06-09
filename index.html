@@ -23,6 +23,7 @@
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 
+
 <script>
 /* ════════════════════════════════════════════════
    EMAILJS CONFIG — À remplir avec vos identifiants
@@ -656,6 +657,67 @@ body {
 @keyframes tab-enter {
   from { opacity: 0; transform: translateY(14px) scale(.99); }
   to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ══ OFFLINE BANNER ══ */
+.offline-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  background: rgba(30,20,10,.96); border-bottom: 1px solid rgba(251,146,60,.3);
+  color: #fdba74; font-size: .78rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 16px; transform: translateY(-100%);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  pointer-events: none;
+}
+.offline-banner.visible { transform: translateY(0); pointer-events: auto; }
+[data-theme="light"] .offline-banner { background: rgba(255,237,213,.97); color: #c2410c; border-color: rgba(194,65,12,.2); }
+
+/* ══ NOTIF PROMPT ══ */
+.notif-prompt {
+  position: fixed; bottom: calc(var(--nav) + 16px); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 9000; opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s cubic-bezier(.16,1,.3,1);
+  width: calc(100% - 32px); max-width: 380px;
+}
+.notif-prompt.visible {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.notif-prompt-inner {
+  background: var(--c1); border: 1px solid var(--border2);
+  border-radius: var(--r2); padding: 14px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.notif-prompt-icon {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(99,102,241,.15); border: 1px solid rgba(129,140,248,.3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent2);
+}
+.notif-prompt-body { flex: 1; min-width: 0; }
+.notif-prompt-title { font-size: .83rem; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.notif-prompt-sub { font-size: .75rem; color: var(--text2); line-height: 1.4; }
+.notif-prompt-actions { display: flex; gap: 8px; margin-top: 10px; }
+.notif-prompt-cta {
+  flex: 1; padding: 7px 12px; border-radius: 100px;
+  background: var(--accent2); border: none; color: #fff;
+  font-size: .78rem; font-weight: 800; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.notif-prompt-dismiss {
+  padding: 7px 12px; border-radius: 100px;
+  background: var(--glass); border: 1px solid var(--border2);
+  color: var(--text3); font-size: .78rem; font-weight: 700;
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+}
+.notif-prompt-close {
+  flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--glass); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text3); margin-top: -2px;
 }
 
 /* ══ PULL TO REFRESH ══ */
@@ -1357,11 +1419,19 @@ body {
 
 /* Typing indicator */
 .typing-indicator {
-  display: flex; align-items: center; gap: 4px;
+  display: flex; align-items: center; gap: 8px;
   background: var(--glass2); border: 1px solid var(--border);
   border-radius: 18px; border-bottom-left-radius: 4px;
-  padding: 9px 13px; align-self: flex-start;
+  padding: 8px 13px; align-self: flex-start;
+  max-width: 80%;
 }
+.typing-dots { display: flex; align-items: center; gap: 4px; }
+.typing-name { font-size: .72rem; color: var(--text3); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.typing-wrap {
+  padding: 0 0 4px 0;
+  display: none;
+}
+.typing-wrap.visible { display: flex; }
 .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); animation: typing-bounce .9s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: .15s; }
 .typing-dot:nth-child(3) { animation-delay: .3s; }
@@ -1417,6 +1487,29 @@ body {
   border: none; background: none; width: 100%; text-align: left;
 }
 .bubble-ctx-item:active { background: var(--glass2); }
+.bubble-ctx-separator { height: 1px; background: var(--border); margin: 2px 0; }
+.bubble-ctx-item.danger { color: var(--rose); }
+.bubble-edited {
+  font-size: .65rem; color: var(--text3); margin-top: 2px;
+  font-style: italic;
+}
+.mine .bubble-edited { color: rgba(255,255,255,.5); }
+.bubble-deleted {
+  font-style: italic; opacity: .5; font-size: .82rem;
+}
+.bubble-edit-input {
+  width: 100%; background: transparent; border: none;
+  border-bottom: 1px solid var(--accent2); outline: none;
+  color: inherit; font-family: inherit; font-size: inherit;
+  padding: 2px 0; margin-bottom: 6px; resize: none;
+}
+.bubble-edit-actions { display: flex; gap: 6px; margin-top: 4px; }
+.bubble-edit-save, .bubble-edit-cancel {
+  padding: 3px 10px; border-radius: 100px; font-size: .72rem; font-weight: 700;
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; border: none;
+}
+.bubble-edit-save { background: var(--accent2); color: #fff; }
+.bubble-edit-cancel { background: var(--glass2); color: var(--text2); border: 1px solid var(--border2); }
 @media (hover: hover) and (pointer: fine) {
   .bubble-ctx-item:hover { background: var(--glass2); }
 }
@@ -1881,6 +1974,10 @@ body {
   </div>
 </div>
 
+<div class="offline-banner" id="offline-banner" role="alert" aria-live="assertive">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+  Hors ligne — vos modifications seront synchronisées au retour de la connexion
+</div>
 <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <!-- ════════════════ LANDING ════════════════ -->
@@ -2045,8 +2142,89 @@ body {
     <span style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg> CareWave</span>
     <span>—</span>
     <span>Made By L.C.</span>
-    <span style="margin-left:auto;font-size:.72rem;">© 2025</span>
+    <span>·</span>
+    <a onclick="UI.show('privacy')" style="color:var(--text3);cursor:pointer;font-size:.8rem;text-decoration:none;transition:color .15s;" onmouseenter="this.style.color='var(--accent2)'" onmouseleave="this.style.color='var(--text3)'">Politique de confidentialité</a>
+    <span style="margin-left:auto;font-size:.72rem;">© 2026</span>
   </footer>
+</div>
+
+<!-- ════════════════ PRIVACY ════════════════ -->
+<div id="view-privacy" class="view">
+  <div style="max-width:720px;margin:0 auto;padding:40px 24px 80px;">
+
+    <button onclick="UI.show('landing')" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;padding:8px 16px;border-radius:100px;background:var(--glass);border:1px solid var(--border2);color:var(--text2);font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Retour
+    </button>
+
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,.1);border:1px solid rgba(129,140,248,.2);border-radius:100px;padding:5px 14px;font-size:.72rem;font-weight:800;color:var(--accent2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">
+      Politique de confidentialité
+    </div>
+    <h1 style="font-family:'Clash Display',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:8px;">Vos données, <br>votre contrôle.</h1>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:40px;">Dernière mise à jour : juin 2026</p>
+
+    <div style="display:flex;flex-direction:column;gap:32px;">
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">1. Qui sommes-nous</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">CareWave est une application web personnelle permettant de partager son état de santé et de bien-être avec ses proches. Elle est hébergée sur GitHub Pages à l'adresse <span style="color:var(--accent2);">care-wave.github.io/CareWave</span>.</p>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">2. Données collectées</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;margin-bottom:10px;">Lors de l'utilisation de CareWave, les données suivantes sont collectées :</p>
+        <ul style="color:var(--text2);font-size:.88rem;line-height:1.9;padding-left:20px;">
+          <li><strong style="color:var(--text);">Adresse email</strong> — utilisée pour l'authentification et les notifications.</li>
+          <li><strong style="color:var(--text);">Pseudo, bio, avatar</strong> — informations de profil visibles par les membres de vos groupes.</li>
+          <li><strong style="color:var(--text);">Statuts de santé</strong> — les tags et messages que vous partagez volontairement.</li>
+          <li><strong style="color:var(--text);">Messages de groupe</strong> — conservés tant que le groupe existe.</li>
+          <li><strong style="color:var(--text);">Préférences</strong> — thème, mode sombre, notifications email.</li>
+          <li><strong style="color:var(--text);">Dernière connexion (lastSeen)</strong> — horodatage mis à jour à chaque session active.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">3. Utilisation des données</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">Vos données sont utilisées exclusivement pour faire fonctionner l'application : afficher votre profil aux membres de vos groupes, envoyer des notifications email si vous les activez, et calculer votre série de statuts quotidiens. Elles ne sont jamais vendues ni partagées avec des tiers à des fins commerciales.</p>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">4. Stockage et sécurité</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">Les données sont stockées sur <strong style="color:var(--text);">Firebase Firestore</strong> (Google Cloud), avec des règles de sécurité garantissant que chaque utilisateur n'accède qu'aux données auxquelles il est autorisé. Les communications sont chiffrées via HTTPS. Les notifications email transitent par <strong style="color:var(--text);">EmailJS</strong>, un service tiers soumis à sa propre politique de confidentialité.</p>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">5. Partage des données</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">Vos statuts et messages ne sont visibles que par les membres des groupes auxquels vous appartenez. Votre adresse email n'est jamais affichée publiquement ni communiquée à d'autres utilisateurs.</p>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">6. Vos droits</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;margin-bottom:10px;">Vous pouvez à tout moment :</p>
+        <ul style="color:var(--text2);font-size:.88rem;line-height:1.9;padding-left:20px;">
+          <li>Modifier votre profil (pseudo, bio, avatar) depuis l'onglet Profil.</li>
+          <li>Supprimer vos statuts depuis l'historique.</li>
+          <li>Désactiver les notifications email depuis Profil → Préférences.</li>
+          <li><strong style="color:var(--text);">Supprimer intégralement votre compte</strong> depuis Profil → Zone Danger. Cette action efface immédiatement toutes vos données.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">7. Cookies et tracking</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">CareWave n'utilise pas de cookies publicitaires ni de trackers analytiques. Le <span style="color:var(--text);">localStorage</span> du navigateur est utilisé uniquement pour mémoriser votre dernier onglet visité et l'horodatage de lecture des groupes.</p>
+      </section>
+
+      <section>
+        <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;color:var(--text);">8. Contact</h2>
+        <p style="color:var(--text2);font-size:.88rem;line-height:1.7;">Pour toute question relative à vos données, vous pouvez ouvrir une issue sur le dépôt GitHub du projet.</p>
+      </section>
+
+    </div>
+
+    <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);text-align:center;color:var(--text3);font-size:.78rem;">
+      CareWave — Made By L.C. · © 2026
+    </div>
+  </div>
 </div>
 
 <!-- ════════════════ LOGIN ════════════════ -->
@@ -2303,6 +2481,26 @@ body {
 
   </main>
 
+  <!-- Popup invitation notifications email -->
+  <div class="notif-prompt" id="notif-prompt" role="dialog" aria-label="Activer les notifications">
+    <div class="notif-prompt-inner">
+      <div class="notif-prompt-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      </div>
+      <div class="notif-prompt-body">
+        <div class="notif-prompt-title">Restez informé(e) 💙</div>
+        <div class="notif-prompt-sub">Activez les notifications email pour ne manquer aucun message ou statut de vos proches.</div>
+        <div class="notif-prompt-actions">
+          <button class="notif-prompt-cta" onclick="activateNotifsFromPrompt()">Activer</button>
+          <button class="notif-prompt-dismiss" onclick="dismissNotifPrompt(true)">Plus tard</button>
+        </div>
+      </div>
+      <button class="notif-prompt-close" onclick="dismissNotifPrompt(false)" aria-label="Fermer">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
   <nav class="app-nav" role="tablist" aria-label="Navigation">
     <button type="button" class="nav-item" id="nav-status" onclick="switchTab('status')" role="tab" aria-selected="false" aria-controls="tab-status">
       <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l1.5-3 2 4.5 1.5-3H21"/></svg></span><span>Statut</span>
@@ -2353,6 +2551,16 @@ body {
       <button class="quick-reaction" onclick="sendQuick('🤗 Gros câlin')">🤗 Gros câlin</button>
       <button class="quick-reaction" onclick="sendQuick('✅ Pris en charge')">✅ Pris en charge</button>
     </div>
+    <div class="typing-wrap" id="typing-wrap">
+      <div class="typing-indicator" id="typing-indicator">
+        <div class="typing-dots">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+        <span class="typing-name" id="typing-name"></span>
+      </div>
+    </div>
     <div class="chat-footer-wrap">
       <div class="chat-reply-bar" id="chat-reply-bar">
         <div class="chat-reply-preview">
@@ -2364,7 +2572,7 @@ body {
         </button>
       </div>
       <div class="chat-input-row">
-        <input class="chat-input" type="text" id="chat-input" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChatMsg()" aria-label="Écrire un message" maxlength="500" />
+        <input class="chat-input" type="text" id="chat-input" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChatMsg()" oninput="onChatInput()" aria-label="Écrire un message" maxlength="500" />
         <button class="chat-send" onclick="sendChatMsg()" aria-label="Envoyer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>
     </div>
@@ -2444,8 +2652,8 @@ body {
     <div class="modal-title" style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg> Modifier le profil</div>
     <div class="form-label" style="margin-bottom:8px;">Avatar</div>
     <div class="avatar-picker" id="avatar-picker" role="radiogroup"></div>
-    <div class="form-group" style="margin-top:14px;"><label class="form-label" for="edit-name">Pseudo</label><input class="form-input" type="text" id="edit-name" placeholder="Votre prénom" maxlength="30" /></div>
-    <div class="form-group"><label class="form-label" for="edit-bio">Bio <span style="color:var(--text3);font-weight:400;text-transform:none;">(optionnelle)</span></label><input class="form-input" type="text" id="edit-bio" placeholder="En quelques mots…" maxlength="100" /></div>
+    <div class="form-group" style="margin-top:14px;"><label class="form-label" for="edit-name">Pseudo</label><input class="form-input" type="text" id="edit-name" placeholder="Votre prénom" maxlength="30" oninput="updateFieldCounter('edit-name',30,'name-counter')" /><span id="name-counter" style="font-size:.7rem;color:var(--text3);float:right;margin-top:2px;">0/30</span></div>
+    <div class="form-group"><label class="form-label" for="edit-bio">Bio <span style="color:var(--text3);font-weight:400;text-transform:none;">(optionnelle)</span></label><input class="form-input" type="text" id="edit-bio" placeholder="En quelques mots…" maxlength="100" oninput="updateFieldCounter('edit-bio',100,'bio-counter')" /><span id="bio-counter" style="font-size:.7rem;color:var(--text3);float:right;margin-top:2px;">0/100</span></div>
     <div class="form-group">
       <label class="form-label">Couleur du thème</label>
       <div class="theme-color-grid" id="theme-color-grid"></div>
@@ -2908,6 +3116,9 @@ const UI = {
     const el = document.getElementById(`view-${view}`);
     if (!el) return;
     el.classList.add('active');
+    // Masquer la nav fixe sur toutes les vues sauf dashboard
+    const nav = document.querySelector('.app-nav');
+    if (nav) nav.style.display = view === 'dashboard' ? '' : 'none';
     if (typeof gsap !== 'undefined') {
       gsap.fromTo(el, { opacity:0, y:12 }, { opacity:1, y:0, duration:.35, ease:'power2.out', clearProps:'all' });
     }
@@ -3258,6 +3469,8 @@ function openEditProfile() {
   const bioEl = document.getElementById('edit-bio');
   if (nameEl) nameEl.value = State.profile.displayName || '';
   if (bioEl) bioEl.value = State.profile.bio || '';
+  updateFieldCounter('edit-name', 30, 'name-counter');
+  updateFieldCounter('edit-bio', 100, 'bio-counter');
   renderAvatarPicker();
   renderThemeColorGrid();
   document.getElementById('edit-modal').classList.add('open');
@@ -3286,10 +3499,25 @@ function selectAvatar(a, el) {
   el.classList.add('selected'); el.setAttribute('aria-checked','true');
 }
 
+function updateFieldCounter(inputId, max, counterId) {
+  const inp = document.getElementById(inputId);
+  const ctr = document.getElementById(counterId);
+  if (!inp || !ctr) return;
+  const len = inp.value.length;
+  ctr.textContent = `${len}/${max}`;
+  ctr.style.color = len > max * 0.85 ? (len >= max ? 'var(--rose)' : 'var(--accent2)') : 'var(--text3)';
+}
+
 async function saveProfile() {
   const name = document.getElementById('edit-name').value.trim();
   const bio = document.getElementById('edit-bio').value.trim();
   if (!name) { toast('Le pseudo est requis','error'); return; }
+  if (name.length < 2) { toast('Le pseudo doit faire au moins 2 caractères','error'); return; }
+  if (name.length > 30) { toast('Le pseudo ne peut pas dépasser 30 caractères','error'); return; }
+  if (bio.length > 100) { toast('La bio ne peut pas dépasser 100 caractères','error'); return; }
+  if (!/^[\p{L}\p{N}\p{Emoji_Presentation}\p{Emoji_Modifier}\s\-_.'']+$/u.test(name)) {
+    toast('Le pseudo contient des caractères non autorisés','error'); return;
+  }
   const btn = document.getElementById('save-profile-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
   const {db, doc, updateDoc} = window._fb;
@@ -4167,6 +4395,9 @@ function openChat(group) {
 function closeChat() {
   document.getElementById('chat-overlay').classList.remove('open');
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
+  stopTypingListener();
+  clearTyping(State.currentGroup?.id);
+  if (_typingTimer) { clearTimeout(_typingTimer); _typingTimer = null; }
   cancelReply();
 }
 function closeChatOutside(e) { /* plein écran — pas de fermeture par clic extérieur */ }
@@ -4314,6 +4545,7 @@ function loadChatMessages(groupId) {
   // puis on souscrit via onSnapshot asc limité à partir de ce curseur.
   const {getDocs, query: q2, orderBy: ob, limit: lim, startAfter, startAt} = window._fb;
 
+  listenTyping(groupId);
   async function init() {
     // 1. Charger les N derniers pour trouver le curseur
     const {query: fq, orderBy: fob, limit: flim, getDocs: fget} = window._fb;
@@ -4526,7 +4758,18 @@ function renderMessageGroup(group, container) {
       bubble.appendChild(cite);
     }
 
-    bubble.appendChild(document.createTextNode(m.text || ''));
+    if (m.deleted) {
+      bubble.classList.add('bubble-deleted');
+      bubble.appendChild(document.createTextNode('Message supprimé'));
+    } else {
+      bubble.appendChild(document.createTextNode(m.text || ''));
+      if (m.edited) {
+        const editedTag = document.createElement('div');
+        editedTag.className = 'bubble-edited';
+        editedTag.textContent = 'modifié';
+        bubble.appendChild(editedTag);
+      }
+    }
 
     // Timestamp (hidden, fades in on row hover via CSS on bubble)
     if (ts) {
@@ -4666,6 +4909,118 @@ function renderMessageGroup(group, container) {
 }
 
 /* ════════════════════════════════════════════════
+   OFFLINE / ONLINE DETECTION
+════════════════════════════════════════════════ */
+(function initOfflineDetection() {
+  const banner = () => document.getElementById('offline-banner');
+
+  function setOffline() {
+    const b = banner();
+    if (b) b.classList.add('visible');
+    // Désactiver les actions Firestore-dépendantes visuellement
+    document.body.setAttribute('data-offline', '1');
+  }
+
+  function setOnline() {
+    const b = banner();
+    if (b) {
+      b.classList.remove('visible');
+      // Flash bref "Connexion rétablie"
+      b.style.background = 'rgba(10,40,25,.96)';
+      b.style.color = '#6ee7b7';
+      b.style.borderColor = 'rgba(52,211,153,.3)';
+      b.querySelector('svg').style.display = 'none';
+      b.childNodes[b.childNodes.length - 1].textContent = ' Connexion rétablie';
+      b.classList.add('visible');
+      setTimeout(() => {
+        b.classList.remove('visible');
+        setTimeout(() => {
+          b.style.background = '';
+          b.style.color = '';
+          b.style.borderColor = '';
+          b.querySelector('svg').style.display = '';
+          b.childNodes[b.childNodes.length - 1].textContent = ' Hors ligne — vos modifications seront synchronisées au retour de la connexion';
+        }, 400);
+      }, 2500);
+    }
+    document.body.removeAttribute('data-offline');
+  }
+
+  // État initial
+  if (!navigator.onLine) setOffline();
+
+  window.addEventListener('offline', setOffline);
+  window.addEventListener('online', setOnline);
+})();
+
+// Utilitaire : vérifier si hors-ligne avant une action critique
+function isOffline() {
+  return !navigator.onLine;
+}
+
+/* ════════════════════════════════════════════════
+   NOTIF EMAIL PROMPT
+════════════════════════════════════════════════ */
+const NOTIF_PROMPT_DELAY_MS  = 3 * 60_000;  // 3 min après connexion
+const NOTIF_PROMPT_REPEAT_MS = 3 * 86_400_000; // re-affiche au bout de 3 jours si "Plus tard"
+const NOTIF_PROMPT_KEY = 'cw_notif_prompt_dismissed';
+
+let _notifPromptTimer = null;
+
+function scheduleNotifPrompt() {
+  if (_notifPromptTimer) return;
+  // Ne pas afficher si déjà activé
+  if (State.profile?.notifEmail) return;
+  // Ne pas afficher si refusé définitivement (clé 'never')
+  try {
+    const raw = localStorage.getItem(NOTIF_PROMPT_KEY);
+    if (raw === 'never') return;
+    if (raw) {
+      const ts = parseInt(raw, 10);
+      if (Date.now() - ts < NOTIF_PROMPT_REPEAT_MS) return;
+    }
+  } catch(e) {}
+
+  _notifPromptTimer = setTimeout(() => {
+    // Re-vérifier au moment d'afficher
+    if (State.profile?.notifEmail) return;
+    showNotifPrompt();
+  }, NOTIF_PROMPT_DELAY_MS);
+}
+
+function showNotifPrompt() {
+  const el = document.getElementById('notif-prompt');
+  if (!el) return;
+  el.classList.add('visible');
+}
+
+function hideNotifPrompt() {
+  const el = document.getElementById('notif-prompt');
+  if (el) el.classList.remove('visible');
+}
+
+function dismissNotifPrompt(later) {
+  hideNotifPrompt();
+  try {
+    // "Plus tard" → snooze 3 jours | ✕ → snooze 3 jours aussi (pas de "never" pour éviter de bloquer)
+    localStorage.setItem(NOTIF_PROMPT_KEY, later ? Date.now().toString() : Date.now().toString());
+  } catch(e) {}
+}
+
+async function activateNotifsFromPrompt() {
+  hideNotifPrompt();
+  try { localStorage.setItem(NOTIF_PROMPT_KEY, 'never'); } catch(e) {}
+  await toggleNotifEmail();
+  // S'assurer que le toggle profil est bien activé
+  syncNotifEmailToggle();
+}
+
+function stopNotifPrompt() {
+  if (_notifPromptTimer) { clearTimeout(_notifPromptTimer); _notifPromptTimer = null; }
+  hideNotifPrompt();
+}
+
+/* ════════════════════════════════════════════════
    SCHEDULED STATUSES
 ════════════════════════════════════════════════ */
 let _scheduleTimer = null;
@@ -4677,6 +5032,15 @@ function initSchedulePresets() {
   if (!row) return;
   row.querySelectorAll('.schedule-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      // Si déjà sélectionné → désélectionner et annuler
+      if (_selectedScheduleBtn === btn) {
+        btn.classList.remove('active');
+        _selectedScheduleBtn = null;
+        _pendingScheduleTime = null;
+        document.getElementById('schedule-custom-row').classList.remove('visible');
+        updatePublishBtn();
+        return;
+      }
       // Désélectionner l'ancien
       if (_selectedScheduleBtn) _selectedScheduleBtn.classList.remove('active');
       document.getElementById('schedule-custom-row').classList.remove('visible');
@@ -4920,6 +5284,33 @@ function showBubbleMenu(e, msgId, text, displayName, isMine) {
   });
   menu.appendChild(copyBtn);
 
+  // Actions sur ses propres messages uniquement
+  if (isMine) {
+    const sep = document.createElement('div');
+    sep.className = 'bubble-ctx-separator';
+    menu.appendChild(sep);
+
+    // Modifier
+    const editBtn = document.createElement('button');
+    editBtn.className = 'bubble-ctx-item';
+    editBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Modifier`;
+    editBtn.addEventListener('click', () => {
+      closeBubbleMenu();
+      startEditMessage(msgId, text);
+    });
+    menu.appendChild(editBtn);
+
+    // Supprimer
+    const delBtn = document.createElement('button');
+    delBtn.className = 'bubble-ctx-item danger';
+    delBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Supprimer`;
+    delBtn.addEventListener('click', () => {
+      closeBubbleMenu();
+      deleteMessage(msgId);
+    });
+    menu.appendChild(delBtn);
+  }
+
   document.body.appendChild(menu);
 
   // Positionner en évitant les bords
@@ -4939,6 +5330,160 @@ function showBubbleMenu(e, msgId, text, displayName, isMine) {
     document.addEventListener('click', close);
     document.addEventListener('touchstart', close);
   }, 50);
+}
+
+/* ════════════════════════════════════════════════
+   TYPING INDICATOR
+════════════════════════════════════════════════ */
+let _typingTimer = null;
+let _typingUnsub = null;
+let _isTyping = false;
+const TYPING_TIMEOUT_MS = 4000;
+
+async function setTyping(groupId) {
+  if (!State.user || !window._fb || isOffline()) return;
+  const { db, doc, setDoc, serverTimestamp } = window._fb;
+  try {
+    await setDoc(doc(db, 'groups', groupId, 'typing', State.user.uid), {
+      name: State.profile?.displayName || 'Quelqu\'un',
+      ts: serverTimestamp()
+    });
+    _isTyping = true;
+  } catch(e) { /* silencieux */ }
+}
+
+async function clearTyping(groupId) {
+  if (!State.user || !window._fb) return;
+  _isTyping = false;
+  const { db, doc, deleteDoc } = window._fb;
+  try {
+    await deleteDoc(doc(db, 'groups', groupId, 'typing', State.user.uid));
+  } catch(e) { /* silencieux */ }
+}
+
+function onChatInput() {
+  const groupId = State.currentGroup?.id;
+  if (!groupId) return;
+
+  // Démarrer ou prolonger le typing
+  if (!_isTyping) setTyping(groupId);
+  if (_typingTimer) clearTimeout(_typingTimer);
+  _typingTimer = setTimeout(() => {
+    clearTyping(groupId);
+    _typingTimer = null;
+  }, TYPING_TIMEOUT_MS);
+}
+
+function listenTyping(groupId) {
+  stopTypingListener();
+  const { db, collection, onSnapshot } = window._fb;
+  _typingUnsub = onSnapshot(
+    collection(db, 'groups', groupId, 'typing'),
+    snap => {
+      const others = [];
+      snap.forEach(d => {
+        if (d.id !== State.user?.uid) {
+          // Ignorer si le document a plus de 8s (stale)
+          const ts = d.data().ts?.toDate?.();
+          if (!ts || Date.now() - ts.getTime() < 8000) {
+            others.push(d.data().name || 'Quelqu\'un');
+          }
+        }
+      });
+      const wrap = document.getElementById('typing-wrap');
+      const nameEl = document.getElementById('typing-name');
+      if (!wrap || !nameEl) return;
+      if (others.length === 0) {
+        wrap.classList.remove('visible');
+      } else {
+        const label = others.length === 1
+          ? `${others[0]} est en train d'écrire…`
+          : `${others.slice(0,-1).join(', ')} et ${others[others.length-1]} écrivent…`;
+        nameEl.textContent = label;
+        wrap.classList.add('visible');
+        // Scroll vers le bas si déjà en bas
+        const msgs = document.getElementById('chat-messages');
+        if (msgs && msgs.scrollHeight - msgs.scrollTop - msgs.clientHeight < 80) {
+          msgs.scrollTop = msgs.scrollHeight;
+        }
+      }
+    },
+    () => {}
+  );
+}
+
+function stopTypingListener() {
+  if (_typingUnsub) { try { _typingUnsub(); } catch(e){} _typingUnsub = null; }
+  const wrap = document.getElementById('typing-wrap');
+  if (wrap) wrap.classList.remove('visible');
+}
+
+/* ════════════════════════════════════════════════
+   EDIT / DELETE MESSAGE
+════════════════════════════════════════════════ */
+function startEditMessage(msgId, currentText) {
+  // Trouver la bulle
+  const bubble = document.querySelector(`[data-msg-id="${msgId}"]`);
+  if (!bubble) return;
+
+  // Sauvegarder le contenu original
+  const originalHTML = bubble.innerHTML;
+
+  // Remplacer par un input
+  bubble.innerHTML = '';
+  const textarea = document.createElement('textarea');
+  textarea.className = 'bubble-edit-input';
+  textarea.value = currentText;
+  textarea.rows = Math.min(5, Math.ceil(currentText.length / 40) + 1);
+  bubble.appendChild(textarea);
+
+  const actions = document.createElement('div');
+  actions.className = 'bubble-edit-actions';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'bubble-edit-save';
+  saveBtn.textContent = 'Sauvegarder';
+  saveBtn.addEventListener('click', async () => {
+    const newText = textarea.value.trim();
+    if (!newText) { toast('Le message ne peut pas être vide', 'error'); return; }
+    if (newText.length > 500) { toast('Message trop long', 'error'); return; }
+    if (newText === currentText) { bubble.innerHTML = originalHTML; return; }
+    if (isOffline()) { toast('Hors ligne', 'error'); return; }
+    try {
+      const { db, doc, updateDoc } = window._fb;
+      await updateDoc(doc(db, 'groups', State.currentGroup.id, 'messages', msgId), {
+        text: newText, edited: true
+      });
+    } catch(e) {
+      toast('Erreur lors de la modification', 'error');
+      bubble.innerHTML = originalHTML;
+    }
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'bubble-edit-cancel';
+  cancelBtn.textContent = 'Annuler';
+  cancelBtn.addEventListener('click', () => { bubble.innerHTML = originalHTML; });
+
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  bubble.appendChild(actions);
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+}
+
+async function deleteMessage(msgId) {
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
+  if (!State.currentGroup || !window._fb) return;
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    // Soft delete : on garde le document mais on marque deleted
+    await updateDoc(doc(db, 'groups', State.currentGroup.id, 'messages', msgId), {
+      deleted: true, text: ''
+    });
+  } catch(e) {
+    toast('Erreur lors de la suppression', 'error');
+  }
 }
 
 /* ════════════════════════════════════════════════
@@ -4978,6 +5523,8 @@ async function sendChatMsg() {
   const inp = document.getElementById('chat-input');
   const text = inp.value.trim();
   if (!text || !State.currentGroup || !State.user) return;
+  if (isOffline()) { toast('Hors ligne — message non envoyé', 'error'); return; }
+  if (text.length > 500) { toast('Message trop long (500 caractères max)','error'); return; }
   inp.value = '';
   const {db, collection, addDoc, serverTimestamp} = window._fb;
   try {
@@ -4992,6 +5539,8 @@ async function sendChatMsg() {
     if (_replyTo) msgData.replyTo = { ..._replyTo };
     await addDoc(collection(db,'groups',State.currentGroup.id,'messages'), msgData);
     cancelReply();
+    clearTyping(State.currentGroup?.id);
+    if (_typingTimer) { clearTimeout(_typingTimer); _typingTimer = null; }
     // Notifs email — best-effort, non-bloquant
     const g = State.currentGroup;
     notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_MESSAGE, {
@@ -5049,6 +5598,7 @@ async function _initDashboard(user, profile) {
   startScheduleChecker();
   initSchedulePresets();
   renderScheduledList();
+  scheduleNotifPrompt();
   UI.show('dashboard');
 
   // Restaurer le dernier onglet visité
@@ -5327,6 +5877,7 @@ const App = {
     stopPresenceHeartbeat();
     clearPresenceWatchers();
     stopScheduleChecker();
+    stopNotifPrompt();
     stopVerifyCheck();
     try { sessionStorage.removeItem('cw_verify_dismissed'); } catch(e) {}
     resetAppState();
@@ -5339,10 +5890,12 @@ const App = {
 
   async publishStatus() {
     if (State.selectedStatus.size === 0) { toast('Sélectionne au moins un état 👆','error'); return; }
+    if (isOffline()) { toast('Hors ligne — statut non publié', 'error'); return; }
     // Si une heure est programmée → déléguer à scheduleStatus
     if (_pendingScheduleTime) { await scheduleStatus(); return; }
     const tags = [...State.selectedStatus];
     const message = document.getElementById('status-msg').value.trim();
+    if (message.length > 180) { toast('Le message ne peut pas dépasser 180 caractères','error'); return; }
 
     const btn = document.getElementById('publish-btn');
     btn.disabled = true; btn.textContent = '⏳ Partage en cours…';
@@ -5402,6 +5955,9 @@ const App = {
     const name = document.getElementById('cg-name').value.trim();
     const desc = document.getElementById('cg-desc').value.trim();
     if (!name) { toast('Le nom du groupe est requis','error'); return; }
+    if (name.length < 2) { toast('Le nom doit faire au moins 2 caractères','error'); return; }
+    if (name.length > 40) { toast('Le nom ne peut pas dépasser 40 caractères','error'); return; }
+    if (desc.length > 80) { toast('La description ne peut pas dépasser 80 caractères','error'); return; }
     const btn = document.getElementById('create-group-btn');
     btn.disabled = true; btn.textContent = '⏳ Création…';
     const {db, collection, addDoc, serverTimestamp} = window._fb;
