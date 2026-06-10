@@ -1489,6 +1489,32 @@ body {
 .bubble-ctx-item:active { background: var(--glass2); }
 .bubble-ctx-separator { height: 1px; background: var(--border); margin: 2px 0; }
 .bubble-ctx-item.danger { color: var(--rose); }
+/* Vu par panel */
+.seen-by-panel {
+  position: fixed; z-index: 9999;
+  background: var(--c1); border: 1px solid var(--border2);
+  border-radius: var(--r); padding: 10px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.3);
+  font-size: .75rem; color: var(--text2);
+  min-width: 140px; max-width: 220px;
+  animation: ctx-pop .15s cubic-bezier(.16,1,.3,1);
+}
+.seen-by-title { font-size: .65rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+.seen-by-list { display: flex; flex-direction: column; gap: 5px; }
+.seen-by-item { display: flex; align-items: center; gap: 7px; }
+.seen-by-avatar { font-size: .9rem; flex-shrink: 0; }
+.seen-by-name { font-size: .78rem; font-weight: 700; color: var(--text); }
+.seen-by-time { font-size: .65rem; color: var(--text3); }
+
+/* Double check lu/non lu */
+.bubble-checks {
+  font-size: .65rem; color: rgba(255,255,255,.5);
+  margin-top: 1px; text-align: right; user-select: none;
+  line-height: 1;
+}
+.msg-group.theirs .bubble-checks { display: none; }
+.bubble-checks.read { color: #60d4f7; }
+
 .bubble-edited {
   font-size: .65rem; color: var(--text3); margin-top: 2px;
   font-style: italic;
@@ -3563,8 +3589,40 @@ async function saveProfile() {
 /* ════════════════════════════════════════════════
    GROUPS
 ════════════════════════════════════════════════ */
-function getLastRead(gid) { try { const v=localStorage.getItem('cw_read_'+gid); return v?new Date(v):new Date(0); } catch{return new Date(0);} }
-function setLastRead(gid) { try { localStorage.setItem('cw_read_'+gid, new Date().toISOString()); } catch{} }
+// Cache en mémoire des lastRead Firestore
+const _lastReadCache = {};
+
+function getLastRead(gid) {
+  // Priorité : cache mémoire (chargé depuis Firestore), puis localStorage
+  if (_lastReadCache[gid]) return new Date(_lastReadCache[gid]);
+  try { const v = localStorage.getItem('cw_read_'+gid); return v ? new Date(v) : new Date(0); } catch { return new Date(0); }
+}
+
+function setLastRead(gid) {
+  const now = new Date().toISOString();
+  _lastReadCache[gid] = now;
+  try { localStorage.setItem('cw_read_'+gid, now); } catch {}
+  // Persister dans Firestore (best-effort)
+  if (State.user && window._fb) {
+    const { db, doc, updateDoc } = window._fb;
+    updateDoc(doc(db, 'users', State.user.uid), { [`lastRead.${gid}`]: now }).catch(() => {});
+  }
+}
+
+// Charger les lastRead depuis Firestore au login
+async function loadLastReadFromFirestore() {
+  if (!State.user || !window._fb) return;
+  try {
+    const { db, doc, getDoc } = window._fb;
+    const snap = await getDoc(doc(db, 'users', State.user.uid));
+    if (!snap.exists()) return;
+    const lastRead = snap.data().lastRead || {};
+    Object.entries(lastRead).forEach(([gid, ts]) => {
+      _lastReadCache[gid] = ts;
+      try { localStorage.setItem('cw_read_'+gid, ts); } catch {}
+    });
+  } catch(e) { /* silencieux, fallback localStorage */ }
+}
 
 function listenGroupNotifications(groups) {
   if (!window._fb || !groups?.length) return;
@@ -4370,6 +4428,9 @@ function openChat(group) {
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
   document.getElementById('chat-overlay').classList.add('open');
 
+  // Marquer les messages comme lus
+  markMessagesAsRead(freshGroup.id);
+
   // Effacer notifSent pour ce groupe (on l'a ouvert → prochaines notifs autorisées)
   if (State.user && window._fb) {
     const gid = freshGroup.id;
@@ -4788,6 +4849,25 @@ function renderMessageGroup(group, container) {
       ${iLiked ? '❤️' : '🤍'}<span class="like-count">${likeCount > 0 ? likeCount : ''}</span>
     </button>`;
     row.appendChild(likeArea);
+
+    // Double check pour ses propres messages
+    if (group.mine && !m.deleted) {
+      const members = State.currentGroup?.members || [];
+      const otherMembers = members.filter(uid => uid !== State.user?.uid);
+      const readBy = m.readBy || {};
+      const allRead = otherMembers.length > 0 && otherMembers.every(uid => !!readBy[uid]);
+      const checks = document.createElement('div');
+      checks.className = 'bubble-checks' + (allRead ? ' read' : '');
+      checks.dataset.checksId = id;
+      checks.innerHTML = allRead ? '✓✓' : '✓';
+      // Tap sur ✓✓ → panel "vu par"
+      checks.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showSeenByPanel(e, m.readBy || {}, State.currentGroup);
+      });
+      checks.style.cursor = 'pointer';
+      row.appendChild(checks);
+    }
 
     groupEl.appendChild(row);
 
@@ -5333,6 +5413,98 @@ function showBubbleMenu(e, msgId, text, displayName, isMine) {
 }
 
 /* ════════════════════════════════════════════════
+   SEEN BY PANEL
+════════════════════════════════════════════════ */
+let _seenByPanel = null;
+
+function closeSeenByPanel() {
+  if (_seenByPanel) { _seenByPanel.remove(); _seenByPanel = null; }
+}
+
+function showSeenByPanel(e, readBy, group) {
+  closeSeenByPanel();
+  if (!group) return;
+
+  const members = group.members || [];
+  const memberNames = group.memberNames || [];
+  const memberAvatars = group.memberAvatars || [];
+  const myUid = State.user?.uid;
+
+  // Construire la liste des lecteurs (pas soi-même)
+  const readers = members
+    .map((uid, i) => ({ uid, name: memberNames[i] || 'Membre', avatar: memberAvatars[i] || '' }))
+    .filter(m => m.uid !== myUid && readBy[m.uid]);
+
+  if (!readers.length) return; // rien à afficher
+
+  const panel = document.createElement('div');
+  panel.className = 'seen-by-panel';
+  _seenByPanel = panel;
+
+  panel.innerHTML = `<div class="seen-by-title">Vu par</div><div class="seen-by-list">${
+    readers.map(m => {
+      const ts = readBy[m.uid];
+      const date = ts ? new Date(ts) : null;
+      const timeStr = date ? date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+      return `<div class="seen-by-item">
+        <span class="seen-by-avatar">${m.avatar || '👤'}</span>
+        <div>
+          <div class="seen-by-name">${m.name}</div>
+          ${timeStr ? `<div class="seen-by-time">${timeStr}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('')
+  }</div>`;
+
+  document.body.appendChild(panel);
+
+  // Positionner
+  const x = e.touches ? e.touches[0].clientX : e.clientX;
+  const y = e.touches ? e.touches[0].clientY : e.clientY;
+  const pw = panel.offsetWidth || 160;
+  const ph = panel.offsetHeight || 80;
+  panel.style.left = `${Math.min(x, window.innerWidth - pw - 10)}px`;
+  panel.style.top  = `${Math.max(10, Math.min(y - ph - 8, window.innerHeight - ph - 10))}px`;
+
+  // Fermer au prochain tap
+  setTimeout(() => {
+    const close = (ev) => { if (!panel.contains(ev.target)) { closeSeenByPanel(); document.removeEventListener('click', close); document.removeEventListener('touchstart', close); } };
+    document.addEventListener('click', close);
+    document.addEventListener('touchstart', close);
+  }, 50);
+}
+
+/* ════════════════════════════════════════════════
+   READ RECEIPTS (double check)
+════════════════════════════════════════════════ */
+async function markMessagesAsRead(groupId) {
+  if (!State.user || !window._fb || isOffline()) return;
+  const uid = State.user.uid;
+  const { db, collection, query, orderBy, limit, getDocs, updateDoc, doc } = window._fb;
+
+  try {
+    // Prendre les 30 derniers messages
+    const q = query(
+      collection(db, 'groups', groupId, 'messages'),
+      orderBy('createdAt', 'desc'),
+      limit(30)
+    );
+    const snap = await getDocs(q);
+    const batch = [];
+    snap.forEach(d => {
+      const data = d.data();
+      // Seulement les messages des autres, non supprimés, pas encore lus par moi
+      if (data.uid !== uid && !data.deleted && !data.readBy?.[uid]) {
+        batch.push(updateDoc(doc(db, 'groups', groupId, 'messages', d.id), {
+          [`readBy.${uid}`]: Date.now()
+        }));
+      }
+    });
+    if (batch.length) await Promise.allSettled(batch);
+  } catch(e) { /* silencieux */ }
+}
+
+/* ════════════════════════════════════════════════
    TYPING INDICATOR
 ════════════════════════════════════════════════ */
 let _typingTimer = null;
@@ -5594,6 +5766,7 @@ async function _initDashboard(user, profile) {
   renderStatusOptions();
   renderQuickMsgs();
   listenLatestStatus();
+  await loadLastReadFromFirestore();
   startPresenceHeartbeat();
   startScheduleChecker();
   initSchedulePresets();
@@ -6269,6 +6442,10 @@ function startPresenceHeartbeat() {
     if (document.visibilityState === 'visible') {
       _writeLastSeen();
       if (!_presenceTimer) _presenceTimer = setInterval(_writeLastSeen, PRESENCE_INTERVAL_MS);
+      // Marquer comme lus si le chat est ouvert
+      if (State.currentGroup?.id && document.getElementById('chat-overlay')?.classList.contains('open')) {
+        markMessagesAsRead(State.currentGroup.id);
+      }
     } else {
       clearInterval(_presenceTimer); _presenceTimer = null;
     }
