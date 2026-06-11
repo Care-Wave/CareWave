@@ -14,12 +14,12 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   const firebaseConfig = { apiKey:"AIzaSyAt245YXg-80Q0aHolRUNS3M2iZ1q4Jfx0",authDomain:"carew-95ee4.firebaseapp.com",projectId:"carew-95ee4",storageBucket:"carew-95ee4.firebasestorage.app",messagingSenderId:"443664388194",appId:"1:443664388194:web:477905a47e2e2f9aaac13b" };
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore };
+  window._fb = { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, deleteUser, GoogleAuthProvider, signInWithPopup, sendEmailVerification, fetchSignInMethodsForEmail, doc, setDoc, getDoc, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp, updateDoc, deleteDoc, getDocs, limit, writeBatch, startAt, endBefore, arrayUnion, arrayRemove };
   window.dispatchEvent(new Event('fb-ready'));
 </script>
 
@@ -115,10 +115,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+/* Pas de hover coloré — évite la barre verte visible sur desktop */
+
+/* Masquer la scrollbar horizontale sur le body */
+html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
 /* ══ VERIFICATION BANNER ══ */
 .verify-banner {
@@ -1639,7 +1642,17 @@ body {
 .ms-member-avatar { font-size: 1.35rem; flex-shrink: 0; }
 .ms-member-name { font-size: .86rem; font-weight: 700; flex: 1; }
 .ms-member-role { font-size: .62rem; font-weight: 800; padding: 2px 7px; border-radius: 100px; }
-.ms-member-role.creator { background: rgba(99,102,241,.15); color: var(--accent2); }
+.ms-member-role.creator { background: rgba(251,191,36,.12); color: #f59e0b; border: 1px solid rgba(251,191,36,.25); }
+.ms-member-role.admin { background: rgba(99,102,241,.12); color: var(--accent2); border: 1px solid rgba(129,140,248,.25); }
+.ms-admin-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border-radius: 100px; font-size: .68rem; font-weight: 800;
+  background: rgba(99,102,241,.08); border: 1px solid rgba(129,140,248,.2);
+  color: var(--accent2); cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+  transition: background .1s; -webkit-tap-highlight-color: transparent;
+}
+.ms-admin-btn.revoke { background: rgba(244,63,94,.06); border-color: rgba(244,63,94,.18); color: var(--rose); }
+.ms-admin-btn:active { transform: scale(.95); }
 .ms-member-role.me { background: rgba(45,212,191,.12); color: var(--teal); }
 .ms-view-btn { padding: 5px 11px; border-radius: 100px; background: rgba(129,140,248,.1); color: var(--accent2); font-size: .7rem; font-weight: 800; border: 1px solid rgba(129,140,248,.2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0; }
 
@@ -3151,9 +3164,12 @@ const UI = {
   }
 };
 
-function toast(msg, type='', duration=3000) {
+function toast(msg, type='', duration=3500) {
   const c = document.getElementById('toast-container');
   if (!c) return;
+  // Anti-doublon : éviter le même toast dans les 2s
+  const existing = [...c.querySelectorAll('.toast')];
+  if (existing.some(el => el.textContent === msg)) return;
   const t = document.createElement('div');
   t.className = `toast ${type}`;
   t.textContent = msg;
@@ -3442,30 +3458,78 @@ function listenLatestStatus() {
 /* ════════════════════════════════════════════════
    NOTIFICATIONS
 ════════════════════════════════════════════════ */
-function addNotification(icon, text) {
-  State.notifications.unshift({ icon, text, time: new Date(), read: false });
+function addNotification(icon, text, group = null) {
+  // Éviter les doublons : même texte dans les 5 dernières secondes
+  const now = new Date();
+  const isDuplicate = State.notifications.some(n =>
+    n.text === text && (now - n.time) < 5000
+  );
+  if (isDuplicate) return;
+
+  State.notifications.unshift({ icon, text, time: now, read: false, group });
+  // Garder max 50 notifications
+  if (State.notifications.length > 50) State.notifications = State.notifications.slice(0, 50);
   renderNotifications();
+}
+
+function _formatNotifTime(date) {
+  const now = new Date();
+  const diff = now - date;
+  if (diff < 60000) return "À l'instant";
+  if (diff < 3600000) return `Il y a ${Math.floor(diff / 60000)} min`;
+  if (diff < 86400000) return `Il y a ${Math.floor(diff / 3600000)} h`;
+  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 }
 
 function renderNotifications() {
   const unread = State.notifications.filter(n => !n.read).length;
   const badge = document.getElementById('notif-badge');
-  if (badge) { badge.style.display = unread > 0 ? 'flex' : 'none'; badge.textContent = unread > 9 ? '9+' : unread; }
-  const list = document.getElementById('notif-list'); if (!list) return;
+  if (badge) {
+    badge.style.display = unread > 0 ? 'flex' : 'none';
+    badge.textContent = unread > 9 ? '9+' : unread;
+  }
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+
   if (!State.notifications.length) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon" style="display:flex;align-items:center;justify-content:center;color:var(--text3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="empty-title">Aucune notification</div></div>';
     return;
   }
-  list.innerHTML = State.notifications.slice(0,20).map((n, i) => `
-    <div class="notif-item ${n.read?'read':''}" onclick="markNotifRead(${i})">
+
+  list.innerHTML = State.notifications.slice(0, 20).map((n, i) => `
+    <div class="notif-item ${n.read ? 'read' : ''}" onclick="handleNotifClick(${i})">
       <span class="notif-icon">${n.icon}</span>
-      <div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time.toLocaleTimeString('fr-FR',{timeStyle:'short'})}</div></div>
+      <div style="flex:1;min-width:0;">
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${_formatNotifTime(n.time)}</div>
+      </div>
+      ${n.group ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text3);flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>' : ''}
     </div>`).join('');
+}
+
+function handleNotifClick(i) {
+  const n = State.notifications[i];
+  if (!n) return;
+  n.read = true;
+  renderNotifications();
+  closeNotifs();
+  // Naviguer vers le groupe si disponible
+  if (n.group) {
+    switchTab('groups');
+    setTimeout(() => openChat(n.group), 150);
+  }
 }
 
 function markNotifRead(i) { if (State.notifications[i]) State.notifications[i].read = true; renderNotifications(); }
 function clearNotifs() { State.notifications = []; renderNotifications(); }
-function openNotifs() { document.getElementById('notif-drawer').classList.add('open'); State.notifications.forEach(n=>n.read=true); renderNotifications(); }
+function openNotifs() {
+  document.getElementById('notif-drawer').classList.add('open');
+  // Marquer tout comme lu après 1s (laisser le temps de voir les nouvelles)
+  setTimeout(() => {
+    State.notifications.forEach(n => n.read = true);
+    renderNotifications();
+  }, 1000);
+}
 function closeNotifs() { document.getElementById('notif-drawer').classList.remove('open'); }
 
 /* ════════════════════════════════════════════════
@@ -3637,40 +3701,63 @@ function listenGroupNotifications(groups) {
     const unsub = onSnapshot(q, snap => {
       if (snap.empty) { isFirst = false; return; }
       const msg = snap.docs[0].data();
+      const msgId = snap.docs[0].id;
       const msgTime = msg.createdAt?.toDate?.();
       const lastRead = getLastRead(group.id);
+
+      // Premier chargement : marquer les non-lus sans notifier
       if (isFirst) {
-        if (msgTime && msgTime > lastRead) { State.unread[group.id] = (State.unread[group.id] || 0) + 1; renderGroups(); updateGroupsBadge(); }
-        isFirst = false; return;
-      }
-      if (msgTime && State.currentGroup?.id !== group.id) {
-        if (msg.uid === State.user?.uid) return;
-        // Only notify for regular messages, not system/status messages
-        const isStatus = msg.type === 'status_update';
-        const isSystem = msg.type === 'system';
-
-        State.unread[group.id] = (State.unread[group.id] || 0) + 1;
-        renderGroups(); updateGroupsBadge();
-
-        let notifText, notifIcon;
-        if (isStatus) {
-          notifText = `Nouveau statut dans "${group.name}"`;
-          notifIcon = '🌊';
-        } else if (isSystem) {
-          notifText = `${msg.text} (${group.name})`;
-          notifIcon = 'ℹ️';
-        } else {
-          // Regular chat message notification
-          const senderName = msg.displayName || 'Quelqu\'un';
-          notifText = `Nouveau message de ${senderName} dans "${group.name}"`;
-          notifIcon = '💬';
+        if (msgTime && msgTime > lastRead) {
+          State.unread[group.id] = (State.unread[group.id] || 0) + 1;
+          renderGroups(); updateGroupsBadge(); syncTitleBadge();
         }
-
-        addNotification(notifIcon, notifText);
-        if (!isSystem) {
-          toast(notifIcon + ' ' + notifText, 'info');
-        }
+        isFirst = false;
+        return;
       }
+
+      // Ignorer ses propres messages, messages système, et si chat ouvert sur ce groupe
+      if (!msgTime) return;
+      if (msg.uid === State.user?.uid) return;
+      if (State.currentGroup?.id === group.id && document.getElementById('chat-overlay')?.classList.contains('open')) return;
+
+      const isStatus = msg.type === 'status_update';
+      const isSystem = msg.type === 'system';
+      const senderName = msg.displayName || 'Quelqu\'un';
+
+      // Badge non-lu
+      State.unread[group.id] = (State.unread[group.id] || 0) + 1;
+      renderGroups(); updateGroupsBadge(); syncTitleBadge();
+
+      if (isSystem) return; // pas de notif pour les messages système
+
+      // Texte de notif
+      let notifIcon, notifTitle, notifBody;
+      if (isStatus) {
+        notifIcon = '🌊';
+        notifTitle = group.name;
+        notifBody = `${senderName} a partagé son état`;
+      } else {
+        notifIcon = '💬';
+        notifTitle = group.name;
+        notifBody = `${senderName} : ${(msg.text || '').slice(0, 80)}`;
+      }
+
+      // 1. Notification in-app (drawer)
+      addNotification(notifIcon, `${notifBody}`, group);
+
+      // 2. Toast discret (pas pour les statuts pour éviter le spam)
+      if (!isStatus) {
+        toast(`${notifIcon} ${notifTitle} — ${notifBody}`, 'info', 4000);
+      }
+
+      // 3. Notification browser si app en arrière-plan
+      if (document.visibilityState !== 'visible') {
+        sendBrowserNotif(notifTitle, notifBody, () => {
+          window.focus();
+          openChat(group);
+        });
+      }
+
     }, err => console.warn('Group notif:', err.message));
     _unsubs.push(unsub);
   });
@@ -3935,22 +4022,35 @@ function msFillCurrentMembers() {
   const ids = State.currentGroup.members || [];
   const avatars = State.currentGroup.memberAvatars || [];
   const isCurrentUserCreator = State.currentGroup.createdBy === State.user?.uid;
+  const admins = State.currentGroup.admins || [];
+  const isCurrentUserAdmin = admins.includes(State.user?.uid);
+  const canManage = isCurrentUserCreator || isCurrentUserAdmin;
 
   if (!names.length) { el.innerHTML='<div style="color:var(--text3);font-size:.83rem;">Aucun membre.</div>'; return; }
   el.innerHTML = names.map((n, i) => {
     const uid = ids[i];
-    const avatar = avatars[i] || '';  // no emoji fallback, SVG used in display
+    const avatar = avatars[i] || '';
     const isMe = uid === State.user?.uid;
     const isCreator = uid === State.currentGroup.createdBy;
+    const isAdmin = admins.includes(uid);
+
     let roleEl = '';
     if (isCreator) roleEl = '<span class="ms-member-role creator">Créateur</span>';
+    else if (isAdmin) roleEl = '<span class="ms-member-role admin">Admin</span>';
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
 
-    // View profile button (not for self)
     const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Voir</button>` : '';
 
-    // Kick button: only creator can kick, and only on non-creator members, and not themselves
-    const canKick = isCurrentUserCreator && !isCreator && !isMe;
+    // Bouton admin : seul le créateur peut promouvoir/rétrograder
+    const adminBtn = isCurrentUserCreator && !isCreator && !isMe
+      ? isAdmin
+        ? `<button class="ms-admin-btn revoke" data-uid="${uid}" data-name="${n}">− Admin</button>`
+        : `<button class="ms-admin-btn" data-uid="${uid}" data-name="${n}">+ Admin</button>`
+      : '';
+
+    // Kick : créateur ou admin, mais pas sur le créateur ni sur un autre admin (sauf si créateur)
+    const canKick = (isCurrentUserCreator && !isCreator && !isMe) ||
+                    (isCurrentUserAdmin && !isCreator && !isAdmin && !isMe);
     const kickBtn = canKick
       ? `<button class="ms-kick-btn" data-uid="${uid}" data-name="${n}" aria-label="Retirer ${n}">✕ Retirer</button>`
       : '';
@@ -3962,7 +4062,7 @@ function msFillCurrentMembers() {
         <span class="presence-dot" id="${presenceDotId}"></span>
       </span>
       <span class="ms-member-name">${n}</span>
-      ${roleEl}${viewBtn}${kickBtn}
+      ${roleEl}${viewBtn}${adminBtn}${kickBtn}
     </div>`;
   }).join('');
 
@@ -3972,6 +4072,9 @@ function msFillCurrentMembers() {
   });
   el.querySelectorAll('.ms-kick-btn').forEach(btn => {
     btn.addEventListener('click', function() { kickMember(this.dataset.uid, this.dataset.name); });
+  });
+  el.querySelectorAll('.ms-admin-btn').forEach(btn => {
+    btn.addEventListener('click', function() { toggleAdmin(this.dataset.uid, this.dataset.name, this.classList.contains('revoke')); });
   });
 
   if (window._applyHoverListeners) window._applyHoverListeners(el);
@@ -3988,12 +4091,41 @@ function msFillCurrentMembers() {
 }
 
 /* ════════════════════════════════════════════════
-   KICK MEMBER (creator only)
+   ADMIN MANAGEMENT
+════════════════════════════════════════════════ */
+async function toggleAdmin(uid, name, isRevoke) {
+  if (!State.currentGroup || !window._fb) return;
+  if (State.currentGroup.createdBy !== State.user?.uid) {
+    toast('Seul le créateur peut gérer les admins.', 'error'); return;
+  }
+  const { db, doc, updateDoc, arrayUnion, arrayRemove } = window._fb;
+  const gid = State.currentGroup.id;
+  try {
+    if (isRevoke) {
+      await updateDoc(doc(db, 'groups', gid), { admins: arrayRemove(uid) });
+      toast(`${name} n'est plus admin`, 'success');
+      // Mettre à jour State
+      State.currentGroup.admins = (State.currentGroup.admins || []).filter(id => id !== uid);
+    } else {
+      await updateDoc(doc(db, 'groups', gid), { admins: arrayUnion(uid) });
+      toast(`${name} est maintenant admin ⭐`, 'success');
+      State.currentGroup.admins = [...(State.currentGroup.admins || []), uid];
+    }
+    msFillCurrentMembers();
+  } catch(e) {
+    toast('Erreur lors de la mise à jour', 'error');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   KICK MEMBER (creator + admins)
 ════════════════════════════════════════════════ */
 async function kickMember(uid, name) {
   if (!State.currentGroup) return;
-  if (State.currentGroup.createdBy !== State.user?.uid) {
-    toast('Seul le créateur peut retirer des membres.', 'error'); return;
+  const isCreator = State.currentGroup.createdBy === State.user?.uid;
+  const isAdmin = (State.currentGroup.admins || []).includes(State.user?.uid);
+  if (!isCreator && !isAdmin) {
+    toast('Seuls le créateur et les admins peuvent retirer des membres.', 'error'); return;
   }
   if (uid === State.user?.uid) { toast('Vous ne pouvez pas vous retirer vous-même.', 'error'); return; }
   if (!confirm(`Retirer ${name} du groupe "${State.currentGroup.name}" ?\n\nIl/elle pourra être réinvité(e) plus tard.`)) return;
@@ -4407,6 +4539,13 @@ async function _deleteGroupById(groupId, groupName) {
     renderGroups(); updateGroupsBadge();
     toast(`Groupe "${groupName}" supprimé.`,'success');
     addNotification('🗑', `Groupe "${groupName}" supprimé`);
+    // Nettoyer notifSent pour ce groupe
+    if (State.user && window._fb) {
+      const { db, doc, updateDoc } = window._fb;
+      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+        .then(({ deleteField }) => updateDoc(doc(db, 'users', State.user.uid), { [`notifSent.${gid}`]: deleteField() }))
+        .catch(() => {});
+    }
   } catch(e) { console.error('deleteGroup:', e); toast('Erreur lors de la suppression.','error'); }
 }
 
@@ -4418,6 +4557,7 @@ function openChat(group) {
   State.currentGroup = freshGroup;
   State.unread[freshGroup.id] = 0;
   setLastRead(freshGroup.id);
+  syncTitleBadge();
 
   // Initialize member colors for this group
   initMemberColors(freshGroup.members || []);
@@ -4989,6 +5129,54 @@ function renderMessageGroup(group, container) {
 }
 
 /* ════════════════════════════════════════════════
+   TITLE BADGE + WEB NOTIFICATIONS
+════════════════════════════════════════════════ */
+const _baseTitle = 'CareWave';
+let _titleBadgeCount = 0;
+let _titleBlinkTimer = null;
+
+function updateTitleBadge(count) {
+  _titleBadgeCount = count;
+  if (count > 0) {
+    document.title = `(${count}) ${_baseTitle}`;
+  } else {
+    document.title = _baseTitle;
+  }
+}
+
+// Demander la permission pour les notifications browser (une seule fois)
+async function requestBrowserNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  try {
+    const result = await Notification.requestPermission();
+    return result === 'granted';
+  } catch(e) { return false; }
+}
+
+function sendBrowserNotif(title, body, onClick) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible') return; // app active → pas de notif browser
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: 'https://care-wave.github.io/CareWave/icons/icon-192.png',
+      badge: 'https://care-wave.github.io/CareWave/icons/icon-192.png',
+      tag: 'carewave-msg',
+      renotify: true,
+    });
+    if (onClick) n.addEventListener('click', () => { window.focus(); onClick(); n.close(); });
+  } catch(e) { /* silencieux */ }
+}
+
+// Mettre à jour le badge titre depuis les unread counts
+function syncTitleBadge() {
+  const total = Object.values(State.unread || {}).reduce((a, b) => a + b, 0);
+  updateTitleBadge(total);
+}
+
+/* ════════════════════════════════════════════════
    OFFLINE / ONLINE DETECTION
 ════════════════════════════════════════════════ */
 (function initOfflineDetection() {
@@ -5049,9 +5237,11 @@ let _notifPromptTimer = null;
 
 function scheduleNotifPrompt() {
   if (_notifPromptTimer) return;
-  // Ne pas afficher si déjà activé
+  // Ne pas afficher si notifs email déjà activées
   if (State.profile?.notifEmail) return;
-  // Ne pas afficher si refusé définitivement (clé 'never')
+  // Ne pas afficher si notifications browser déjà accordées
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') return;
+  // Ne pas afficher si refusé définitivement
   try {
     const raw = localStorage.getItem(NOTIF_PROMPT_KEY);
     if (raw === 'never') return;
@@ -5064,6 +5254,7 @@ function scheduleNotifPrompt() {
   _notifPromptTimer = setTimeout(() => {
     // Re-vérifier au moment d'afficher
     if (State.profile?.notifEmail) return;
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') return;
     showNotifPrompt();
   }, NOTIF_PROMPT_DELAY_MS);
 }
@@ -5090,9 +5281,19 @@ function dismissNotifPrompt(later) {
 async function activateNotifsFromPrompt() {
   hideNotifPrompt();
   try { localStorage.setItem(NOTIF_PROMPT_KEY, 'never'); } catch(e) {}
-  await toggleNotifEmail();
-  // S'assurer que le toggle profil est bien activé
-  syncNotifEmailToggle();
+
+  // Demander permission notifications browser
+  const browserGranted = await requestBrowserNotifPermission();
+
+  // Activer aussi les notifs email si pas encore activées
+  if (!State.profile?.notifEmail) {
+    await toggleNotifEmail();
+    syncNotifEmailToggle();
+  }
+
+  if (browserGranted) {
+    toast('🔔 Notifications activées', 'success');
+  }
 }
 
 function stopNotifPrompt() {
@@ -5719,7 +5920,23 @@ async function sendChatMsg() {
       from_name: State.profile.displayName || 'Quelqu\'un',
       message_preview: text.length > 80 ? text.slice(0, 80) + '\u2026' : text,
     }).catch(() => {});
-  } catch(e) { inp.value = text; toast('Impossible d\'envoyer le message.','error'); }
+  } catch(e) {
+    inp.value = text;
+    toast('Envoi échoué — nouvelle tentative…', 'error');
+    // Retry une fois après 2s
+    setTimeout(async () => {
+      if (!isOffline() && State.currentGroup && State.user) {
+        try {
+          const {db: db2, collection: col2, addDoc: add2, serverTimestamp: sts2} = window._fb;
+          const retryData = { text, uid: State.user.uid, displayName: State.profile.displayName || 'Anonyme', avatar: State.profile.avatar || '', createdAt: sts2(), likes: {} };
+          if (_replyTo) retryData.replyTo = { ..._replyTo };
+          await add2(col2(db2, 'groups', State.currentGroup.id, 'messages'), retryData);
+          inp.value = '';
+          toast('Message envoyé ✓', 'success');
+        } catch(e2) { toast('Impossible d\'envoyer le message.', 'error'); }
+      }
+    }, 2000);
+  }
 }
 
 function sendQuick(msg) {
@@ -5767,6 +5984,7 @@ async function _initDashboard(user, profile) {
   renderQuickMsgs();
   listenLatestStatus();
   await loadLastReadFromFirestore();
+  requestBrowserNotifPermission();
   startPresenceHeartbeat();
   startScheduleChecker();
   initSchedulePresets();
