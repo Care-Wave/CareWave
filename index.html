@@ -31,8 +31,8 @@
 ════════════════════════════════════════════════ */
 const EMAILJS_PUBLIC_KEY    = '4Y7Z6qUclvA2m367R';
 const EMAILJS_SERVICE_ID    = 'service_CareWave';
-const EMAILJS_TPL_MESSAGE   = 'template_xj7xsql';
-const EMAILJS_TPL_STATUS    = 'template_62kzhcp';
+const EMAILJS_TPL_ACTIVITY  = 'template_xj7xsql'; // template unique : message, statut, like...
+const EMAILJS_TPL_SUPPORT   = 'template_62kzhcp'; // template : message de support
 
 // Init EmailJS (ne plante pas si les clés sont vides)
 if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'VOTRE_PUBLIC_KEY') {
@@ -1672,6 +1672,23 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 }
 .ms-admin-btn.revoke { background: rgba(244,63,94,.06); border-color: rgba(244,63,94,.18); color: var(--rose); }
 .ms-admin-btn:active { transform: scale(.95); }
+
+/* ══ SUPPORT / CONTACT ══ */
+.support-faq-mini { margin-bottom: 18px; }
+.support-faq-mini .faq-item { margin-bottom: 6px; }
+.support-faq-mini .faq-q { padding: 12px 16px; font-size: .82rem; }
+.support-faq-mini .faq-a { font-size: .8rem; }
+.support-faq-mini .faq-item.open .faq-a { max-height: 200px; padding: 0 16px 14px; }
+.support-divider {
+  display: flex; align-items: center; gap: 10px; margin: 18px 0 14px;
+  font-size: .68rem; font-weight: 800; color: var(--text3);
+  text-transform: uppercase; letter-spacing: .1em;
+}
+.support-divider::before, .support-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.support-limit-note {
+  font-size: .72rem; color: var(--text3); margin-top: 8px; text-align: center;
+}
+.support-limit-note.warn { color: var(--rose); font-weight: 700; }
 .ms-member-role.me { background: rgba(45,212,191,.12); color: var(--teal); }
 .ms-view-btn { padding: 5px 11px; border-radius: 100px; background: rgba(129,140,248,.1); color: var(--accent2); font-size: .7rem; font-weight: 800; border: 1px solid rgba(129,140,248,.2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0; }
 
@@ -2524,6 +2541,10 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
           <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Créer un groupe</div><div class="settings-sub">Inviter des proches</div></div>
           <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
+        <div class="settings-row clickable" onclick="openSupportModal()">
+          <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Aide &amp; Contact</div><div class="settings-sub">Questions fréquentes et support</div></div>
+          <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
         <div class="settings-row clickable" onclick="App.logout()">
           <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Se déconnecter</div><div class="settings-sub">Revenir à l'accueil</div></div>
           <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -2766,6 +2787,63 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
     <div class="modal-footer">
       <button class="btn btn-ghost btn-full" onclick="closeCreateGroup()">Annuler</button>
       <button class="btn btn-primary btn-full" onclick="App.createGroup()" id="create-group-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SUPPORT / CONTACT MODAL ════ -->
+<div class="centered-modal" id="support-modal" onclick="closeSupportOutside(event)" role="dialog" aria-modal="true" aria-labelledby="support-modal-title">
+  <div class="modal-card">
+    <div class="modal-title" id="support-modal-title" style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Aide &amp; Contact</div>
+
+    <div class="support-faq-mini" id="support-faq-mini">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Comment supprimer mon compte ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Profil → Zone danger → "Supprimer mon compte". Cette action est immédiate et irréversible.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Je ne reçois pas l'email de vérification</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Vérifiez vos spams. Vous pouvez aussi renvoyer l'email depuis le bandeau en haut de l'app. Le lien expire après 24h.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Comment quitter ou supprimer un groupe ?</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Ouvrez le groupe → icône Membres → en bas de la liste. Le créateur peut supprimer le groupe, les autres membres peuvent le quitter.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+          <span class="faq-q-text">Je ne reçois pas les notifications email</span>
+          <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="faq-a">Vérifiez qu'elles sont activées dans Profil → Préférences, et regardez vos spams. Aucun email n'est envoyé tant que vous êtes actif sur l'app.</div>
+      </div>
+    </div>
+
+    <div class="support-divider">Pas trouvé votre réponse ?</div>
+
+    <div class="form-group">
+      <label class="form-label" for="support-subject">Sujet</label>
+      <input class="form-input" type="text" id="support-subject" placeholder="Ex: Bug dans le chat" maxlength="100" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="support-message">Message</label>
+      <textarea class="msg-textarea" id="support-message" maxlength="1000" placeholder="Décrivez votre problème ou votre question…" oninput="updateFieldCounter('support-message',1000,'support-counter')"></textarea>
+      <span id="support-counter" style="font-size:.7rem;color:var(--text3);float:right;margin-top:2px;">0/1000</span>
+    </div>
+
+    <div id="support-limit-note" class="support-limit-note"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-full" onclick="closeSupportModal()">Annuler</button>
+      <button class="btn btn-primary btn-full" onclick="sendSupportMessage()" id="support-send-btn">Envoyer</button>
     </div>
   </div>
 </div>
@@ -4748,7 +4826,7 @@ function renderLikes(msgId, likes = {}, groupEl) {
 
 async function toggleLike(msgId, isLiked) {
   if (!State.currentGroup || !State.user || !window._fb) return;
-  const {db, doc, updateDoc} = window._fb;
+  const {db, doc, updateDoc, getDoc} = window._fb;
   try {
     const msgRef = doc(db, 'groups', State.currentGroup.id, 'messages', msgId);
     const fieldPath = `likes.${State.user.uid}`;
@@ -4758,6 +4836,18 @@ async function toggleLike(msgId, isLiked) {
       await updateDoc(msgRef, { [fieldPath]: deleteField() });
     } else {
       await updateDoc(msgRef, { [fieldPath]: true });
+      // Notifier l'auteur du message (best-effort, pas pour soi-même)
+      try {
+        const msgSnap = await getDoc(msgRef);
+        const msgData = msgSnap.data();
+        if (msgData && msgData.uid && msgData.uid !== State.user.uid) {
+          const g = State.currentGroup;
+          notifyGroupMembers(g.id, g.name, [msgData.uid], EMAILJS_TPL_ACTIVITY, {
+            from_name: State.profile.displayName || 'Quelqu\'un',
+            activity_text: `a aimé votre message : "${(msgData.text || '').slice(0, 60)}"`,
+          }).catch(() => {});
+        }
+      } catch(e) { /* silencieux */ }
     }
   } catch(e) {
     console.warn('toggleLike error:', e);
@@ -5930,6 +6020,129 @@ function stopGroupDocListener() {
 }
 
 /* ════════════════════════════════════════════════
+   SUPPORT / CONTACT
+════════════════════════════════════════════════ */
+const SUPPORT_DAILY_LIMIT = 3;
+
+function openSupportModal() {
+  const modal = document.getElementById('support-modal');
+  if (!modal) return;
+  // Reset form
+  document.getElementById('support-subject').value = '';
+  document.getElementById('support-message').value = '';
+  updateFieldCounter('support-message', 1000, 'support-counter');
+  // Fermer tous les items FAQ
+  document.querySelectorAll('#support-faq-mini .faq-item.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-q')?.setAttribute('aria-expanded', 'false');
+  });
+  modal.classList.add('open');
+  updateSupportLimitNote();
+}
+
+function closeSupportModal() {
+  document.getElementById('support-modal')?.classList.remove('open');
+}
+
+function closeSupportOutside(e) {
+  if (e.target.id === 'support-modal') closeSupportModal();
+}
+
+// Lit le compteur d'envois du jour depuis Firestore
+async function getSupportSendCount() {
+  if (!State.user || !window._fb) return { count: 0, remaining: SUPPORT_DAILY_LIMIT };
+  const { db, doc, getDoc } = window._fb;
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  try {
+    const snap = await getDoc(doc(db, 'users', State.user.uid));
+    const data = snap.exists() ? snap.data() : {};
+    const sent = data.supportEmailsSent || {};
+    const count = sent.date === today ? (sent.count || 0) : 0;
+    return { count, remaining: Math.max(0, SUPPORT_DAILY_LIMIT - count), today };
+  } catch(e) {
+    return { count: 0, remaining: SUPPORT_DAILY_LIMIT, today };
+  }
+}
+
+async function updateSupportLimitNote() {
+  const note = document.getElementById('support-limit-note');
+  const btn = document.getElementById('support-send-btn');
+  if (!note) return;
+  const { remaining } = await getSupportSendCount();
+  if (remaining <= 0) {
+    note.textContent = `Limite quotidienne atteinte (${SUPPORT_DAILY_LIMIT}/jour). Réessayez demain.`;
+    note.classList.add('warn');
+    if (btn) btn.disabled = true;
+  } else {
+    note.textContent = `${remaining} message${remaining > 1 ? 's' : ''} restant${remaining > 1 ? 's' : ''} aujourd'hui`;
+    note.classList.remove('warn');
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function sendSupportMessage() {
+  if (!State.user) return;
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
+  if (!State.user.emailVerified) { toast('Vérifiez votre email pour contacter le support 📧', 'error'); return; }
+
+  const subject = document.getElementById('support-subject').value.trim();
+  const message = document.getElementById('support-message').value.trim();
+
+  if (!subject) { toast('Le sujet est requis', 'error'); return; }
+  if (subject.length > 100) { toast('Le sujet ne peut pas dépasser 100 caractères', 'error'); return; }
+  if (!message) { toast('Le message est requis', 'error'); return; }
+  if (message.length > 1000) { toast('Le message ne peut pas dépasser 1000 caractères', 'error'); return; }
+
+  // Vérifier la limite quotidienne
+  const { count, remaining, today } = await getSupportSendCount();
+  if (remaining <= 0) {
+    toast(`Limite quotidienne atteinte (${SUPPORT_DAILY_LIMIT}/jour)`, 'error');
+    return;
+  }
+
+  const btn = document.getElementById('support-send-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi…'; }
+
+  const { db, doc, updateDoc, collection, addDoc, serverTimestamp } = window._fb;
+
+  try {
+    // 1. Enregistrer dans Firestore (trace + couvert par les règles support_messages)
+    await addDoc(collection(db, 'support_messages'), {
+      uid: State.user.uid,
+      email: State.profile.email || State.user.email || '',
+      displayName: State.profile.displayName || 'Utilisateur',
+      subject, message,
+      createdAt: serverTimestamp()
+    });
+
+    // 2. Incrémenter le compteur quotidien
+    await updateDoc(doc(db, 'users', State.user.uid), {
+      supportEmailsSent: { date: today, count: count + 1 }
+    });
+
+    // 3. Envoyer l'email via EmailJS (best-effort)
+    if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'VOTRE_PUBLIC_KEY' &&
+        EMAILJS_TPL_SUPPORT !== 'VOTRE_TEMPLATE_SUPPORT') {
+      await _sendNotifEmail(EMAILJS_TPL_SUPPORT, {
+        from_name: State.profile.displayName || 'Utilisateur',
+        from_email: State.profile.email || State.user.email || '',
+        subject,
+        message,
+        to_email: 'louiscollin15@gmail.com', // adresse de réception du support
+      });
+    }
+
+    toast('✓ Message envoyé, merci !', 'success');
+    closeSupportModal();
+  } catch(e) {
+    console.error('sendSupportMessage:', e);
+    toast('Erreur lors de l\'envoi. Réessayez plus tard.', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Envoyer'; }
+  }
+}
+
+/* ════════════════════════════════════════════════
    PIN MESSAGE
 ════════════════════════════════════════════════ */
 async function pinMessage(msgId, text, displayName) {
@@ -6110,9 +6323,9 @@ async function sendChatMsg() {
     if (_typingTimer) { clearTimeout(_typingTimer); _typingTimer = null; }
     // Notifs email — best-effort, non-bloquant
     const g = State.currentGroup;
-    notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_MESSAGE, {
+    notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_ACTIVITY, {
       from_name: State.profile.displayName || 'Quelqu\'un',
-      message_preview: text.length > 80 ? text.slice(0, 80) + '\u2026' : text,
+      activity_text: text.length > 80 ? text.slice(0, 80) + '\u2026' : text,
     }).catch(() => {});
   } catch(e) {
     inp.value = text;
@@ -6517,9 +6730,9 @@ const App = {
         const senderName = State.profile.displayName || 'Quelqu\'un';
         const statusText = tags.join(' · ') + (message ? ` — "${message}"` : '');
         State.groups.forEach(g => {
-          notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_STATUS, {
+          notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_ACTIVITY, {
             from_name: senderName,
-            status_text: statusText,
+            activity_text: `a partagé son état : ${statusText}`,
           }).catch(() => {});
         });
       }
@@ -6920,7 +7133,7 @@ async function _getMemberNotifInfo(uid) {
 // Envoie un email via EmailJS — silencieux en cas d'erreur
 async function _sendNotifEmail(templateId, params) {
   if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'VOTRE_PUBLIC_KEY') return;
-  if (!EMAILJS_SERVICE_ID || templateId === 'VOTRE_TEMPLATE_MSG' || templateId === 'VOTRE_TEMPLATE_STATUS') return;
+  if (!EMAILJS_SERVICE_ID) return;
   console.log('[EmailJS] Sending', templateId, 'to', params.to_email, 'params:', params);
   try {
     const result = await emailjs.send(EMAILJS_SERVICE_ID, templateId, params);
