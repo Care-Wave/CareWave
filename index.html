@@ -1199,6 +1199,25 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 .chat-members-count { font-size: .71rem; color: var(--text3); }
 .chat-header-actions { display: flex; gap: 6px; }
 
+/* Bandeau message épinglé */
+.pinned-bar {
+  display: none; align-items: center; gap: 10px;
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  background: rgba(99,102,241,.06); cursor: pointer;
+  max-width: 860px; width: 100%; margin: 0 auto; box-sizing: border-box;
+}
+.pinned-bar.visible { display: flex; }
+.pinned-bar-icon { flex-shrink: 0; color: var(--accent2); display: flex; align-items: center; }
+.pinned-bar-content { flex: 1; min-width: 0; }
+.pinned-bar-label { font-size: .65rem; font-weight: 800; color: var(--accent2); text-transform: uppercase; letter-spacing: .06em; }
+.pinned-bar-text { font-size: .8rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pinned-bar-unpin {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--glass2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text3);
+}
+
 /* ══ CHAT MESSAGES — IMPROVED ══ */
 .chat-messages {
   flex: 1; overflow-y: auto; padding: 14px;
@@ -2514,7 +2533,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
       <div class="danger-zone">
         <div class="danger-title" style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Zone danger</div>
         <p style="font-size:.82rem;color:var(--text2);margin-bottom:11px;line-height:1.5;">Supprimer définitivement votre compte et toutes vos données. Cette action est irréversible.</p>
-        <button class="btn btn-danger btn-sm" onclick="App.deleteAccount()" style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Supprimer mon compte</button>
+        <button class="btn btn-danger btn-sm" id="delete-account-btn" onclick="App.deleteAccount()" style="display:inline-flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Supprimer mon compte</button>
       </div>
     </div>
 
@@ -2579,6 +2598,16 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         <button class="btn btn-sm btn-outline" onclick="openMembersModal()" aria-label="Membres" style="font-size:.75rem;padding:6px 11px;display:inline-flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Membres</button>
         <button class="icon-btn" onclick="closeChat()" aria-label="Fermer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
+    </div>
+    <div class="pinned-bar" id="pinned-bar" onclick="scrollToPinned()">
+      <div class="pinned-bar-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2a1 1 0 0 1 1 1v6.5l3.5 2a1 1 0 0 1 .5.87V14a1 1 0 0 1-1 1h-3v6l-1 1-1-1v-6H8a1 1 0 0 1-1-1v-1.63a1 1 0 0 1 .5-.87L11 9.5V3a1 1 0 0 1 1-1z"/></svg></div>
+      <div class="pinned-bar-content">
+        <div class="pinned-bar-label">Épinglé</div>
+        <div class="pinned-bar-text" id="pinned-bar-text"></div>
+      </div>
+      <button class="pinned-bar-unpin" id="pinned-bar-unpin" onclick="event.stopPropagation(); unpinMessage();" aria-label="Désépingler" style="display:none;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
       <div class="chat-loading"><div class="chat-loading-spinner"></div><span>Chargement…</span></div>
@@ -3088,6 +3117,7 @@ let _unsubs = [];
 
 function resetAppState() {
   _unsubs.forEach(fn => { try { fn(); } catch(e){} }); _unsubs = [];
+  stopAllGroupNotifListeners();
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
   Object.assign(State, {
     user:null, profile:{}, selectedStatus:new Set(),
@@ -3163,6 +3193,17 @@ const UI = {
     }
   }
 };
+
+// Échappe le HTML pour éviter les injections XSS dans innerHTML
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function toast(msg, type='', duration=3500) {
   const c = document.getElementById('toast-container');
@@ -3610,7 +3651,25 @@ async function saveProfile() {
   }
   const btn = document.getElementById('save-profile-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
-  const {db, doc, updateDoc} = window._fb;
+  const {db, doc, updateDoc, collection, query, where, getDocs} = window._fb;
+
+  // Vérifier l'unicité du pseudo si modifié
+  const nameLower = name.toLowerCase();
+  const currentLower = (State.profile.displayNameLower || State.profile.displayName || '').toLowerCase();
+  if (nameLower !== currentLower) {
+    try {
+      const pseudoSnap = await getDocs(query(collection(db, 'users'), where('displayNameLower', '==', nameLower)));
+      const takenByOther = pseudoSnap.docs.some(d => d.id !== State.user.uid);
+      if (takenByOther) {
+        toast('Ce pseudo est déjà utilisé', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Sauvegarder'; }
+        return;
+      }
+    } catch(e) {
+      console.warn('Pseudo uniqueness check failed, continuing:', e.message);
+    }
+  }
+
   try {
     const newAvatar = State.profile.avatar || '';
     const themeIdx = _pendingThemeIdx !== null ? _pendingThemeIdx : (State.themeColorIdx ?? 0);
@@ -3622,6 +3681,7 @@ async function saveProfile() {
       themeColorIdx: themeIdx
     });
     State.profile.displayName = name;
+    State.profile.displayNameLower = nameLower;
     State.profile.bio = bio;
     State.profile.themeColorIdx = themeIdx;
     if (State.groups.length > 0) {
@@ -3688,9 +3748,30 @@ async function loadLastReadFromFirestore() {
   } catch(e) { /* silencieux, fallback localStorage */ }
 }
 
+const _groupNotifUnsubs = {}; // groupId -> unsub function
+
+function stopGroupNotifListener(groupId) {
+  if (_groupNotifUnsubs[groupId]) {
+    try { _groupNotifUnsubs[groupId](); } catch(e) {}
+    delete _groupNotifUnsubs[groupId];
+  }
+  State._listeningGroups?.delete(groupId);
+}
+
+function stopAllGroupNotifListeners() {
+  Object.keys(_groupNotifUnsubs).forEach(stopGroupNotifListener);
+}
+
 function listenGroupNotifications(groups) {
   if (!window._fb || !groups?.length) return;
   const {db, collection, query, orderBy, limit, onSnapshot} = window._fb;
+
+  // Nettoyer les listeners pour les groupes qu'on a quittés/supprimés
+  const currentIds = new Set(groups.map(g => g.id));
+  Object.keys(_groupNotifUnsubs).forEach(gid => {
+    if (!currentIds.has(gid)) stopGroupNotifListener(gid);
+  });
+
   groups.forEach(group => {
     if (State._listeningGroups && State._listeningGroups.has(group.id)) return;
     if (!State._listeningGroups) State._listeningGroups = new Set();
@@ -3759,7 +3840,7 @@ function listenGroupNotifications(groups) {
       }
 
     }, err => console.warn('Group notif:', err.message));
-    _unsubs.push(unsub);
+    _groupNotifUnsubs[group.id] = unsub;
   });
 }
 
@@ -4033,26 +4114,27 @@ function msFillCurrentMembers() {
     const isMe = uid === State.user?.uid;
     const isCreator = uid === State.currentGroup.createdBy;
     const isAdmin = admins.includes(uid);
+    const safeName = escapeHtml(n);
 
     let roleEl = '';
     if (isCreator) roleEl = '<span class="ms-member-role creator">Créateur</span>';
     else if (isAdmin) roleEl = '<span class="ms-member-role admin">Admin</span>';
     else if (isMe) roleEl = '<span class="ms-member-role me">Vous</span>';
 
-    const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${n}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Voir</button>` : '';
+    const viewBtn = !isMe ? `<button class="ms-view-btn" data-uid="${uid}" aria-label="Voir ${safeName}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Voir</button>` : '';
 
     // Bouton admin : seul le créateur peut promouvoir/rétrograder
     const adminBtn = isCurrentUserCreator && !isCreator && !isMe
       ? isAdmin
-        ? `<button class="ms-admin-btn revoke" data-uid="${uid}" data-name="${n}">− Admin</button>`
-        : `<button class="ms-admin-btn" data-uid="${uid}" data-name="${n}">+ Admin</button>`
+        ? `<button class="ms-admin-btn revoke" data-uid="${uid}" data-name="${safeName}">− Admin</button>`
+        : `<button class="ms-admin-btn" data-uid="${uid}" data-name="${safeName}">+ Admin</button>`
       : '';
 
     // Kick : créateur ou admin, mais pas sur le créateur ni sur un autre admin (sauf si créateur)
     const canKick = (isCurrentUserCreator && !isCreator && !isMe) ||
                     (isCurrentUserAdmin && !isCreator && !isAdmin && !isMe);
     const kickBtn = canKick
-      ? `<button class="ms-kick-btn" data-uid="${uid}" data-name="${n}" aria-label="Retirer ${n}">✕ Retirer</button>`
+      ? `<button class="ms-kick-btn" data-uid="${uid}" data-name="${safeName}" aria-label="Retirer ${safeName}">✕ Retirer</button>`
       : '';
 
     const presenceDotId = `pdot-${uid}`;
@@ -4095,6 +4177,7 @@ function msFillCurrentMembers() {
 ════════════════════════════════════════════════ */
 async function toggleAdmin(uid, name, isRevoke) {
   if (!State.currentGroup || !window._fb) return;
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
   if (State.currentGroup.createdBy !== State.user?.uid) {
     toast('Seul le créateur peut gérer les admins.', 'error'); return;
   }
@@ -4122,6 +4205,7 @@ async function toggleAdmin(uid, name, isRevoke) {
 ════════════════════════════════════════════════ */
 async function kickMember(uid, name) {
   if (!State.currentGroup) return;
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
   const isCreator = State.currentGroup.createdBy === State.user?.uid;
   const isAdmin = (State.currentGroup.admins || []).includes(State.user?.uid);
   if (!isCreator && !isAdmin) {
@@ -4568,6 +4652,10 @@ function openChat(group) {
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
   document.getElementById('chat-overlay').classList.add('open');
 
+  // Afficher le message épinglé s'il existe
+  renderPinnedBar();
+  listenGroupDoc(freshGroup.id);
+
   // Marquer les messages comme lus
   markMessagesAsRead(freshGroup.id);
 
@@ -4596,6 +4684,7 @@ function openChat(group) {
 function closeChat() {
   document.getElementById('chat-overlay').classList.remove('open');
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
+  stopGroupDocListener();
   stopTypingListener();
   clearTyping(State.currentGroup?.id);
   if (_typingTimer) { clearTimeout(_typingTimer); _typingTimer = null; }
@@ -4954,7 +5043,14 @@ function renderMessageGroup(group, container) {
     if (m.replyTo?.msgId) {
       const cite = document.createElement('div');
       cite.className = 'bubble-reply';
-      cite.innerHTML = `<div class="bubble-reply-name">${m.replyTo.displayName || ''}</div><div class="bubble-reply-text">${(m.replyTo.text || '').slice(0, 80)}</div>`;
+      const citeName = document.createElement('div');
+      citeName.className = 'bubble-reply-name';
+      citeName.textContent = m.replyTo.displayName || '';
+      const citeText = document.createElement('div');
+      citeText.className = 'bubble-reply-text';
+      citeText.textContent = (m.replyTo.text || '').slice(0, 80);
+      cite.appendChild(citeName);
+      cite.appendChild(citeText);
       cite.addEventListener('click', (e) => { e.stopPropagation(); scrollToMsg(m.replyTo.msgId); });
       bubble.appendChild(cite);
     }
@@ -5565,6 +5661,26 @@ function showBubbleMenu(e, msgId, text, displayName, isMine) {
   });
   menu.appendChild(copyBtn);
 
+  // Épingler/désépingler — créateur ou admin uniquement
+  const canPin = State.currentGroup && (
+    State.currentGroup.createdBy === State.user?.uid ||
+    (State.currentGroup.admins || []).includes(State.user?.uid)
+  );
+  if (canPin) {
+    const isPinned = State.currentGroup.pinnedMessage?.msgId === msgId;
+    const pinBtn = document.createElement('button');
+    pinBtn.className = 'bubble-ctx-item';
+    pinBtn.innerHTML = isPinned
+      ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Désépingler`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg> Épingler`;
+    pinBtn.addEventListener('click', () => {
+      closeBubbleMenu();
+      if (isPinned) unpinMessage();
+      else pinMessage(msgId, text, displayName);
+    });
+    menu.appendChild(pinBtn);
+  }
+
   // Actions sur ses propres messages uniquement
   if (isMine) {
     const sep = document.createElement('div');
@@ -5792,6 +5908,83 @@ function stopTypingListener() {
 }
 
 /* ════════════════════════════════════════════════
+   GROUP DOC LISTENER (sync pinnedMessage, admins en temps réel)
+════════════════════════════════════════════════ */
+let _groupDocUnsub = null;
+
+function listenGroupDoc(groupId) {
+  stopGroupDocListener();
+  if (!window._fb) return;
+  const { db, doc, onSnapshot } = window._fb;
+  _groupDocUnsub = onSnapshot(doc(db, 'groups', groupId), snap => {
+    if (!snap.exists() || !State.currentGroup || State.currentGroup.id !== groupId) return;
+    const data = snap.data();
+    State.currentGroup.pinnedMessage = data.pinnedMessage || null;
+    State.currentGroup.admins = data.admins || [];
+    renderPinnedBar();
+  }, () => {});
+}
+
+function stopGroupDocListener() {
+  if (_groupDocUnsub) { try { _groupDocUnsub(); } catch(e){} _groupDocUnsub = null; }
+}
+
+/* ════════════════════════════════════════════════
+   PIN MESSAGE
+════════════════════════════════════════════════ */
+async function pinMessage(msgId, text, displayName) {
+  if (!State.currentGroup || !window._fb || isOffline()) {
+    if (isOffline()) toast('Hors ligne', 'error');
+    return;
+  }
+  const { db, doc, updateDoc } = window._fb;
+  const pinned = { msgId, text: (text || '').slice(0, 200), displayName: displayName || 'Quelqu\'un' };
+  try {
+    await updateDoc(doc(db, 'groups', State.currentGroup.id), { pinnedMessage: pinned });
+    State.currentGroup.pinnedMessage = pinned;
+    renderPinnedBar();
+    toast('📌 Message épinglé', 'success');
+  } catch(e) { toast('Erreur lors de l\'épinglage', 'error'); }
+}
+
+async function unpinMessage() {
+  if (!State.currentGroup || !window._fb) return;
+  const { db, doc, updateDoc } = window._fb;
+  try {
+    const { deleteField } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    await updateDoc(doc(db, 'groups', State.currentGroup.id), { pinnedMessage: deleteField() });
+    delete State.currentGroup.pinnedMessage;
+    renderPinnedBar();
+    toast('Message désépinglé', 'success');
+  } catch(e) { toast('Erreur', 'error'); }
+}
+
+function renderPinnedBar() {
+  const bar = document.getElementById('pinned-bar');
+  const textEl = document.getElementById('pinned-bar-text');
+  const unpinBtn = document.getElementById('pinned-bar-unpin');
+  if (!bar || !textEl) return;
+
+  const pinned = State.currentGroup?.pinnedMessage;
+  if (!pinned) {
+    bar.classList.remove('visible');
+    return;
+  }
+
+  textEl.textContent = `${pinned.displayName} : ${pinned.text}`;
+  bar.classList.add('visible');
+
+  const canUnpin = State.currentGroup.createdBy === State.user?.uid ||
+                   (State.currentGroup.admins || []).includes(State.user?.uid);
+  if (unpinBtn) unpinBtn.style.display = canUnpin ? '' : 'none';
+}
+
+function scrollToPinned() {
+  const pinned = State.currentGroup?.pinnedMessage;
+  if (pinned?.msgId) scrollToMsg(pinned.msgId);
+}
+
+/* ════════════════════════════════════════════════
    EDIT / DELETE MESSAGE
 ════════════════════════════════════════════════ */
 function startEditMessage(msgId, currentText) {
@@ -5897,6 +6090,7 @@ async function sendChatMsg() {
   const text = inp.value.trim();
   if (!text || !State.currentGroup || !State.user) return;
   if (isOffline()) { toast('Hors ligne — message non envoyé', 'error'); return; }
+  if (!State.user.emailVerified) { toast('Vérifiez votre email pour envoyer des messages 📧', 'error'); return; }
   if (text.length > 500) { toast('Message trop long (500 caractères max)','error'); return; }
   inp.value = '';
   const {db, collection, addDoc, serverTimestamp} = window._fb;
@@ -6282,6 +6476,7 @@ const App = {
   async publishStatus() {
     if (State.selectedStatus.size === 0) { toast('Sélectionne au moins un état 👆','error'); return; }
     if (isOffline()) { toast('Hors ligne — statut non publié', 'error'); return; }
+    if (!State.user.emailVerified) { toast('Vérifiez votre email pour publier un statut 📧', 'error'); return; }
     // Si une heure est programmée → déléguer à scheduleStatus
     if (_pendingScheduleTime) { await scheduleStatus(); return; }
     const tags = [...State.selectedStatus];
@@ -6387,8 +6582,11 @@ const App = {
 
   async deleteAccount() {
     if (!confirm('Supprimer définitivement votre compte et toutes vos données ?\n\nCette action est irréversible.')) return;
+    if (isOffline()) { toast('Hors ligne — impossible de supprimer le compte', 'error'); return; }
     const uid = State.user.uid;
     const displayName = State.profile.displayName || 'Quelqu\'un';
+    const btn = document.getElementById('delete-account-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Suppression…'; }
     try {
       const {auth, db, deleteUser, doc, deleteDoc, collection, query, where, getDocs, updateDoc, addDoc, serverTimestamp} = window._fb;
 
@@ -6433,6 +6631,7 @@ const App = {
       if (e.code === 'auth/requires-recent-login') {
         toast('Reconnectez-vous avant de supprimer votre compte.','error');
       } else { toast('Erreur lors de la suppression.','error'); }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Supprimer mon compte'; }
     }
   }
 };
