@@ -1879,14 +1879,18 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 }
 .theme-color-swatch {
   width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
-  border: 3px solid transparent; transition: all .2s var(--t-spring);
-  position: relative; flex-shrink: 0;
+  border: 3px solid transparent; position: relative; flex-shrink: 0;
+  transition: transform .15s var(--t-spring);
+  -webkit-tap-highlight-color: transparent;
 }
 @media (max-width: 360px) {
   .theme-color-grid { gap: 8px; }
   .theme-color-swatch { width: 30px; height: 30px; }
 }
-.theme-color-swatch:hover { transform: scale(1.15); }
+@media (hover: hover) and (pointer: fine) {
+  .theme-color-swatch:hover { transform: scale(1.15); }
+}
+.theme-color-swatch:active { transform: scale(.92); }
 .theme-color-swatch.active {
   border-color: var(--text);
   box-shadow: 0 0 0 2px var(--c1), 0 0 0 4px currentColor;
@@ -1900,7 +1904,6 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 /* ══ STATUS REACTIONS ══ */
 
 @media (hover: hover) and (pointer: fine) {
-  .theme-color-swatch:hover { transform: scale(1.15); }
   .onboarding-skip:hover { color: var(--text2); background: var(--glass2); }
 }
 .skeleton { background: var(--border); border-radius: 6px; animation: skeleton-pulse 1.6s ease-in-out infinite; }
