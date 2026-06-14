@@ -1875,11 +1875,16 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 /* ══ THEME COLOR PICKER ══ */
 .theme-color-grid {
   display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
+  justify-content: flex-start;
 }
 .theme-color-swatch {
   width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
   border: 3px solid transparent; transition: all .2s var(--t-spring);
   position: relative; flex-shrink: 0;
+}
+@media (max-width: 360px) {
+  .theme-color-grid { gap: 8px; }
+  .theme-color-swatch { width: 30px; height: 30px; }
 }
 .theme-color-swatch:hover { transform: scale(1.15); }
 .theme-color-swatch.active {
@@ -2851,7 +2856,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 <!-- ════ MEMBER PROFILE MODAL ════ -->
 <div class="member-profile-modal" id="member-profile-modal" onclick="closeMemberProfileOutside(event)" role="dialog" aria-modal="true">
   <div class="member-sheet">
-    <div class="mp-cover"><button class="mp-close" onclick="closeMemberProfile()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mp-cover"><button class="mp-close" onclick="closeMemberProfile()" aria-label="Fermer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="mp-body">
       <div class="mp-avatar-row"><div class="mp-avatar" id="mp-avatar" style="display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
       <div class="mp-name" id="mp-name">Chargement…</div>
@@ -3272,6 +3277,49 @@ const UI = {
   }
 };
 
+/* ════════════════════════════════════════════════
+   FOCUS MANAGEMENT (modales accessibles)
+════════════════════════════════════════════════ */
+let _lastFocusedEl = null;
+
+// À appeler à l'ouverture d'une modale : mémorise le déclencheur et déplace le focus
+function trapFocusOpen(modalEl) {
+  if (!modalEl) return;
+  _lastFocusedEl = document.activeElement;
+  // Focus le premier élément focusable de la modale (input, textarea, bouton)
+  setTimeout(() => {
+    const focusable = modalEl.querySelector(
+      'input:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable) focusable.focus();
+    else modalEl.setAttribute('tabindex', '-1'), modalEl.focus();
+  }, 50);
+}
+
+// À appeler à la fermeture : restaure le focus sur l'élément déclencheur
+function trapFocusClose() {
+  if (_lastFocusedEl && typeof _lastFocusedEl.focus === 'function') {
+    // Vérifier que l'élément est toujours dans le DOM et visible
+    if (document.body.contains(_lastFocusedEl)) {
+      _lastFocusedEl.focus();
+    }
+  }
+  _lastFocusedEl = null;
+}
+
+// Fermeture via Escape — modale ouverte la plus "prioritaire" en premier
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('chat-overlay')?.classList.contains('open')) { closeChat(); return; }
+  if (document.getElementById('support-modal')?.classList.contains('open')) { closeSupportModal(); return; }
+  if (document.getElementById('create-group-modal')?.classList.contains('open')) { closeCreateGroup(); return; }
+  if (document.getElementById('edit-modal')?.classList.contains('open')) { closeEditModal(); return; }
+  if (document.getElementById('members-modal')?.classList.contains('open')) { closeMembersModal(); return; }
+  if (document.getElementById('notif-drawer')?.classList.contains('open')) { closeNotifs(); return; }
+  closeBubbleMenu?.();
+  closeSeenByPanel?.();
+});
+
 // Échappe le HTML pour éviter les injections XSS dans innerHTML
 function escapeHtml(str) {
   if (str == null) return '';
@@ -3683,6 +3731,7 @@ function openEditProfile() {
   renderAvatarPicker();
   renderThemeColorGrid();
   document.getElementById('edit-modal').classList.add('open');
+  trapFocusOpen(document.getElementById('edit-modal'));
 }
 function closeEditModal() {
   // Restaurer le thème si annulation
@@ -3691,6 +3740,7 @@ function closeEditModal() {
   }
   _pendingThemeIdx = null;
   document.getElementById('edit-modal').classList.remove('open');
+  trapFocusClose();
 }
 function closeEditOutside(e) { if (e.target.id === 'edit-modal') closeEditModal(); }
 
@@ -3999,7 +4049,7 @@ function renderGroups() {
     const uc = State.unread[g.id] || 0;
     const unreadBadge = uc > 0 ? `<span class="group-unread-badge" aria-label="${uc} non lu${uc>1?'s':''}">${uc>9?'9+':uc}</span>` : '';
     const deleteBtn = isCreator
-      ? `<button class="group-row-delete" title="Supprimer" onclick="event.stopPropagation();confirmDeleteGroup('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`
+      ? `<button class="group-row-delete" title="Supprimer" aria-label="Supprimer le groupe ${(g.name||'')}" onclick="event.stopPropagation();confirmDeleteGroup('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>`
       : '';
     return `<div class="group-row" onclick='openChat(${JSON.stringify(g).replace(/'/g,"&#39;")})' role="button" tabindex="0" aria-label="Ouvrir ${g.name}">
       <div class="group-row-avatar">${g.emoji||''}</div>
@@ -4029,8 +4079,9 @@ function openCreateGroup() {
   cgRenderPendingMembers();
   document.getElementById('create-group-modal').classList.add('open');
   if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('create-group-modal'));
+  trapFocusOpen(document.getElementById('create-group-modal'));
 }
-function closeCreateGroup() { document.getElementById('create-group-modal').classList.remove('open'); }
+function closeCreateGroup() { document.getElementById('create-group-modal').classList.remove('open'); trapFocusClose(); }
 function closeCreateGroupOutside(e) { if (e.target.id === 'create-group-modal') closeCreateGroup(); }
 
 function renderGroupEmojiPicker() {
@@ -4138,6 +4189,7 @@ function openMembersModal() {
   msFillCurrentMembers();
   document.getElementById('members-modal').classList.add('open');
   if (window._applyHoverListeners) window._applyHoverListeners(document.getElementById('members-modal'));
+  trapFocusOpen(document.getElementById('members-modal'));
 }
 
 async function copyGroupInviteLink() {
@@ -4172,7 +4224,7 @@ async function copyGroupInviteLink() {
     toast('🔗 Lien copié !', 'success', 4000);
   }
 }
-function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); }
+function closeMembersModal() { document.getElementById('members-modal').classList.remove('open'); hideMemberProfile(); trapFocusClose(); }
 function closeMembersOutside(e) { if (e.target.id === 'members-modal') closeMembersModal(); }
 
 function msFillCurrentMembers() {
@@ -4729,6 +4781,7 @@ function openChat(group) {
   document.getElementById('chat-group-name-label').textContent = freshGroup.name;
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
   document.getElementById('chat-overlay').classList.add('open');
+  trapFocusOpen(document.getElementById('chat-overlay'));
 
   // Afficher le message épinglé s'il existe
   renderPinnedBar();
@@ -4767,6 +4820,7 @@ function closeChat() {
   clearTyping(State.currentGroup?.id);
   if (_typingTimer) { clearTimeout(_typingTimer); _typingTimer = null; }
   cancelReply();
+  trapFocusClose();
 }
 function closeChatOutside(e) { /* plein écran — pas de fermeture par clic extérieur */ }
 
@@ -6038,10 +6092,12 @@ function openSupportModal() {
   });
   modal.classList.add('open');
   updateSupportLimitNote();
+  trapFocusOpen(modal);
 }
 
 function closeSupportModal() {
   document.getElementById('support-modal')?.classList.remove('open');
+  trapFocusClose();
 }
 
 function closeSupportOutside(e) {
