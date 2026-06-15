@@ -2078,6 +2078,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   <div class="loader-progress">
     <div class="loader-bar-track"><div class="loader-bar" id="loader-bar"></div></div>
     <div class="loader-hint" id="loader-hint">Connexion…</div>
+    <button class="btn btn-ghost btn-sm" id="loader-retry-btn" onclick="location.reload()" style="display:none;margin-top:6px;">Réessayer</button>
   </div>
 </div>
 
@@ -3057,6 +3058,7 @@ function showLoader(v = true) {
   } else {
     if ($loaderBar) $loaderBar.style.width = '100%';
     clearInterval(_loaderInt);
+    clearTimeout(_loaderTimeout);
     setTimeout(() => {
       el.style.transition = 'opacity .4s';
       el.style.opacity = '0';
@@ -3064,6 +3066,22 @@ function showLoader(v = true) {
     }, 300);
   }
 }
+
+// Timeout : si fb-ready ne se déclenche pas après 10s (Firebase down / réseau),
+// afficher un message d'erreur clair avec bouton de réessai au lieu de rester bloqué
+const _loaderTimeout = setTimeout(() => {
+  clearInterval(_loaderInt);
+  if ($loaderBar) $loaderBar.style.width = '100%';
+  if ($loaderHint) {
+    $loaderHint.textContent = 'La connexion prend plus de temps que prévu. Vérifiez votre connexion internet.';
+    $loaderHint.style.color = 'var(--rose)';
+    $loaderHint.style.maxWidth = '240px';
+    $loaderHint.style.textAlign = 'center';
+    $loaderHint.style.lineHeight = '1.5';
+  }
+  const retryBtn = document.getElementById('loader-retry-btn');
+  if (retryBtn) retryBtn.style.display = 'inline-flex';
+}, 10000);
 
 /* ════════════════════════════════════════════════
    DATA CONSTANTS
@@ -7228,7 +7246,18 @@ function clearPresenceWatchers() {
 ════════════════════════════════════════════════ */
 
 // Cache email+notifEmail par UID pour éviter les re-fetch Firestore
+// Limité en taille pour éviter une croissance illimitée sur une session très longue
 const _emailCache = {};
+const _EMAIL_CACHE_MAX = 200;
+
+function _cacheNotifInfo(uid, info) {
+  const keys = Object.keys(_emailCache);
+  if (keys.length >= _EMAIL_CACHE_MAX) {
+    // Supprime les plus anciennes entrées (FIFO simple)
+    keys.slice(0, keys.length - _EMAIL_CACHE_MAX + 1).forEach(k => delete _emailCache[k]);
+  }
+  _emailCache[uid] = info;
+}
 
 async function _getMemberNotifInfo(uid) {
   if (_emailCache[uid]) return _emailCache[uid];
@@ -7238,7 +7267,7 @@ async function _getMemberNotifInfo(uid) {
     if (!snap.exists()) return null;
     const d = snap.data();
     const info = { email: d.email || null, notifEmail: !!d.notifEmail, name: d.displayName || 'Quelqu\'un', lastSeen: d.lastSeen || null };
-    _emailCache[uid] = info;
+    _cacheNotifInfo(uid, info);
     return info;
   } catch(e) { return null; }
 }
@@ -7274,12 +7303,12 @@ async function notifyGroupMembers(groupId, groupName, memberUids, templateId, te
       if (!snap.exists()) return;
       freshData = snap.data();
       // Mettre à jour le cache
-      _emailCache[uid] = {
+      _cacheNotifInfo(uid, {
         email: freshData.email || null,
         notifEmail: !!freshData.notifEmail,
         name: freshData.displayName || 'Quelqu\'un',
         lastSeen: freshData.lastSeen || null,
-      };
+      });
     } catch(e) { return; }
 
     const info = _emailCache[uid];
