@@ -462,6 +462,152 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 .feat-title { font-weight: 800; font-size: 1rem; margin-bottom: 7px; }
 .feat-desc { font-size: .85rem; color: var(--text2); line-height: 1.6; }
 
+/* ══ INTERACTIVE DEMO (phone frame) ══ */
+.idemo-section { padding: 70px 32px; max-width: 1100px; margin: 0 auto; }
+.idemo-layout { display: grid; grid-template-columns: auto 1fr; gap: 56px; align-items: center; justify-content: center; }
+@media (max-width: 760px) { .idemo-layout { grid-template-columns: 1fr; gap: 28px; justify-items: center; } }
+
+.idemo-phone {
+  width: 300px; height: 600px; flex-shrink: 0;
+  border-radius: 34px; padding: 10px;
+  background: linear-gradient(160deg, #1a1a2e, #0a0a14);
+  border: 1px solid var(--border2);
+  box-shadow: 0 30px 70px rgba(0,0,0,.4);
+  position: relative;
+}
+.idemo-screen {
+  width: 100%; height: 100%; border-radius: 26px; overflow: hidden;
+  background: var(--c0); position: relative;
+  display: flex; flex-direction: column;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.idemo-notch {
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 18px; border-radius: 100px; background: #0a0a14; z-index: 50;
+}
+
+/* Header mini */
+.idemo-header {
+  display: flex; align-items: center; padding: 28px 16px 10px;
+  font-family: 'Clash Display', sans-serif; font-weight: 700; font-size: .92rem;
+  color: var(--accent2); gap: 7px; flex-shrink: 0;
+}
+
+/* Pages */
+.idemo-page {
+  position: absolute; inset: 0; top: 0;
+  padding-top: 56px; padding-bottom: 64px;
+  overflow-y: auto; opacity: 0; transform: translateX(16px);
+  transition: opacity .3s ease, transform .3s cubic-bezier(.16,1,.3,1);
+  pointer-events: none;
+}
+.idemo-page.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.idemo-page-inner { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Bottom nav mini (reproduit .app-nav / .nav-item) */
+.idemo-nav {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 58px;
+  background: rgba(6,6,16,.96); border-top: 1px solid var(--border);
+  display: flex; z-index: 60;
+}
+[data-theme="light"] .idemo-nav { background: rgba(245,247,255,.96); }
+.idemo-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; font-size: .55rem; font-weight: 700; color: var(--text3);
+  letter-spacing: .03em; text-transform: uppercase;
+  cursor: pointer; border: none; background: none; font-family: 'Cabinet Grotesk', sans-serif;
+  position: relative; transition: color var(--t);
+}
+.idemo-nav-item.active { color: var(--accent2); }
+.idemo-nav-item.active svg { transform: scale(1.15) translateY(-1px); }
+.idemo-nav-item svg { transition: transform var(--t-spring); }
+.idemo-nav-item::after {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--accent2);
+  transition: width var(--t-spring);
+}
+.idemo-nav-item.active::after { width: 20px; }
+
+/* Statut card */
+.idemo-current-card {
+  background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(45,212,191,.08));
+  border: 1px solid var(--border2); border-radius: var(--r2); padding: 14px;
+}
+.idemo-current-label { font-size: .6rem; font-weight: 800; color: var(--accent2); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+
+/* Mini groups */
+.idemo-group-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .12s; border-radius: 8px;
+}
+.idemo-group-row:active { background: var(--glass); }
+.idemo-group-avatar {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(45,212,191,.08));
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+}
+.idemo-group-body { flex: 1; min-width: 0; }
+.idemo-group-name { font-size: .85rem; font-weight: 800; color: var(--text); }
+.idemo-group-sub { font-size: .68rem; color: var(--text3); }
+
+/* Chat */
+.idemo-chat-header {
+  display: flex; align-items: center; gap: 10px; padding: 0 14px 10px;
+  border-bottom: 1px solid var(--border); margin-bottom: 8px;
+}
+.idemo-chat-back {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: var(--glass); border: 1px solid var(--border2); cursor: pointer; color: var(--text2); flex-shrink: 0;
+}
+.idemo-chat-title { font-size: .85rem; font-weight: 800; }
+.idemo-chat-messages { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.idemo-bubble-row { display: flex; flex-direction: column; }
+.idemo-bubble-row.mine { align-items: flex-end; }
+.idemo-bubble-row.theirs { align-items: flex-start; }
+.idemo-bubble {
+  padding: 8px 12px; border-radius: 16px; font-size: .76rem; line-height: 1.4;
+  max-width: 78%; width: fit-content; animation: idemo-pop .25s cubic-bezier(.16,1,.3,1);
+}
+@keyframes idemo-pop { from { opacity: 0; transform: scale(.9) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.idemo-bubble.mine { background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff; border-bottom-right-radius: 5px; }
+.idemo-bubble.theirs { background: var(--glass2); border: 1px solid var(--border2); color: var(--text); border-bottom-left-radius: 5px; }
+.idemo-bubble.status { background: rgba(129,140,248,.1); color: var(--accent2); border: 1px solid rgba(129,140,248,.2); font-size: .68rem; font-weight: 700; text-align: center; align-self: center; border-radius: 100px; max-width: 90%; }
+.idemo-chat-input-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  padding: 8px 12px; border-radius: 100px; background: var(--glass); border: 1px solid var(--border2);
+}
+.idemo-chat-input-row input {
+  flex: 1; border: none; background: none; outline: none; color: var(--text);
+  font-size: .76rem; font-family: 'Cabinet Grotesk', sans-serif;
+}
+.idemo-chat-send {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent), #7c3aed); color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; border: none;
+}
+.idemo-chat-send:active { transform: scale(.9); }
+
+/* Publish button mini */
+.idemo-publish-btn {
+  margin-top: 4px; padding: 12px; text-align: center; border-radius: 100px;
+  font-size: .8rem; font-weight: 800; color: #fff; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  box-shadow: 0 8px 24px rgba(99,102,241,.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.idemo-publish-btn:active { transform: scale(.97); }
+.idemo-publish-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 8px 24px rgba(34,197,94,.35); }
+
+/* Sidebar légende */
+.idemo-info { display: flex; flex-direction: column; gap: 16px; max-width: 380px; }
+.idemo-info-title { font-family: 'Clash Display', sans-serif; font-size: clamp(1.4rem,3vw,1.9rem); font-weight: 700; letter-spacing: -.03em; line-height: 1.2; }
+.idemo-info-desc { font-size: .92rem; color: var(--text2); line-height: 1.65; }
+.idemo-hints { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.idemo-hint { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--text2); }
+.idemo-hint-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+
 /* ══ TRUST SECTION ══ */
 .trust-section {
   padding: 80px 40px; max-width: 1100px; margin: 0 auto;
@@ -928,6 +1074,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 .msg-counter.warn { color: var(--rose); font-weight: 700; }
 
 .quick-msgs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+@media (max-width: 640px) { .quick-msgs { display: none; } }
 .quick-msg {
   padding: 5px 11px; border-radius: 100px;
   background: var(--glass); border: 1px solid var(--border);
@@ -2237,6 +2384,150 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
     </div>
   </section>
 
+  <section class="idemo-section">
+    <div class="idemo-layout">
+
+      <div class="idemo-phone">
+        <div class="idemo-screen">
+          <div class="idemo-notch"></div>
+          <div class="idemo-header" id="idemo-header">CareWave</div>
+
+          <!-- Page Statut -->
+          <div class="idemo-page active" data-page="status">
+            <div class="idemo-page-inner">
+              <div class="idemo-current-card">
+                <div class="idemo-current-label">Mon état actuel</div>
+                <div id="idemo-current-pill"></div>
+              </div>
+              <div class="idemo-current-label" style="margin-top:6px;">Choisir mon état</div>
+              <div class="status-options" id="idemo-status-opts"></div>
+              <div class="idemo-current-label" style="margin-top:6px;">Disponibilité</div>
+              <div class="status-options" id="idemo-avail-opts"></div>
+              <button class="idemo-publish-btn" id="idemo-publish-btn">Partager mon état</button>
+            </div>
+          </div>
+
+          <!-- Page Groupes -->
+          <div class="idemo-page" data-page="groups">
+            <div class="idemo-page-inner">
+              <div class="idemo-current-label" style="font-size:.7rem;">Mes groupes</div>
+              <div class="idemo-group-row" data-group="famille">
+                <div class="idemo-group-avatar">👨‍👩‍👧‍👦</div>
+                <div class="idemo-group-body">
+                  <div class="idemo-group-name">Famille</div>
+                  <div class="idemo-group-sub">5 membres</div>
+                </div>
+                <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;"></span>
+              </div>
+              <div class="idemo-group-row" data-group="amis">
+                <div class="idemo-group-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">🎓</div>
+                <div class="idemo-group-body">
+                  <div class="idemo-group-name">Amis proches</div>
+                  <div class="idemo-group-sub">8 membres</div>
+                </div>
+              </div>
+              <div class="idemo-group-row" data-group="collegues">
+                <div class="idemo-group-avatar" style="background:linear-gradient(135deg,#6366f1,#0d9488);">💼</div>
+                <div class="idemo-group-body">
+                  <div class="idemo-group-name">Collègues</div>
+                  <div class="idemo-group-sub">3 membres</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page Chat -->
+          <div class="idemo-page" data-page="chat">
+            <div class="idemo-page-inner" style="height:100%;">
+              <div class="idemo-chat-header">
+                <div class="idemo-chat-back" id="idemo-chat-back">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </div>
+                <div class="idemo-chat-title" id="idemo-chat-title">Famille</div>
+              </div>
+              <div class="idemo-chat-messages" id="idemo-chat-messages"></div>
+              <div class="idemo-chat-input-row">
+                <input type="text" id="idemo-chat-input" placeholder="Votre message…" maxlength="40" />
+                <button class="idemo-chat-send" id="idemo-chat-send" aria-label="Envoyer">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page Profil (réutilise les vraies classes profile-card / settings-row) -->
+          <div class="idemo-page" data-page="profile">
+            <div class="idemo-page-inner">
+              <div class="profile-card" style="margin-bottom:0;">
+                <div class="profile-cover" aria-hidden="true" style="height:64px;">
+                  <div class="profile-cover-dots"></div>
+                  <div class="profile-cover-line"></div>
+                </div>
+                <div class="profile-avatar-row" style="padding:0 12px;margin-top:-26px;">
+                  <div class="profile-avatar" style="width:52px;height:52px;font-size:1.5rem;">👩</div>
+                  <button class="profile-edit-btn" style="font-size:.68rem;padding:5px 10px;" tabindex="-1">Modifier</button>
+                </div>
+                <div class="profile-info" style="padding:0 12px 12px;">
+                  <div class="profile-name" style="font-size:1rem;">Léa Martin</div>
+                  <div class="profile-bio" style="font-size:.74rem;">Maman de deux enfants 🌿</div>
+                  <div class="profile-stats" style="margin-top:8px;">
+                    <div class="profile-stat"><div class="profile-stat-num" style="font-size:.95rem;">24</div><div class="profile-stat-lbl" style="font-size:.58rem;">Statuts</div></div>
+                    <div class="profile-stat"><div class="profile-stat-num" style="font-size:.95rem;">🔥 12</div><div class="profile-stat-lbl" style="font-size:.58rem;">Série</div></div>
+                    <div class="profile-stat"><div class="profile-stat-num" style="font-size:.95rem;">3</div><div class="profile-stat-lbl" style="font-size:.58rem;">Groupes</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="settings-block" style="margin-top:10px;">
+                <div class="settings-block-title" style="font-size:.6rem;">Préférences</div>
+                <div class="settings-row" style="padding:9px 12px;">
+                  <div><div class="settings-label" style="font-size:.78rem;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> Mode sombre</div></div>
+                  <div class="toggle on" id="idemo-dark-toggle" style="transform:scale(.8);"></div>
+                </div>
+                <div class="settings-row" style="padding:9px 12px;">
+                  <div><div class="settings-label" style="font-size:.78rem;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Notifications</div></div>
+                  <div class="toggle on" style="transform:scale(.8);"></div>
+                </div>
+                <div class="settings-row clickable" style="padding:9px 12px;">
+                  <div><div class="settings-label" style="font-size:.78rem;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Aide &amp; Contact</div></div>
+                  <div class="settings-right"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="idemo-nav">
+            <button class="idemo-nav-item active" data-page="status">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              Statut
+            </button>
+            <button class="idemo-nav-item" data-page="groups">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Groupes
+            </button>
+            <button class="idemo-nav-item" data-page="profile">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Profil
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="idemo-info">
+        <div class="section-eyebrow">Découvrir</div>
+        <div class="idemo-info-title">Essayez CareWave, sans créer de compte.</div>
+        <div class="idemo-info-desc">Ceci est une vraie mini-version de l'app. Sélectionnez votre état, ouvrez un groupe et envoyez un message — exactement comme dans CareWave.</div>
+        <div class="idemo-hints">
+          <div class="idemo-hint"><span class="idemo-hint-dot"></span> Cliquez sur un état pour le sélectionner</div>
+          <div class="idemo-hint"><span class="idemo-hint-dot"></span> Ouvrez un groupe pour voir le chat</div>
+          <div class="idemo-hint"><span class="idemo-hint-dot"></span> Envoyez un message factice</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <section class="how-section">
     <div class="section-eyebrow">Comment ça marche</div>
     <h2 class="section-title">En trois étapes simples.</h2>
@@ -2558,11 +2849,6 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
       <div class="recipient-chips" id="recipient-chips"></div>
       <div class="recipient-hint" id="recipient-hint"></div>
 
-      <button class="publish-btn" id="publish-btn" onclick="App.publishStatus()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Partager mon état
-      </button>
-
       <!-- Programmer un statut -->
       <div style="margin-top:14px;">
         <div class="section-header" style="margin-bottom:8px;">
@@ -2583,6 +2869,11 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         </div>
         <div class="scheduled-list" id="scheduled-list"></div>
       </div>
+
+      <button class="publish-btn" id="publish-btn" onclick="App.publishStatus()" style="margin-top:16px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:6px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Partager mon état
+      </button>
 
       <div class="section-header" style="margin-top:28px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Historique récent</div>
       <div id="status-history-list">
@@ -7956,6 +8247,191 @@ async function toggleStatusReaction(msgId, emoji, currentlyReacted, btnEl) {
     setup();
   }
 })();
+
+/* ════════════════════════════════════════════════
+   INTERACTIVE DEMO (phone frame, landing)
+════════════════════════════════════════════════ */
+(function initInteractiveDemo() {
+  const STATE = {
+    selectedWellness: 'Super forme',
+    selectedAvail: 'Dispo pour écrire',
+    currentGroup: null,
+  };
+
+  const IS_MOBILE_DEMO = window.matchMedia('(max-width: 640px)').matches;
+
+  const GROUPS = {
+    famille: { name: 'Famille', avatar: '👨‍👩‍👧‍👦', messages: IS_MOBILE_DEMO ? [] : [
+      { type: 'status', text: '🙂 Maman a mis à jour son état : ✨ Super forme' },
+      { type: 'theirs', text: 'Contente de voir ça ! Bisous à tous 💙' },
+      { type: 'mine', text: 'On pense à toi, prends soin de toi !' },
+    ]},
+    amis: { name: 'Amis proches', avatar: '🎓', messages: IS_MOBILE_DEMO ? [] : [
+      { type: 'theirs', text: 'On se voit ce week-end ?' },
+      { type: 'mine', text: 'Avec plaisir, je vous tiens au courant 😊' },
+    ]},
+    collegues: { name: 'Collègues', avatar: '💼', messages: IS_MOBILE_DEMO ? [] : [
+      { type: 'theirs', text: 'Bon courage pour cette semaine !' },
+    ]},
+  };
+
+  function renderPills(containerId, category, selectedLabel, onSelect) {
+    const el = document.getElementById(containerId);
+    if (!el || typeof STATUS_OPTS === 'undefined' || typeof icon !== 'function') return;
+    const opts = STATUS_OPTS[category] || [];
+    el.innerHTML = opts.map(o => {
+      const isSel = o.label === selectedLabel;
+      return `<span class="status-opt ${o.color} ${isSel ? 'selected' : ''}" data-label="${o.label}" role="button" tabindex="0">${icon(o.icon, 14)}<span>${o.label}</span></span>`;
+    }).join('');
+    el.querySelectorAll('.status-opt').forEach(pill => {
+      pill.addEventListener('click', () => onSelect(pill.dataset.label));
+      pill.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(pill.dataset.label); }
+      });
+    });
+  }
+
+  function renderCurrentPill() {
+    const el = document.getElementById('idemo-current-pill');
+    if (!el || typeof STATUS_OPTS === 'undefined' || typeof icon !== 'function') return;
+    const opt = STATUS_OPTS.wellness.find(o => o.label === STATE.selectedWellness);
+    if (!opt) return;
+    el.innerHTML = `<span class="status-opt ${opt.color} selected">${icon(opt.icon, 14)}<span>${opt.label}</span></span>`;
+  }
+
+  function renderStatusPage() {
+    renderCurrentPill();
+    renderPills('idemo-status-opts', 'wellness', STATE.selectedWellness, (label) => {
+      STATE.selectedWellness = label;
+      renderStatusPage();
+    });
+    renderPills('idemo-avail-opts', 'availability', STATE.selectedAvail, (label) => {
+      STATE.selectedAvail = label;
+      renderStatusPage();
+    });
+  }
+
+  function renderChatMessages(groupKey) {
+    const el = document.getElementById('idemo-chat-messages');
+    if (!el) return;
+    const group = GROUPS[groupKey];
+    if (!group.messages.length) {
+      el.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--text3);font-size:.74rem;padding:0 20px;">Envoyez un message pour voir la conversation prendre vie 👇</div>`;
+      return;
+    }
+    el.innerHTML = group.messages.map(m => {
+      if (m.type === 'status') {
+        return `<div class="idemo-bubble status">${escapeHtmlSafe(m.text)}</div>`;
+      }
+      return `<div class="idemo-bubble-row ${m.type}"><div class="idemo-bubble ${m.type}">${escapeHtmlSafe(m.text)}</div></div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function escapeHtmlSafe(str) {
+    if (typeof escapeHtml === 'function') return escapeHtml(str);
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function switchPage(pageName) {
+    document.querySelectorAll('.idemo-page').forEach(p => p.classList.toggle('active', p.dataset.page === pageName));
+    document.querySelectorAll('.idemo-nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === pageName));
+
+    const header = document.getElementById('idemo-header');
+    if (header) {
+      if (pageName === 'chat' && STATE.currentGroup) header.textContent = GROUPS[STATE.currentGroup].name;
+      else if (pageName === 'groups') header.textContent = 'Groupes';
+      else if (pageName === 'profile') header.textContent = 'Profil';
+      else header.textContent = 'CareWave';
+    }
+  }
+
+  function openGroup(groupKey) {
+    STATE.currentGroup = groupKey;
+    const titleEl = document.getElementById('idemo-chat-title');
+    if (titleEl) titleEl.textContent = GROUPS[groupKey].name;
+    renderChatMessages(groupKey);
+    switchPage('chat');
+    // Synchroniser l'état "actif" du nav (chat n'a pas son propre item, on garde "groupes" visuellement neutre)
+    document.querySelectorAll('.idemo-nav-item').forEach(n => n.classList.remove('active'));
+  }
+
+  function sendDemoMessage() {
+    const input = document.getElementById('idemo-chat-input');
+    if (!input || !STATE.currentGroup) return;
+    const text = input.value.trim();
+    if (!text) return;
+    GROUPS[STATE.currentGroup].messages.push({ type: 'mine', text });
+    renderChatMessages(STATE.currentGroup);
+    input.value = '';
+
+    // Petite réponse automatique pour montrer l'aspect "vivant"
+    setTimeout(() => {
+      if (!STATE.currentGroup) return;
+      GROUPS[STATE.currentGroup].messages.push({ type: 'theirs', text: '👍' });
+      renderChatMessages(STATE.currentGroup);
+    }, 900);
+  }
+
+  function publishDemo() {
+    const btn = document.getElementById('idemo-publish-btn');
+    if (!btn) return;
+    const original = btn.textContent;
+    btn.textContent = '✓ Statut partagé !';
+    btn.classList.add('success');
+    setTimeout(() => {
+      btn.textContent = original;
+      btn.classList.remove('success');
+    }, 1800);
+  }
+
+  function setup() {
+    if (!document.querySelector('.idemo-section')) return;
+
+    renderStatusPage();
+
+    document.querySelectorAll('.idemo-nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = btn.dataset.page;
+        if (page === 'groups' || page === 'status' || page === 'profile') {
+          STATE.currentGroup = null;
+          switchPage(page);
+        }
+      });
+    });
+
+    document.querySelectorAll('.idemo-group-row').forEach(row => {
+      row.addEventListener('click', () => openGroup(row.dataset.group));
+    });
+
+    document.getElementById('idemo-chat-back')?.addEventListener('click', () => {
+      STATE.currentGroup = null;
+      switchPage('groups');
+      document.querySelector('.idemo-nav-item[data-page="groups"]')?.classList.add('active');
+    });
+
+    document.getElementById('idemo-chat-send')?.addEventListener('click', sendDemoMessage);
+    document.getElementById('idemo-chat-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendDemoMessage();
+    });
+
+    document.getElementById('idemo-publish-btn')?.addEventListener('click', publishDemo);
+
+    // Toggle factice (visuel uniquement, ne change pas le vrai thème)
+    document.getElementById('idemo-dark-toggle')?.addEventListener('click', function() {
+      this.classList.toggle('on');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
 </script>
 <!-- ════ ONBOARDING ════ -->
 <div class="onboarding-overlay" id="onboarding-overlay" role="dialog" aria-modal="true">
