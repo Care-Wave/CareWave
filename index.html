@@ -1339,6 +1339,148 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 
 /* Settings blocks */
 .settings-block { background: var(--glass); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; margin-bottom: 12px; }
+
+/* ══ TENANT NOTICE (encart confidentialité institutionnelle) ══ */
+.tenant-notice {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--glass); border: 1px solid var(--border2);
+  border-radius: var(--r2); padding: 13px 14px; margin: 12px 0;
+}
+.tenant-notice-icon { flex-shrink: 0; color: var(--teal); margin-top: 1px; }
+.tenant-notice-text { font-size: .8rem; color: var(--text2); line-height: 1.55; }
+.tenant-notice-text strong { color: var(--text); font-weight: 800; }
+
+/* ══ COORDINATOR PORTAL ══ */
+.coord-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin-bottom: 24px; }
+.coord-stat-card {
+  background: var(--glass); border: 1px solid var(--border); border-radius: var(--r2);
+  padding: 16px; text-align: center;
+}
+.coord-stat-num { font-family: 'Clash Display', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--accent2); }
+.coord-stat-lbl { font-size: .72rem; color: var(--text3); margin-top: 2px; }
+.coord-stat-card.warn .coord-stat-num { color: var(--rose); }
+
+.coord-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.coord-tab {
+  padding: 8px 16px; border-radius: 100px; font-size: .8rem; font-weight: 700;
+  background: var(--glass); border: 1px solid var(--border2); color: var(--text2);
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+}
+.coord-tab.active { background: rgba(99,102,241,.12); border-color: rgba(129,140,248,.35); color: var(--accent2); }
+
+.coord-panel { display: none; }
+.coord-panel.active { display: block; }
+
+.coord-filter-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.coord-filter-btn {
+  padding: 6px 13px; border-radius: 100px; font-size: .74rem; font-weight: 700;
+  background: var(--glass); border: 1px solid var(--border2); color: var(--text2);
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+}
+.coord-filter-btn.active { background: rgba(244,63,94,.1); border-color: rgba(244,63,94,.3); color: var(--rose); }
+
+.coord-patient-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  background: var(--glass); border: 1px solid var(--border); border-radius: var(--r2);
+  margin-bottom: 8px;
+}
+.coord-patient-avatar {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent2), var(--teal));
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+}
+.coord-patient-body { flex: 1; min-width: 0; }
+.coord-patient-name { font-size: .88rem; font-weight: 800; }
+.coord-patient-sub { font-size: .72rem; color: var(--text3); }
+.coord-patient-status {
+  flex-shrink: 0; font-size: .68rem; font-weight: 700; padding: 4px 10px; border-radius: 100px;
+}
+.coord-patient-status.active { background: rgba(34,197,94,.1); color: #22c55e; }
+.coord-patient-status.pending { background: rgba(234,179,8,.1); color: #facc15; }
+.coord-patient-status.isolated { background: rgba(244,63,94,.1); color: var(--rose); }
+
+.coord-empty { text-align: center; padding: 32px 20px; color: var(--text3); font-size: .85rem; }
+
+.coord-consent-row {
+  display: flex; align-items: flex-start; gap: 9px; padding: 12px;
+  background: var(--glass); border: 1px solid var(--border2); border-radius: var(--r);
+  margin: 14px 0; cursor: pointer;
+}
+.coord-consent-row input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+.coord-consent-text { font-size: .78rem; color: var(--text2); line-height: 1.5; }
+
+/* ── Header du portail : badge tenant + identité visuelle ── */
+.coord-header-card {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(99,102,241,.1), rgba(45,212,191,.06));
+  border: 1px solid var(--border2); border-radius: var(--r2);
+  padding: 18px 20px; margin-bottom: 22px;
+}
+.coord-header-logo {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent2), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.2rem; font-weight: 800;
+}
+.coord-header-body { flex: 1; min-width: 0; }
+.coord-header-eyebrow {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .64rem; font-weight: 800; color: var(--accent2);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px;
+}
+.coord-header-name { font-family: 'Clash Display', sans-serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
+
+/* ── Onglets avec icônes ── */
+.coord-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.coord-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 15px; border-radius: 100px; font-size: .79rem; font-weight: 700;
+  background: var(--glass); border: 1px solid var(--border2); color: var(--text2);
+  cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif; transition: background .15s, border-color .15s, color .15s;
+}
+.coord-tab svg { flex-shrink: 0; opacity: .8; }
+.coord-tab.active { background: rgba(99,102,241,.14); border-color: rgba(129,140,248,.4); color: var(--accent2); }
+.coord-tab.active svg { opacity: 1; }
+
+/* ── Section titles internes au portail ── */
+.coord-section-title {
+  font-family: 'Clash Display', sans-serif; font-size: 1rem; font-weight: 700;
+  letter-spacing: -.01em; margin-bottom: 4px;
+}
+.coord-section-sub { font-size: .8rem; color: var(--text3); margin-bottom: 16px; line-height: 1.5; }
+
+/* ── Color picker pour la personnalisation ── */
+.coord-color-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.coord-color-swatch {
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; position: relative; flex-shrink: 0;
+  transition: transform .15s var(--t-spring);
+}
+.coord-color-swatch.active { border-color: var(--text); }
+.coord-color-swatch.active::after {
+  content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: .8rem; font-weight: 800; text-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.coord-color-swatch:active { transform: scale(.92); }
+
+.coord-preview-card {
+  margin-top: 18px; padding: 16px; border-radius: var(--r2);
+  background: var(--glass); border: 1px solid var(--border); display: flex; align-items: center; gap: 12px;
+}
+.coord-preview-logo {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 1rem;
+}
+.coord-preview-text { font-size: .78rem; color: var(--text2); line-height: 1.5; }
+.coord-preview-text strong { color: var(--text); }
+
+/* ── Badge "Mode entreprise" visible côté patient ── */
+.tenant-mode-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .64rem; font-weight: 800; color: var(--teal);
+  background: rgba(45,212,191,.1); border: 1px solid rgba(45,212,191,.25);
+  padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: .06em;
+}
 .settings-block-title { font-size: .64rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; padding: 13px 16px 9px; border-bottom: 1px solid var(--border); }
 .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid var(--border); transition: background var(--t); }
 .settings-row:last-child { border-bottom: none; }
@@ -1547,6 +1689,14 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   border: 1px solid rgba(129,140,248,.2);
   border-radius: 100px; padding: 6px 14px; max-width: 92%;
 }
+
+/* ══ BANDEROLE INSTITUTIONNELLE ══ */
+.institutional-banner {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: .66rem; font-weight: 600; color: var(--text);
+  opacity: .6; margin-top: 4px; text-align: center;
+}
+.institutional-banner svg { flex-shrink: 0; opacity: .85; }
 
 /* ══ ONLINE PRESENCE ══ */
 .member-presence {
@@ -1912,6 +2062,40 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   font-size: .72rem; color: var(--text3); margin-top: 8px; text-align: center;
 }
 .support-limit-note.warn { color: var(--rose); font-weight: 700; }
+
+/* ══ CAREGIVERS ══ */
+.cgv-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border);
+}
+.cgv-row-avatar { font-size: 1.3rem; flex-shrink: 0; }
+.cgv-row-body { flex: 1; min-width: 0; }
+.cgv-row-name { font-size: .85rem; font-weight: 800; color: var(--text); }
+.cgv-row-sub { font-size: .68rem; color: var(--text3); }
+.cgv-row-remove {
+  flex-shrink: 0; padding: 5px 11px; border-radius: 100px;
+  background: rgba(244,63,94,.06); border: 1px solid rgba(244,63,94,.18);
+  color: var(--rose); font-size: .7rem; font-weight: 700; cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.cgv-row-remove:active { transform: scale(.95); }
+.cgv-empty { font-size: .78rem; color: var(--text3); padding: 8px 2px; }
+
+/* Sélecteur "publier pour" sur l'écran statut */
+.publish-as-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.publish-as-select {
+  flex: 1; padding: 9px 12px; border-radius: var(--r);
+  background: var(--glass); border: 1px solid var(--border2);
+  color: var(--text); font-size: .82rem; font-weight: 700;
+  font-family: 'Cabinet Grotesk', sans-serif; cursor: pointer; outline: none;
+}
+.publish-as-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .68rem; font-weight: 700; color: var(--accent2);
+  background: rgba(99,102,241,.1); border: 1px solid rgba(129,140,248,.25);
+  padding: 3px 9px; border-radius: 100px; margin-top: 4px;
+}
 .ms-member-role.me { background: rgba(45,212,191,.12); color: var(--teal); }
 .ms-view-btn { padding: 5px 11px; border-radius: 100px; background: rgba(129,140,248,.1); color: var(--accent2); font-size: .7rem; font-weight: 800; border: 1px solid rgba(129,140,248,.2); cursor: pointer; transition: all var(--t); font-family: 'Cabinet Grotesk', sans-serif; flex-shrink: 0; }
 
@@ -2629,6 +2813,8 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
     <span>Made By L.C.</span>
     <span>·</span>
     <a onclick="UI.show('privacy')" style="color:var(--text3);cursor:pointer;font-size:.8rem;text-decoration:none;transition:color .15s;" onmouseenter="this.style.color='var(--accent2)'" onmouseleave="this.style.color='var(--text3)'">Politique de confidentialité</a>
+    <span>·</span>
+    <a onclick="UI.show('institution')" style="color:var(--text3);cursor:pointer;font-size:.8rem;text-decoration:none;transition:color .15s;" onmouseenter="this.style.color='var(--accent2)'" onmouseleave="this.style.color='var(--text3)'">Vous êtes une institution ?</a>
     <span style="margin-left:auto;font-size:.72rem;">© 2026</span>
   </footer>
 </div>
@@ -2712,6 +2898,205 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   </div>
 </div>
 
+<!-- ════════════════ INSTITUTION REQUEST ════════════════ -->
+<div id="view-institution" class="view">
+  <div style="max-width:560px;margin:0 auto;padding:40px 24px 80px;">
+
+    <button onclick="UI.show('landing')" style="display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;padding:8px 16px;border-radius:100px;background:var(--glass);border:1px solid var(--border2);color:var(--text2);font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Retour
+    </button>
+
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.25);border-radius:100px;padding:5px 14px;font-size:.72rem;font-weight:800;color:var(--teal);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;">
+      Institutions &amp; partenaires
+    </div>
+    <h1 style="font-family:'Clash Display',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;letter-spacing:-.03em;line-height:1.15;margin-bottom:8px;">Vous accompagnez des personnes au quotidien ?</h1>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:36px;">Hôpitaux, ASBL, centres de rééducation — CareWave permet à votre équipe de garder vos patients en lien avec leurs proches, simplement. Demandez une démo gratuite, sans engagement.</p>
+
+    <div id="institution-form-wrap">
+      <div class="form-group">
+        <label class="form-label" for="inst-name">Nom de l'institution</label>
+        <input class="form-input" type="text" id="inst-name" placeholder="Ex : CHU Namur" maxlength="100" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inst-type">Type d'établissement</label>
+        <select class="form-input" id="inst-type" style="cursor:pointer;">
+          <option value="Hôpital">Hôpital</option>
+          <option value="ASBL">ASBL</option>
+          <option value="Centre de rééducation">Centre de rééducation</option>
+          <option value="Mutuelle">Mutuelle</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inst-contact">Nom du contact</label>
+        <input class="form-input" type="text" id="inst-contact" placeholder="Prénom et nom" maxlength="100" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inst-email">Email professionnel</label>
+        <input class="form-input" type="email" id="inst-email" placeholder="contact@institution.be" maxlength="120" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inst-phone">Téléphone</label>
+        <input class="form-input" type="tel" id="inst-phone" placeholder="+32 4xx xx xx xx" maxlength="30" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="inst-message">Message (optionnel)</label>
+        <textarea class="msg-textarea" id="inst-message" maxlength="500" placeholder="Parlez-nous de votre besoin, du nombre de patients concernés…"></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="submitInstitutionRequest()" id="inst-submit-btn" style="margin-top:8px;">Demander une démo gratuite</button>
+    </div>
+
+    <div id="institution-form-success" style="display:none;text-align:center;padding:40px 20px;">
+      <div style="font-size:2.4rem;margin-bottom:14px;">✅</div>
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.15rem;font-weight:700;margin-bottom:8px;">Merci !</div>
+      <div style="color:var(--text2);font-size:.88rem;">Nous vous contactons sous 48h.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════ COORDINATOR PORTAL ════════════════ -->
+<div id="view-coordinator" class="view">
+  <header class="app-header" role="banner">
+    <div class="app-logo"><span style="display:inline-flex;align-items:center;gap:7px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent2);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Espace pro</span></div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="UI.show('dashboard')" title="Retour à l'app" aria-label="Retour à l'app">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div style="max-width:760px;margin:0 auto;padding:20px 20px 60px;">
+
+    <div class="coord-header-card">
+      <div class="coord-header-logo" id="coord-header-logo">🏥</div>
+      <div class="coord-header-body">
+        <div class="coord-header-eyebrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mode entreprise actif</div>
+        <div class="coord-header-name" id="coord-tenant-name">Chargement…</div>
+      </div>
+    </div>
+
+    <div class="coord-tabs">
+      <button class="coord-tab active" data-coord-tab="overview" onclick="switchCoordTab('overview')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Vue d'ensemble
+      </button>
+      <button class="coord-tab" data-coord-tab="patients" onclick="switchCoordTab('patients')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Patients
+      </button>
+      <button class="coord-tab" data-coord-tab="create" onclick="switchCoordTab('create')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Créer un compte
+      </button>
+      <button class="coord-tab" data-coord-tab="broadcast" onclick="switchCoordTab('broadcast')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        Notification groupée
+      </button>
+      <button class="coord-tab" data-coord-tab="settings" onclick="switchCoordTab('settings')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Personnaliser
+      </button>
+    </div>
+
+    <!-- Vue d'ensemble -->
+    <div class="coord-panel active" data-coord-panel="overview">
+      <div class="coord-stats-grid">
+        <div class="coord-stat-card">
+          <div class="coord-stat-num" id="coord-stat-active">—</div>
+          <div class="coord-stat-lbl">Actifs (7 jours)</div>
+        </div>
+        <div class="coord-stat-card">
+          <div class="coord-stat-num" id="coord-stat-total">—</div>
+          <div class="coord-stat-lbl">Patients totaux</div>
+        </div>
+        <div class="coord-stat-card warn">
+          <div class="coord-stat-num" id="coord-stat-isolated">—</div>
+          <div class="coord-stat-lbl">Inactifs +5 jours</div>
+        </div>
+      </div>
+      <div id="coord-overview-list"></div>
+    </div>
+
+    <!-- Liste des patients -->
+    <div class="coord-panel" data-coord-panel="patients">
+      <div class="coord-section-title">Tous les patients</div>
+      <div class="coord-section-sub">Gérez les comptes liés à votre institution et suivez leur activité.</div>
+      <div class="coord-filter-row">
+        <button class="coord-filter-btn active" data-coord-filter="all" onclick="setCoordFilter('all')">Tous</button>
+        <button class="coord-filter-btn" data-coord-filter="isolated" onclick="setCoordFilter('isolated')">Inactifs depuis +5 jours</button>
+      </div>
+      <div id="coord-patients-list"></div>
+    </div>
+
+    <!-- Créer un compte patient -->
+    <div class="coord-panel" data-coord-panel="create">
+      <div class="coord-section-title">Créer un compte patient</div>
+      <div class="coord-section-sub">Le patient recevra un email pour finaliser son inscription et choisir son mot de passe.</div>
+      <div class="form-group">
+        <label class="form-label" for="coord-create-firstname">Prénom</label>
+        <input class="form-input" type="text" id="coord-create-firstname" placeholder="Jean" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="coord-create-lastname">Nom</label>
+        <input class="form-input" type="text" id="coord-create-lastname" placeholder="Dupont" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="coord-create-email">Email du patient</label>
+        <input class="form-input" type="email" id="coord-create-email" placeholder="jean.dupont@email.com" maxlength="120" />
+      </div>
+
+      <div class="coord-consent-row" onclick="document.getElementById('coord-consent-check').click()">
+        <input type="checkbox" id="coord-consent-check" onclick="event.stopPropagation()" />
+        <div class="coord-consent-text">Le patient (ou son représentant légal) a consenti à la création de son compte et à la publication de statuts en son nom.</div>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="coordCreatePatient()" id="coord-create-btn">Créer le compte et envoyer l'invitation</button>
+    </div>
+
+    <!-- Notification groupée -->
+    <div class="coord-panel" data-coord-panel="broadcast">
+      <div class="coord-section-title">Notification groupée</div>
+      <div class="coord-section-sub">Envoyez un message par email à tous les patients de votre institution simultanément.</div>
+      <div class="form-group">
+        <label class="form-label" for="coord-broadcast-text">Message à envoyer à tous les patients</label>
+        <textarea class="msg-textarea" id="coord-broadcast-text" maxlength="300" placeholder="Ex : Notre service sera fermé ce week-end, en cas d'urgence…"></textarea>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="coordSendBroadcast()" id="coord-broadcast-btn">Envoyer un message à tous les patients</button>
+    </div>
+
+    <!-- Personnaliser -->
+    <div class="coord-panel" data-coord-panel="settings">
+      <div class="coord-section-title">Personnaliser votre espace</div>
+      <div class="coord-section-sub">Ces réglages s'appliquent à la banderole institutionnelle et au message de bienvenue envoyé aux nouveaux patients.</div>
+
+      <div class="form-group">
+        <label class="form-label" for="coord-settings-name">Nom affiché de l'institution</label>
+        <input class="form-input" type="text" id="coord-settings-name" placeholder="CHU Namur" maxlength="80" oninput="updateCoordSettingsPreview()" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Couleur d'accent</label>
+        <div class="coord-color-grid" id="coord-color-grid"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="coord-settings-welcome">Message de bienvenue aux nouveaux patients</label>
+        <textarea class="msg-textarea" id="coord-settings-welcome" maxlength="200" placeholder="Bienvenue sur CareWave. Notre équipe peut désormais partager des nouvelles avec votre famille."></textarea>
+      </div>
+
+      <div class="coord-preview-card">
+        <div class="coord-preview-logo" id="coord-settings-preview-logo">🏥</div>
+        <div class="coord-preview-text">Aperçu : <strong id="coord-settings-preview-name">Mon institution</strong> apparaîtra ainsi dans les groupes et la banderole institutionnelle.</div>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="coordSaveSettings()" id="coord-settings-save-btn" style="margin-top:16px;">Enregistrer les modifications</button>
+    </div>
+  </div>
+</div>
+
 <!-- ════════════════ LOGIN ════════════════ -->
 <div id="view-login" class="view">
   <div class="auth-wrap">
@@ -2784,6 +3169,10 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   <header class="app-header" role="banner">
     <div class="app-logo"><span style="display:inline-flex;align-items:center;gap:7px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAIvElEQVR4nMVXe3BU5RX/fY979252N+8HBJKQCFVJQkcCVtASaDtYYFBr3dhS0ZFCdSpacaQVnXGz2ooKA5b6GKlVZEQ0cRhL6aitSNKKVRHEB/gIREO0CXnubrK7uY/vO/0jIFEJ1bba3z/3m3vP+X6/c8/5zpwP+D+DfQkb+i/2/lK+DA0kQCTARuxBxLFrl0Qkwkd3JRap3SUjERphw9AQJtEQJoF/GzARG0nKAJSVlVk1gPEpzwYSn3UNhxs++848Z/w5/k+TMkQ+E8CJj5EIRzSqGYDAozsvdguLw0oYU0jwIFOe4ppaZX/8haz9Lz3Wcdf1R0aIpUiEeDTK9PdOv6a4vHzBoiyZPdeCOSnATOljNCjIe8d2e7b98tnznwTgHrc/IeAYec4ta0uS3zp/kzem5DtkGCDXAZQHcAlIH5gGeEdHwmg7FLWvPX8dEfHa2U28uXmOt+C7jy8pCp15Z76vqMDUgPBcGNpDkJvIlH74OTA41Pn6e7E9S9Y2X7n/uAiGSISjvp4KVt5XFDt31m63eEIF4v0eSBOEYXDTD9bfC3LsPuZqTlYwm+WMh3xrzxPOdef9mADMmNt4d1nhrJUi3QdK9SZMjzl+Ejk5ZoGQ0JDkukEhWYEvV9peb//h2Cuz7my+4u1bI5pLVNYzMKYTD+162M0bV4GuTpcBgqwQl/19PTLWssHX07NDvb/vI782hVNaPi4dGjufAsU3ylt23HPm7u5WllWyoqt3/1o78f6fVVdrSyzZM1RRVFk4aE6Yn+MruT7bP3b8gEpq2+1yC628nHzrG1um1kydBkAxAAjdvnlmqnrGbkVKMU2MfAEuY70HA7ufXRh/YFXryeo165sXZtO5P1lb+LFXrJNHrm59/qYjJ7ObXnbFmKljF2/PC5ROB6W0X3BdYOXItsSr4dXNP3xKAoATLLhECYuQimviUop4LO3f85eL4w+sakXD2yYONHqorx8+y/VgmN3E43PmxPDGH5cmjhHV1LxmpCtaGQD4cyqoot9iaE+Ixpdndgpl/WDK+MveCvoysz3lkiUUMYQuATAsQAuzCrbD4CiNQJCJrg+2Dfz2V+/hwdcM1FU5AIBo9HhQhCg0iD45QTVXbZR7N053sfdEv9l77NkQJlHXyD4uzp+9yZBTVqR1iiRLMmLmJACQAKA0QnBcwNNgQw5YLPY8iBjqm0bvYIzR8QLeu/EqFwCf8v0/zAwFi7/ttzJPtzj3hJd4cXNiYwOAVCLd85xlxFdw8jhRCiEfcmvLYEkA4LY7pF0NuIoxlQal7aNgjNDQMLqAyC6J6BwP0ShKLth0uRUo+4URLJ1qGiHogSPdmrxOv5ldaRsZVeFw5Oa21xPtht0Pg/s4uIlcw7Cb2+BKAMBQugUe1cLxNEwTRDwXAHCg4POtMxwWmNxAiDIvZ95t1Sg4e4NjjZ1tmEVIxT58c+jjnRtkMLPUju97493n7t5Wfd5NObniHzql5soMpRG3k1SUWQiwZDsAJQFAxmIv6Nz0Mu24jCQDDGs6gC3HfzYiEQaAo7KeUMcUA4N1+ZblycD41YxnBbWS4F2vPmq37dyUXbX0Dmb3iqLT5q25NHKXRBTxKEDVFevPitsMAUO4BaE80Tdw5EUA4ACDb89fn2NdHX1QzKDBQWgZWFhTU2MATXq46KIa0aiHOqasxetnyGt3PG8XTvqdA+HXWkPH3rlDHXz6QVl+6dMSeTOSnYcear5/zmBTU5NEBAAYxZJYwpjAaQUlMp7uUm2xN7cei244l+byhyNuSWU9pQZs7g/5jPb9y+z7rnoo67Lby73cvIBnBKcrmXWJ5sH5WmUAA0MOZ0HT6H7316G3X9zMJy/aZ2krGFBcI9XRFDtwwcKODqQAsEll61blBat+U5yd7eT7x5j98VceadwTXhIOk2DDIojlPXFhIDbvsjdVZmEZCFo4yb78fVvLB04/d5E98eyNesgDDWkgkVJwDMEdDR5rvy741jPb1cTF+308O9ufSisfcW4xP2Pp7kOGk37fB6vMz/MrLW6oDB5kffG/xQ93/n7yh92vHmWoZxIA4WAj731v+4Cv6qwrqcS/U3NDaSuzoHfi/Ce8exctlDc8NQPB0ivZgA1mM8EGeveZvYd+zo/2pNIT6vYbOiObknGtSAqlNGydIIvlTeSmMRFKw1VMCeXR4b4touXo5iWDg22dDHUCaFQnqjzcINBYp3zhdT9zx1Q+qD3XZlbQJ48eusd9fOkKY/HGNYBfyP72rZk7bj7YO2vDFZRRskFQQBj2kDa15KYCDA0YmiCV0CZZZJGETrdSX/+fZE+8eUUy3XUPUCuBZm+4Bk5yts2L1t3k5Z2xWivPZsLnk90frHW3X72yDLD+OXv9GmWOnUcidBpsG9J1ydAGk4rD0BymljBIwvA8YKhNpxMvIZl8nbte76pUquPOkeSfFwAAtbskmud4cu4dN+qsSWs0pMeYlKKv7bFQ/9PLB4Lzr9Oi+DZNFpgilytIQ3EmPYLh2RB2L5D+AO7gAeUOHRZaJ8EIy9Ppj+7DcOf1RtKdfEY7JsI879awFyp/RLNAgEGAD3T+PfDG6ovsolnZrih4EgrTmPLAvLTibkIwpxvkdBOpAQVSkhOLE+OXO+n27ScjH13ACBEZ1ddMtbMnb1Ey5wxogKe6+1isZZlquXcbzyhbBW7cDlIC2lEMBAYIRgwg9TIj56eO03dwNPJTCwCA2ohEc9TLyqrOGSyvu1/D+hFpD9zpB0u2b1VD8RvgtGRwx9kA8haAPIBUkhFbr9zu2wC4AAQAdUqeUyIc/mTa5RMWL+Oli3v5uIuJj1lAPHfmIM+qXomciiyYhRcyM+9JyLxpI7xPMcJ/OTAcG7t9mZMn8txpz/CsKcRDlcSDZxD3lwwYRlHVCPsvcAf4j1Arj694RulSbo37iJljWmHk1wFFAQzn+n8W9WjgwPFpKDMXCOV91YSjQYyy/lrB8NXk+uvDvwBJMhhMljWg6QAAAABJRU5ErkJggg==" alt="" width="20" height="20" style="display:block;" /> CareWave</span></div>
     <div class="header-right">
+      <button class="icon-btn" id="coordinator-btn" onclick="openCoordinatorPortal()" title="Espace pro" aria-label="Espace professionnel" style="display:none;width:auto;padding:0 11px;gap:5px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span style="font-size:.72rem;font-weight:800;">Espace pro</span>
+      </button>
       <button class="icon-btn" id="dark-toggle" onclick="toggleDark()" title="Thème" aria-label="Basculer le thème">🌙</button>
       <button class="icon-btn" onclick="openNotifs()" title="Notifications" aria-label="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
@@ -2814,6 +3203,17 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 
     <!-- STATUS TAB -->
     <div class="tab-panel" id="tab-status" role="tabpanel">
+
+      <!-- Sélecteur "Publier pour" — visible uniquement si l'utilisateur est aidant de quelqu'un -->
+      <div id="publish-as-wrap" style="display:none;margin-bottom:14px;">
+        <div class="publish-as-row">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--accent2);"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <select class="publish-as-select" id="publish-as-select" onchange="onPublishAsChange(this.value)" aria-label="Publier le statut pour">
+            <option value="">Moi-même</option>
+          </select>
+        </div>
+      </div>
+
       <div class="current-status-card" id="cs-card">
         <div class="cs-glow" aria-hidden="true"></div>
         <div class="cs-top">
@@ -2938,6 +3338,15 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         </div>
       </div>
 
+      <!-- Encart confidentialité institutionnelle — visible uniquement si l'utilisateur a un tenant -->
+      <div class="tenant-notice" id="tenant-notice" style="display:none;flex-direction:column;align-items:flex-start;gap:8px;">
+        <span class="tenant-mode-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mode entreprise</span>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tenant-notice-icon" style="margin-top:1px;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="tenant-notice-text">Votre établissement (<strong id="tenant-notice-name"></strong>) peut publier des nouvelles en votre nom. Il n'a accès à aucune de vos conversations privées.</div>
+        </div>
+      </div>
+
       <div class="settings-block">
         <div class="settings-block-title">Préférences</div>
         <div class="settings-row">
@@ -2954,6 +3363,10 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         </div>
         <div class="settings-row clickable" onclick="switchTab('groups');openCreateGroup()">
           <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Créer un groupe</div><div class="settings-sub">Inviter des proches</div></div>
+          <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="settings-row clickable" onclick="openCaregiversModal()">
+          <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Mes aidants</div><div class="settings-sub">Personnes autorisées à publier pour vous</div></div>
           <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
         <div class="settings-row clickable" onclick="openSupportModal()">
@@ -3202,6 +3615,38 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
     <div class="modal-footer">
       <button class="btn btn-ghost btn-full" onclick="closeCreateGroup()">Annuler</button>
       <button class="btn btn-primary btn-full" onclick="App.createGroup()" id="create-group-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CAREGIVERS MODAL ════ -->
+<div class="centered-modal" id="caregivers-modal" onclick="closeCaregiversOutside(event)" role="dialog" aria-modal="true" aria-labelledby="caregivers-modal-title">
+  <div class="modal-card">
+    <div class="modal-title" id="caregivers-modal-title" style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> Mes aidants</div>
+    <p style="font-size:.82rem;color:var(--text2);line-height:1.5;margin:-8px 0 14px;">Les personnes ci-dessous peuvent publier un statut en votre nom (par exemple un proche ou un membre du corps médical). Cela sera toujours visible comme "mis à jour par" cette personne.</p>
+
+    <div class="form-group">
+      <label class="form-label" for="cgv-email">Ajouter un aidant par email</label>
+      <div class="input-group">
+        <input class="form-input" type="email" id="cgv-email" placeholder="email@exemple.com" onkeydown="if(event.key==='Enter'){event.preventDefault();searchCaregiver();}" style="border-radius:var(--r);" />
+        <button class="btn btn-primary btn-sm" onclick="searchCaregiver()" id="cgv-search-btn" style="border-radius:var(--r);">Chercher</button>
+      </div>
+      <div id="cgv-error" style="display:none;font-size:.76rem;color:var(--rose);margin-top:6px;padding:7px 11px;background:rgba(244,63,94,.08);border-radius:var(--r);border:1px solid rgba(244,63,94,.18);" role="alert"></div>
+      <div id="cgv-result" style="display:none;margin-top:9px;background:var(--glass);border:1px solid var(--border2);border-radius:var(--r);padding:11px;align-items:center;gap:10px;width:100%;box-sizing:border-box;">
+        <span id="cgv-result-avatar" style="font-size:1.4rem;flex-shrink:0;"></span>
+        <div style="flex:1;min-width:0;"><div id="cgv-result-name" style="font-size:.88rem;font-weight:800;"></div><div id="cgv-result-email" style="font-size:.7rem;color:var(--text3);"></div></div>
+        <button id="cgv-add-btn" class="btn btn-primary btn-sm" onclick="addCaregiver()" style="font-size:.76rem;">+ Autoriser</button>
+      </div>
+    </div>
+
+    <div class="settings-block-title" style="margin-top:6px;">Aidants autorisés</div>
+    <div id="cgv-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+
+    <div class="settings-block-title">Je suis aidant de</div>
+    <div id="cgv-patients-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-full" onclick="closeCaregiversModal()">Fermer</button>
     </div>
   </div>
 </div>
@@ -3622,7 +4067,10 @@ const State = {
   _isRegistering: false,
   _pendingProfile: null,
   _memberColorMap: {},
-  themeColorIdx: 0
+  themeColorIdx: 0,
+  // ── Couche institutionnelle (B2B) ──
+  tenant: null,        // { id, name, logo, accentColor, welcomeMessage, plan } — rempli si profile.tenantId existe
+  isCoordinator: false // true si profile.role === 'coordinator' ou 'admin'
 };
 let _unsubs = [];
 
@@ -3638,7 +4086,9 @@ function resetAppState() {
     _listeningGroups: new Set(),
     _isRegistering: false,
     _pendingProfile: null,
-    _memberColorMap: {}
+    _memberColorMap: {},
+    tenant: null,
+    isCoordinator: false
   });
   const safe = (id, fn) => { const el=document.getElementById(id); if(el) fn(el); };
   safe('cs-tags', el => el.innerHTML='<span class="cs-tag">Aucun statut partagé</span>');
@@ -3652,6 +4102,7 @@ function resetAppState() {
   safe('notif-list', el => el.innerHTML='<div class="empty-state"><svg class="empty-illustration" width="100" height="100" viewBox="0 0 120 120" fill="none" aria-hidden="true"><defs><linearGradient id="ill-notif-g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#34d4c4"/></linearGradient></defs><circle cx="60" cy="60" r="48" fill="url(#ill-notif-g1)" opacity="0.08"/><path d="M60 30c-12 0-20 9-20 22v12l-6 10h52l-6-10V52c0-13-8-22-20-22z" fill="url(#ill-notif-g1)" opacity="0.85"/><path d="M52 80a8 8 0 0 0 16 0" stroke="url(#ill-notif-g1)" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85"/><circle cx="78" cy="38" r="5" fill="#34d4c4" opacity="0.6"/></svg><div class="empty-title">Aucune notification</div></div>');
   safe('profile-current-status', el => el.style.display='none');
   safe('profile-cs-message', el => { el.style.display='none'; el.textContent=''; });
+  safe('tenant-notice', el => { el.style.display='none'; });
   safe('nav-groups-badge', el => el.style.display='none');
   ['stat-total','stat-streak','stat-groups'].forEach(id => safe(id, el => el.textContent='—'));
   document.querySelectorAll('.status-opt.selected').forEach(b => b.classList.remove('selected'));
@@ -4417,6 +4868,384 @@ function updateGroupsBadge() {
   if (!el) return;
   if (total > 0) { el.style.display='flex'; el.textContent = total > 9 ? '9+' : total; }
   else { el.style.display='none'; }
+}
+
+/* ════════════════════════════════════════════════
+   INSTITUTIONAL LAYER (B2B) — Phase 1 : fondations
+════════════════════════════════════════════════ */
+// Charge le document tenant lié au profil de l'utilisateur courant (si tenantId existe).
+// N'affecte rien si l'utilisateur n'a pas de tenantId — sans impact sur l'expérience standard.
+async function loadTenant(tenantId) {
+  if (!tenantId || !window._fb) return null;
+  try {
+    const { db, doc, getDoc } = window._fb;
+    const snap = await getDoc(doc(db, 'tenants', tenantId));
+    if (!snap.exists()) { State.tenant = null; return null; }
+    State.tenant = { id: snap.id, ...snap.data() };
+    renderTenantNotice();
+    return State.tenant;
+  } catch(e) {
+    console.warn('loadTenant:', e);
+    State.tenant = null;
+    return null;
+  }
+}
+
+// Affiche/masque l'encart de confidentialité institutionnelle dans le profil
+function renderTenantNotice() {
+  const el = document.getElementById('tenant-notice');
+  const nameEl = document.getElementById('tenant-notice-name');
+  if (!el || !nameEl) return;
+  if (State.tenant && State.tenant.name) {
+    nameEl.textContent = State.tenant.name;
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+/* ════════════════════════════════════════════════
+   COORDINATOR PORTAL (B2B)
+════════════════════════════════════════════════ */
+let _coordFilter = 'all';
+State._coordPatients = [];
+
+async function openCoordinatorPortal() {
+  if (!State.isCoordinator) { toast('Accès réservé aux coordinateurs', 'error'); return; }
+  UI.show('coordinator');
+  await loadCoordinatorData();
+}
+
+function switchCoordTab(tab) {
+  document.querySelectorAll('.coord-tab').forEach(b => b.classList.toggle('active', b.dataset.coordTab === tab));
+  document.querySelectorAll('.coord-panel').forEach(p => p.classList.toggle('active', p.dataset.coordPanel === tab));
+}
+
+function setCoordFilter(filter) {
+  _coordFilter = filter;
+  document.querySelectorAll('.coord-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.coordFilter === filter));
+  renderCoordPatientsList();
+}
+
+async function loadCoordinatorData() {
+  if (!State.user || !window._fb || !State.profile.tenantId) {
+    toast('Aucune institution associée à ce compte', 'error');
+    return;
+  }
+
+  try {
+    // S'assurer que le tenant est chargé
+    if (!State.tenant) await loadTenant(State.profile.tenantId);
+    renderCoordHeader();
+    renderCoordSettingsForm();
+
+    const { db, collection, query, where, getDocs } = window._fb;
+    const q = query(collection(db, 'users'), where('tenantId', '==', State.profile.tenantId));
+    const snap = await getDocs(q);
+    const patients = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if (data.role === 'coordinator' || data.role === 'admin') return; // exclure les coordinateurs eux-mêmes
+      patients.push({ uid: d.id, ...data });
+    });
+    State._coordPatients = patients;
+    renderCoordOverview();
+    renderCoordPatientsList();
+  } catch(e) {
+    console.error('loadCoordinatorData:', e);
+    toast('Erreur lors du chargement des données', 'error');
+  }
+}
+
+// Palette de couleurs disponibles pour l'identité visuelle d'un tenant
+const TENANT_COLORS = ['#6366f1', '#0d9488', '#7c3aed', '#e11d48', '#059669', '#d97706', '#0284c7', '#db2777'];
+
+function renderCoordHeader() {
+  const nameEl = document.getElementById('coord-tenant-name');
+  const logoEl = document.getElementById('coord-header-logo');
+  const tenant = State.tenant;
+  if (nameEl) nameEl.textContent = tenant?.name || 'Institution';
+  if (logoEl) {
+    const initial = (tenant?.name || 'I').trim().charAt(0).toUpperCase();
+    const color = tenant?.accentColor || '#6366f1';
+    logoEl.textContent = initial;
+    logoEl.style.background = `linear-gradient(135deg, ${color}, var(--teal))`;
+  }
+}
+
+function renderCoordSettingsForm() {
+  const tenant = State.tenant;
+  const nameInput = document.getElementById('coord-settings-name');
+  const welcomeInput = document.getElementById('coord-settings-welcome');
+  if (nameInput) nameInput.value = tenant?.name || '';
+  if (welcomeInput) welcomeInput.value = tenant?.welcomeMessage || '';
+
+  const grid = document.getElementById('coord-color-grid');
+  if (grid) {
+    const currentColor = tenant?.accentColor || TENANT_COLORS[0];
+    grid.innerHTML = TENANT_COLORS.map(c =>
+      `<div class="coord-color-swatch ${c === currentColor ? 'active' : ''}" data-color="${c}" style="background:${c};" role="button" tabindex="0" aria-label="Couleur ${c}"></div>`
+    ).join('');
+    grid.querySelectorAll('.coord-color-swatch').forEach(sw => {
+      sw.addEventListener('click', () => {
+        grid.querySelectorAll('.coord-color-swatch').forEach(s => s.classList.remove('active'));
+        sw.classList.add('active');
+        updateCoordSettingsPreview();
+      });
+    });
+  }
+  updateCoordSettingsPreview();
+}
+
+function updateCoordSettingsPreview() {
+  const nameInput = document.getElementById('coord-settings-name');
+  const previewName = document.getElementById('coord-settings-preview-name');
+  const previewLogo = document.getElementById('coord-settings-preview-logo');
+  const activeSwatch = document.querySelector('.coord-color-swatch.active');
+  const name = nameInput?.value.trim() || 'Mon institution';
+  const color = activeSwatch?.dataset.color || TENANT_COLORS[0];
+  if (previewName) previewName.textContent = name;
+  if (previewLogo) {
+    previewLogo.textContent = name.charAt(0).toUpperCase();
+    previewLogo.style.background = `linear-gradient(135deg, ${color}, var(--teal))`;
+  }
+}
+
+async function coordSaveSettings() {
+  if (!State.isCoordinator || !State.profile.tenantId) { toast('Accès réservé', 'error'); return; }
+  const name = document.getElementById('coord-settings-name').value.trim();
+  const welcomeMessage = document.getElementById('coord-settings-welcome').value.trim();
+  const activeSwatch = document.querySelector('.coord-color-swatch.active');
+  const accentColor = activeSwatch?.dataset.color || TENANT_COLORS[0];
+
+  if (!name) { toast('Le nom de l\'institution est requis', 'error'); return; }
+  if (name.length > 80) { toast('Le nom ne peut pas dépasser 80 caractères', 'error'); return; }
+  if (welcomeMessage.length > 200) { toast('Le message ne peut pas dépasser 200 caractères', 'error'); return; }
+
+  const btn = document.getElementById('coord-settings-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ Enregistrement…';
+
+  try {
+    const { db, doc, setDoc } = window._fb;
+    await setDoc(doc(db, 'tenants', State.profile.tenantId), {
+      name, welcomeMessage, accentColor,
+      coordinatorUid: State.user.uid
+    }, { merge: true });
+
+    State.tenant = { ...(State.tenant || {}), id: State.profile.tenantId, name, welcomeMessage, accentColor, coordinatorUid: State.user.uid };
+    renderCoordHeader();
+    renderTenantNotice();
+    toast('✅ Personnalisation enregistrée', 'success');
+  } catch(e) {
+    console.error('coordSaveSettings:', e);
+    toast('Erreur lors de l\'enregistrement', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enregistrer les modifications';
+  }
+}
+
+function _daysSinceLastStatus(p) {
+  if (!p.lastStatusAt) return null;
+  try {
+    const last = p.lastStatusAt.toDate ? p.lastStatusAt.toDate() : new Date(p.lastStatusAt);
+    return Math.floor((Date.now() - last.getTime()) / 86400000);
+  } catch(e) { return null; }
+}
+
+function renderCoordOverview() {
+  const patients = State._coordPatients || [];
+  const activeCount = patients.filter(p => { const d = _daysSinceLastStatus(p); return d !== null && d <= 7; }).length;
+  const isolatedCount = patients.filter(p => { const d = _daysSinceLastStatus(p); return d !== null && d > 5; }).length;
+
+  const safe = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  safe('coord-stat-active', activeCount);
+  safe('coord-stat-total', patients.length);
+  safe('coord-stat-isolated', isolatedCount);
+
+  const listEl = document.getElementById('coord-overview-list');
+  if (!listEl) return;
+  const isolated = patients.filter(p => { const d = _daysSinceLastStatus(p); return d !== null && d > 5; });
+  if (!isolated.length) {
+    listEl.innerHTML = '<div class="coord-empty">Aucun signal d\'isolement pour le moment.</div>';
+    return;
+  }
+  listEl.innerHTML = `<div class="settings-block-title" style="margin-top:18px;">Signal d'isolement</div>` +
+    isolated.map(p => _coordPatientRowHtml(p)).join('');
+}
+
+function _coordPatientRowHtml(p) {
+  const days = _daysSinceLastStatus(p);
+  let statusClass = 'pending', statusLabel = 'En attente';
+  if (days !== null) {
+    if (days <= 7) { statusClass = 'active'; statusLabel = `Actif · ${days}j`; }
+    else { statusClass = 'isolated'; statusLabel = `${days}j sans nouvelles`; }
+  }
+  return `<div class="coord-patient-row">
+    <div class="coord-patient-avatar">${escapeHtml(p.avatar || '👤')}</div>
+    <div class="coord-patient-body">
+      <div class="coord-patient-name">${escapeHtml(p.displayName || 'Utilisateur')}</div>
+      <div class="coord-patient-sub">${escapeHtml(p.email || '')}</div>
+    </div>
+    <div class="coord-patient-status ${statusClass}">${statusLabel}</div>
+  </div>`;
+}
+
+function renderCoordPatientsList() {
+  const el = document.getElementById('coord-patients-list');
+  if (!el) return;
+  let patients = State._coordPatients || [];
+  if (_coordFilter === 'isolated') {
+    patients = patients.filter(p => { const d = _daysSinceLastStatus(p); return d !== null && d > 5; });
+  }
+  if (!patients.length) {
+    el.innerHTML = '<div class="coord-empty">Aucun patient' + (_coordFilter === 'isolated' ? ' inactif depuis +5 jours.' : ' pour le moment.') + '</div>';
+    return;
+  }
+  el.innerHTML = patients.map(p => _coordPatientRowHtml(p)).join('');
+}
+
+async function coordCreatePatient() {
+  if (!State.isCoordinator || !State.profile.tenantId) { toast('Accès réservé', 'error'); return; }
+  const firstname = document.getElementById('coord-create-firstname').value.trim();
+  const lastname = document.getElementById('coord-create-lastname').value.trim();
+  const email = document.getElementById('coord-create-email').value.trim().toLowerCase();
+  const consent = document.getElementById('coord-consent-check').checked;
+
+  if (!firstname || !lastname) { toast('Prénom et nom requis', 'error'); return; }
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { toast('Email invalide', 'error'); return; }
+  if (!consent) { toast('Le consentement est obligatoire pour créer ce compte', 'error'); return; }
+
+  const btn = document.getElementById('coord-create-btn');
+  btn.disabled = true; btn.textContent = '⏳ Création en cours…';
+
+  try {
+    const { db, collection, query, where, getDocs, doc, setDoc, addDoc, serverTimestamp } = window._fb;
+
+    // Vérifier qu'aucun compte n'existe déjà avec cet email
+    const existing = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+    if (!existing.empty) {
+      toast('Un compte existe déjà avec cet email', 'error');
+      btn.disabled = false; btn.textContent = 'Créer le compte et envoyer l\'invitation';
+      return;
+    }
+
+    // NOTE : la création d'un compte Firebase Auth nécessite normalement un mot de passe.
+    // Ici on crée le document Firestore "users" en avance avec un UID généré côté client
+    // (basé sur un identifiant temporaire), le patient finalisera son compte via le lien
+    // d'invitation reçu par email (création du compte Auth réel à la première connexion).
+    const tempUid = 'pending_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const displayName = `${firstname} ${lastname}`;
+    const tenantName = State.tenant?.name || 'Institution';
+
+    await setDoc(doc(db, 'users', tempUid), {
+      displayName,
+      displayNameLower: displayName.toLowerCase(),
+      email,
+      avatar: '👤',
+      tenantId: State.profile.tenantId,
+      role: 'user',
+      createdByTenant: true,
+      consentTimestamp: serverTimestamp(),
+      accountPending: true,
+      createdAt: serverTimestamp(),
+      // Le coordinateur est automatiquement désigné aidant, ce qui lui permet
+      // de publier des statuts pour ce patient via le sélecteur "Publier pour"
+      caregivers: [{
+        uid: State.user.uid,
+        name: State.profile.displayName || tenantName,
+        avatar: State.profile.avatar || '',
+        email: State.profile.email || State.user.email || ''
+      }],
+      caregiverUids: [State.user.uid]
+    });
+
+    // Créer le groupe institutionnel automatique
+    const groupRef = await addDoc(collection(db, 'groups'), {
+      name: `${tenantName} — Suivi`,
+      members: [tempUid, State.user.uid],
+      tenantId: State.profile.tenantId,
+      isInstitutional: true,
+      createdBy: State.user.uid,
+      pendingEmail: email, // permet au patient de rejoindre lui-même ce groupe lors de son inscription
+      createdAt: serverTimestamp()
+    });
+
+    // Mémoriser l'ID du groupe institutionnel sur le doc patient en attente,
+    // pour permettre une migration fiable (sans requête array-contains) à l'inscription réelle.
+    await setDoc(doc(db, 'users', tempUid), { pendingGroupIds: [groupRef.id] }, { merge: true });
+
+    // Message de bienvenue dans ce groupe
+    const welcomeMsg = State.tenant?.welcomeMessage || `Bienvenue sur CareWave. ${tenantName} peut désormais partager des nouvelles avec votre famille.`;
+    await addDoc(collection(db, 'groups', groupRef.id, 'messages'), {
+      type: 'system',
+      text: welcomeMsg,
+      authorTenantId: State.profile.tenantId,
+      postedByInstitution: true,
+      createdAt: serverTimestamp()
+    });
+
+    // Email de bienvenue au patient (best-effort)
+    // IMPORTANT : on utilise EMAILJS_TPL_ACTIVITY (To Email = {{to_email}}, dynamique),
+    // PAS EMAILJS_TPL_SUPPORT dont le To Email est configuré en dur sur l'adresse du
+    // développeur — ce dernier ne livrerait jamais l'email au patient.
+    if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'VOTRE_PUBLIC_KEY' && typeof _sendNotifEmail === 'function') {
+      _sendNotifEmail(EMAILJS_TPL_ACTIVITY, {
+        from_name: tenantName,
+        activity_text: `vous invite à rejoindre CareWave. Rendez-vous sur l'app et créez votre mot de passe avec cet email (${email}) pour accéder à votre compte`,
+        group_name: 'Invitation',
+        to_email: email,
+        to_name: firstname,
+        app_url: 'https://care-wave.github.io/CareWave/',
+      }).catch(() => {});
+    }
+
+    toast(`✅ Compte créé pour ${displayName}`, 'success');
+    document.getElementById('coord-create-firstname').value = '';
+    document.getElementById('coord-create-lastname').value = '';
+    document.getElementById('coord-create-email').value = '';
+    document.getElementById('coord-consent-check').checked = false;
+    await loadCoordinatorData();
+  } catch(e) {
+    console.error('coordCreatePatient:', e);
+    toast('Erreur lors de la création du compte', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Créer le compte et envoyer l\'invitation';
+  }
+}
+
+async function coordSendBroadcast() {
+  if (!State.isCoordinator || !State.profile.tenantId) { toast('Accès réservé', 'error'); return; }
+  const text = document.getElementById('coord-broadcast-text').value.trim();
+  if (!text) { toast('Le message est requis', 'error'); return; }
+  if (text.length > 300) { toast('Le message ne peut pas dépasser 300 caractères', 'error'); return; }
+
+  const patients = (State._coordPatients || []).filter(p => p.email);
+  if (!patients.length) { toast('Aucun patient à notifier', 'error'); return; }
+
+  const btn = document.getElementById('coord-broadcast-btn');
+  btn.disabled = true; btn.textContent = '⏳ Envoi…';
+
+  try {
+    const tenantName = State.tenant?.name || 'Institution';
+    // Envoi par email à chaque patient — best-effort, cohérent avec le système de notifications existant
+    await Promise.all(patients.map(p =>
+      _sendNotifEmail(EMAILJS_TPL_ACTIVITY, {
+        from_name: tenantName,
+        activity_text: text,
+        group_name: `Message de ${tenantName}`,
+        to_email: p.email,
+        to_name: p.displayName || 'Utilisateur',
+        app_url: 'https://care-wave.github.io/CareWave/',
+      }).catch(() => {})
+    ));
+    toast(`✅ Message envoyé à ${patients.length} patient(s)`, 'success');
+    document.getElementById('coord-broadcast-text').value = '';
+  } catch(e) {
+    console.error('coordSendBroadcast:', e);
+    toast('Erreur lors de l\'envoi', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Envoyer un message à tous les patients';
+  }
 }
 
 async function loadGroups() {
@@ -5587,6 +6416,14 @@ function renderMessageGroup(group, container) {
     bubble.textContent = m.text;
     el.appendChild(bubble);
 
+    // Banderole institutionnelle — visible uniquement si le statut a été posté par une institution
+    if (m.postedByInstitution && m.institutionName) {
+      const banner = document.createElement('div');
+      banner.className = 'institutional-banner';
+      banner.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg> Posté par ${escapeHtml(m.institutionName)}`;
+      el.appendChild(banner);
+    }
+
     // Reactions bar
     const reactBar = buildStatusReactionsBar(msgId, m.reactions || {});
     el.appendChild(reactBar);
@@ -6079,6 +6916,191 @@ function getRecipientGroups() {
   const groups = State.groups || [];
   if (State.statusRecipients === null) return groups;
   return groups.filter(g => State.statusRecipients.has(g.id));
+}
+
+/* ════════════════════════════════════════════════
+   CAREGIVERS (délégation de statut)
+════════════════════════════════════════════════ */
+// State.caregivers : aidants que JE peux désigner pour publier pour MOI
+// State.patients : personnes dont JE suis l'aidant (chargé via requête inverse)
+
+function openCaregiversModal() {
+  const modal = document.getElementById('caregivers-modal');
+  if (!modal) return;
+  document.getElementById('cgv-email').value = '';
+  document.getElementById('cgv-error').style.display = 'none';
+  document.getElementById('cgv-result').style.display = 'none';
+  modal.classList.add('open');
+  trapFocusOpen(modal);
+  renderCaregiversList();
+  loadPatientsList();
+}
+
+function closeCaregiversModal() {
+  document.getElementById('caregivers-modal')?.classList.remove('open');
+  trapFocusClose();
+}
+
+function closeCaregiversOutside(e) {
+  if (e.target.id === 'caregivers-modal') closeCaregiversModal();
+}
+
+async function searchCaregiver() {
+  const email = document.getElementById('cgv-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('cgv-error');
+  const resEl = document.getElementById('cgv-result');
+  errEl.style.display = 'none'; resEl.style.display = 'none';
+
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    errEl.textContent = 'Entrez un email valide.'; errEl.style.display = 'block'; return;
+  }
+  if (email === (State.user?.email || '').toLowerCase()) {
+    errEl.textContent = 'Vous ne pouvez pas vous désigner vous-même.'; errEl.style.display = 'block'; return;
+  }
+  if ((State.profile.caregivers || []).some(c => c.email === email)) {
+    errEl.textContent = 'Cette personne est déjà autorisée.'; errEl.style.display = 'block'; return;
+  }
+
+  const btn = document.getElementById('cgv-search-btn'); btn.disabled = true; btn.textContent = '⏳';
+  try {
+    const { db, collection, query, where, getDocs } = window._fb;
+    const q = query(collection(db, 'users'), where('email', '==', email));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      errEl.textContent = 'Aucun compte CareWave trouvé pour cet email.'; errEl.style.display = 'block';
+    } else {
+      const ud = { uid: snap.docs[0].id, ...snap.docs[0].data() };
+      document.getElementById('cgv-result-avatar').textContent = ud.avatar || '👤';
+      document.getElementById('cgv-result-name').textContent = ud.displayName || email;
+      document.getElementById('cgv-result-email').textContent = email;
+      const ab = document.getElementById('cgv-add-btn');
+      ab.dataset.uid = ud.uid;
+      ab.dataset.name = ud.displayName || email;
+      ab.dataset.avatar = ud.avatar || '';
+      ab.dataset.email = email;
+      resEl.style.display = 'flex';
+    }
+  } catch(e) { errEl.textContent = 'Erreur réseau. Réessayez.'; errEl.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = 'Chercher'; }
+}
+
+async function addCaregiver() {
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
+  const ab = document.getElementById('cgv-add-btn');
+  const { uid, name, avatar, email } = ab.dataset;
+  if (!uid) return;
+
+  const { db, doc, updateDoc, arrayUnion } = window._fb;
+  try {
+    await updateDoc(doc(db, 'users', State.user.uid), {
+      caregivers: arrayUnion({ uid, name, avatar: avatar || '', email }),
+      caregiverUids: arrayUnion(uid)
+    });
+    State.profile.caregivers = [...(State.profile.caregivers || []), { uid, name, avatar: avatar || '', email }];
+    document.getElementById('cgv-result').style.display = 'none';
+    document.getElementById('cgv-email').value = '';
+    renderCaregiversList();
+    toast(`✅ ${name} peut désormais publier pour vous`, 'success');
+  } catch(e) {
+    toast('Erreur lors de l\'ajout', 'error');
+  }
+}
+
+async function removeCaregiver(uid) {
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
+  const current = State.profile.caregivers || [];
+  const entry = current.find(c => c.uid === uid);
+  if (!entry) return;
+
+  const { db, doc, updateDoc, arrayRemove } = window._fb;
+  try {
+    await updateDoc(doc(db, 'users', State.user.uid), {
+      caregivers: arrayRemove(entry),
+      caregiverUids: arrayRemove(uid)
+    });
+    State.profile.caregivers = current.filter(c => c.uid !== uid);
+    renderCaregiversList();
+    toast('Aidant retiré', 'success');
+  } catch(e) {
+    toast('Erreur lors de la suppression', 'error');
+  }
+}
+
+function renderCaregiversList() {
+  const el = document.getElementById('cgv-list');
+  if (!el) return;
+  const list = State.profile.caregivers || [];
+  if (!list.length) {
+    el.innerHTML = '<div class="cgv-empty">Aucun aidant autorisé pour le moment.</div>';
+    return;
+  }
+  el.innerHTML = list.map(c => `
+    <div class="cgv-row">
+      <span class="cgv-row-avatar">${escapeHtml(c.avatar || '👤')}</span>
+      <div class="cgv-row-body">
+        <div class="cgv-row-name">${escapeHtml(c.name || c.email)}</div>
+        <div class="cgv-row-sub">${escapeHtml(c.email || '')}</div>
+      </div>
+      <button class="cgv-row-remove" data-uid="${c.uid}">Retirer</button>
+    </div>`).join('');
+  el.querySelectorAll('.cgv-row-remove').forEach(btn => {
+    btn.addEventListener('click', () => removeCaregiver(btn.dataset.uid));
+  });
+}
+
+// Charge la liste des personnes dont je suis l'aidant (requête inverse)
+async function loadPatientsList() {
+  const el = document.getElementById('cgv-patients-list');
+  if (!el || !State.user || !window._fb) return;
+  el.innerHTML = '<div class="cgv-empty">Chargement…</div>';
+  try {
+    const { db, collection, query, where, getDocs } = window._fb;
+    // Firestore ne permet pas de requêter directement dans un tableau d'objets par champ,
+    // donc on cherche via une requête sur array-contains avec uid simple si possible.
+    // Solution : stocker aussi un tableau plat caregiverUids pour la requête inverse.
+    const q = query(collection(db, 'users'), where('caregiverUids', 'array-contains', State.user.uid));
+    const snap = await getDocs(q);
+    State.patients = [];
+    snap.forEach(d => State.patients.push({ uid: d.id, ...d.data() }));
+
+    if (!State.patients.length) {
+      el.innerHTML = '<div class="cgv-empty">Vous n\'êtes l\'aidant de personne pour le moment.</div>';
+      return;
+    }
+    el.innerHTML = State.patients.map(p => `
+      <div class="cgv-row">
+        <span class="cgv-row-avatar">${escapeHtml(p.avatar || '👤')}</span>
+        <div class="cgv-row-body">
+          <div class="cgv-row-name">${escapeHtml(p.displayName || 'Utilisateur')}</div>
+          <div class="cgv-row-sub">Vous pouvez publier des statuts pour cette personne</div>
+        </div>
+      </div>`).join('');
+    renderPublishAsSelector();
+  } catch(e) {
+    el.innerHTML = '<div class="cgv-empty">Impossible de charger la liste.</div>';
+  }
+}
+
+// ── Sélecteur "Publier pour" sur l'écran Statut ──
+let _publishAsUid = null; // null = soi-même
+
+function renderPublishAsSelector() {
+  const wrap = document.getElementById('publish-as-wrap');
+  if (!wrap) return;
+  const patients = State.patients || [];
+  if (!patients.length) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  const select = document.getElementById('publish-as-select');
+  select.innerHTML = `<option value="">Moi-même</option>` +
+    patients.map(p => `<option value="${p.uid}">${escapeHtml(p.displayName || 'Utilisateur')}</option>`).join('');
+  select.value = _publishAsUid || '';
+}
+
+function onPublishAsChange(uid) {
+  _publishAsUid = uid || null;
 }
 
 /* ════════════════════════════════════════════════
@@ -6681,6 +7703,58 @@ async function updateSupportLimitNote() {
   }
 }
 
+/* ════════════════════════════════════════════════
+   INSTITUTION REQUEST (formulaire public, sans connexion requise)
+════════════════════════════════════════════════ */
+async function submitInstitutionRequest() {
+  if (!window._fb) { toast('Service indisponible, réessayez plus tard.', 'error'); return; }
+  if (navigator.onLine === false) { toast('Hors ligne', 'error'); return; }
+
+  const name = document.getElementById('inst-name').value.trim();
+  const type = document.getElementById('inst-type').value;
+  const contactName = document.getElementById('inst-contact').value.trim();
+  const email = document.getElementById('inst-email').value.trim();
+  const phone = document.getElementById('inst-phone').value.trim();
+  const message = document.getElementById('inst-message').value.trim();
+
+  if (!name) { toast('Le nom de l\'institution est requis', 'error'); return; }
+  if (!contactName) { toast('Le nom du contact est requis', 'error'); return; }
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { toast('Entrez un email professionnel valide', 'error'); return; }
+  if (message.length > 500) { toast('Le message ne peut pas dépasser 500 caractères', 'error'); return; }
+
+  const btn = document.getElementById('inst-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi…'; }
+
+  const { db, collection, addDoc, serverTimestamp } = window._fb;
+
+  try {
+    // 1. Enregistrer dans Firestore (collection institutionRequests, create-only côté règles)
+    await addDoc(collection(db, 'institutionRequests'), {
+      name, type, contactName, email, phone, message,
+      createdAt: serverTimestamp()
+    });
+
+    // 2. Envoyer l'email via EmailJS — réutilise le template support déjà configuré
+    if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'VOTRE_PUBLIC_KEY' && typeof _sendNotifEmail === 'function') {
+      await _sendNotifEmail(EMAILJS_TPL_SUPPORT, {
+        from_name: `${contactName} — ${name}`,
+        from_email: email,
+        subject: `Demande de démo institution : ${name} (${type})`,
+        message: `Institution : ${name}\nType : ${type}\nContact : ${contactName}\nEmail : ${email}\nTéléphone : ${phone || 'non renseigné'}\n\nMessage :\n${message || '(aucun message)'}`,
+        to_email: 'louiscollin15@gmail.com',
+      }).catch(() => {});
+    }
+
+    // Afficher l'état de succès
+    document.getElementById('institution-form-wrap').style.display = 'none';
+    document.getElementById('institution-form-success').style.display = 'block';
+  } catch(e) {
+    console.error('submitInstitutionRequest:', e);
+    toast('Erreur lors de l\'envoi. Réessayez plus tard.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Demander une démo gratuite'; }
+  }
+}
+
 async function sendSupportMessage() {
   if (!State.user) return;
   if (isOffline()) { toast('Hors ligne', 'error'); return; }
@@ -6983,6 +8057,15 @@ async function _initDashboard(user, profile) {
   const dtp = document.getElementById('dark-toggle-profile');
   if (dtp) { dtp.classList.toggle('on', State.dark); dtp.setAttribute('aria-checked', State.dark); }
 
+  // ── Couche institutionnelle : rôle + tenant ──
+  State.isCoordinator = profile.role === 'coordinator' || profile.role === 'admin';
+  State.tenant = null;
+  if (profile.tenantId) {
+    loadTenant(profile.tenantId).catch(() => {});
+  }
+  const coordBtn = document.getElementById('coordinator-btn');
+  if (coordBtn) coordBtn.style.display = State.isCoordinator ? 'inline-flex' : 'none';
+
   // Appliquer la couleur de thème sauvegardée
   const savedTheme = profile.themeColorIdx ?? 0;
   applyThemeColor(savedTheme);
@@ -6998,6 +8081,7 @@ async function _initDashboard(user, profile) {
   initSchedulePresets();
   renderScheduledList();
   scheduleNotifPrompt();
+  loadPatientsList();
   UI.show('dashboard');
 
   // Restaurer le dernier onglet visité
@@ -7115,7 +8199,7 @@ const App = {
 
   async register() {
     const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
     const pw = document.getElementById('reg-pw').value;
     const globalErr = document.getElementById('reg-global-err');
     globalErr.classList.remove('show');
@@ -7150,19 +8234,65 @@ const App = {
     btn.textContent = '⏳ Création…';
 
     try {
-      const {auth, db, createUserWithEmailAndPassword, updateProfile, doc, setDoc, serverTimestamp} = window._fb;
+      const {auth, db, createUserWithEmailAndPassword, updateProfile, doc, setDoc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, serverTimestamp} = window._fb;
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
       await updateProfile(cred.user, { displayName: name });
-      const profileData = {
+
+      let profileData = {
         displayName: name,
         displayNameLower: name.toLowerCase(),
         email, bio: '', avatar: '🧑',
         darkMode: true, createdAt: serverTimestamp()
       };
+
+      // ── Migration compte institutionnel en attente ──
+      // Si un coordinateur a pré-créé un compte pour cet email (document "pending_xxx"),
+      // on récupère ses données (tenant, rôle, consentement, aidants) et on les fusionne
+      // dans le vrai compte Auth, puis on répare les groupes institutionnels qui référençaient
+      // l'ancien UID temporaire.
+      try {
+        const pendingSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+        const pendingDoc = pendingSnap.docs.find(d => d.data().accountPending === true);
+        if (pendingDoc) {
+          const pendingUid = pendingDoc.id;
+          const pendingData = pendingDoc.data();
+
+          profileData = {
+            ...profileData,
+            tenantId: pendingData.tenantId || null,
+            role: pendingData.role || 'user',
+            createdByTenant: pendingData.createdByTenant || false,
+            consentTimestamp: pendingData.consentTimestamp || null,
+            caregivers: pendingData.caregivers || [],
+            caregiverUids: pendingData.caregiverUids || [],
+          };
+
+          // Réparer les groupes institutionnels : remplacer l'UID temporaire par le vrai UID.
+          // On utilise la liste pendingGroupIds (stockée sur le doc patient lors de sa création)
+          // plutôt qu'une requête array-contains, qui échouerait côté règles Firestore tant que
+          // le nouvel utilisateur n'est pas encore membre du groupe.
+          const pendingGroupIds = pendingData.pendingGroupIds || [];
+          for (const gid of pendingGroupIds) {
+            try {
+              const gSnap = await getDoc(doc(db, 'groups', gid));
+              if (!gSnap.exists()) continue;
+              const gData = gSnap.data();
+              const newMembers = (gData.members || []).map(m => m === pendingUid ? cred.user.uid : m);
+              await updateDoc(doc(db, 'groups', gid), { members: newMembers, pendingEmail: null });
+            } catch(ge) { console.warn('Migration groupe institutionnel:', ge.message); }
+          }
+
+          // Supprimer le document temporaire désormais obsolète
+          try { await deleteDoc(doc(db, 'users', pendingUid)); } catch(de) { /* silencieux */ }
+        }
+      } catch(migErr) {
+        console.warn('Migration compte institutionnel échouée (non-bloquant):', migErr.message);
+      }
+
       await setDoc(doc(db, 'users', cred.user.uid), profileData);
       State._isRegistering = false;
       resetAppState();
-      await _initDashboard(cred.user, { displayName: name, displayNameLower: name.toLowerCase(), email, bio: '', avatar: '🧑', darkMode: true });
+      await _initDashboard(cred.user, profileData);
       showLoader(false);
 
       // Envoyer l'email de vérification APRÈS que le dashboard est affiché
@@ -7297,44 +8427,66 @@ const App = {
     const message = document.getElementById('status-msg').value.trim();
     if (message.length > 180) { toast('Le message ne peut pas dépasser 180 caractères','error'); return; }
 
+    // Délégation : si un patient est sélectionné, le statut est publié pour lui,
+    // avec une trace de qui l'a réellement publié (publishedBy)
+    const targetUid = _publishAsUid || State.user.uid;
+    const patient = _publishAsUid ? (State.patients || []).find(p => p.uid === _publishAsUid) : null;
+    const targetName = patient ? (patient.displayName || 'Utilisateur') : (State.profile.displayName || 'Anonyme');
+    const targetAvatar = patient ? (patient.avatar || '') : (State.profile.avatar || '');
+    const publishedBy = _publishAsUid ? { uid: State.user.uid, name: State.profile.displayName || 'Quelqu\'un' } : null;
+
     const btn = document.getElementById('publish-btn');
     btn.disabled = true; btn.textContent = '⏳ Partage en cours…';
 
     const {db, collection, addDoc, serverTimestamp} = window._fb;
     try {
-      await addDoc(collection(db,'statuses'), {
-        uid: State.user.uid,
-        displayName: State.profile.displayName || 'Anonyme',
-        avatar: State.profile.avatar || '',
+      const statusDoc = {
+        uid: targetUid,
+        displayName: targetName,
+        avatar: targetAvatar,
         tags, message, createdAt: serverTimestamp()
-      });
+      };
+      if (publishedBy) statusDoc.publishedBy = publishedBy;
+      await addDoc(collection(db,'statuses'), statusDoc);
+
+      // Trace pour le portail coordinateur (signal d'isolement) — best-effort
+      try {
+        const { doc, updateDoc } = window._fb;
+        await updateDoc(doc(db, 'users', targetUid), { lastStatusAt: serverTimestamp() });
+      } catch(e) { /* silencieux */ }
 
       const recipientGroups = getRecipientGroups();
       if (recipientGroups.length) {
         const tagStr = tags.join(' · ');
-        const avatar = State.profile.avatar || '';
-        const name = State.profile.displayName || 'Quelqu\'un';
-        const txt = message
-          ? `${avatar} ${name} : ${tagStr} — "${message}"`
-          : `${avatar} ${name} a mis à jour son état : ${tagStr}`;
+        const txt = publishedBy
+          ? (message
+              ? `${targetAvatar} ${targetName} : ${tagStr} — "${message}" (mis à jour par ${publishedBy.name})`
+              : `${targetAvatar} ${targetName} a mis à jour son état : ${tagStr} (mis à jour par ${publishedBy.name})`)
+          : (message
+              ? `${targetAvatar} ${targetName} : ${tagStr} — "${message}"`
+              : `${targetAvatar} ${targetName} a mis à jour son état : ${tagStr}`);
+        const msgDoc = { type:'status_update', text:txt, uid:targetUid, createdAt:serverTimestamp() };
+        // Banderole institutionnelle : visible si le publisher est un coordinateur rattaché à un tenant
+        if (State.isCoordinator && State.tenant?.name) {
+          msgDoc.postedByInstitution = true;
+          msgDoc.institutionName = State.tenant.name;
+        }
         await Promise.all(recipientGroups.map(g =>
-          addDoc(collection(db,'groups',g.id,'messages'), {
-            type:'status_update', text:txt, uid:State.user.uid, createdAt:serverTimestamp()
-          })
+          addDoc(collection(db,'groups',g.id,'messages'), msgDoc)
         ));
       }
 
-      toast('Statut partagé','success');
-      addNotification('', 'Votre statut a été partagé !');
+      toast(publishedBy ? `Statut partagé pour ${targetName}` : 'Statut partagé','success');
+      addNotification('', publishedBy ? `Statut partagé pour ${targetName} !` : 'Votre statut a été partagé !');
 
       // Notifs email — best-effort, non-bloquant
       if (recipientGroups.length) {
-        const senderName = State.profile.displayName || 'Quelqu\'un';
         const statusText = tags.join(' · ') + (message ? ` — "${message}"` : '');
+        const activitySuffix = publishedBy ? ` (mis à jour par ${publishedBy.name})` : '';
         recipientGroups.forEach(g => {
           notifyGroupMembers(g.id, g.name, g.members || [], EMAILJS_TPL_ACTIVITY, {
-            from_name: senderName,
-            activity_text: `a partagé son état : ${statusText}`,
+            from_name: targetName,
+            activity_text: `a partagé son état : ${statusText}${activitySuffix}`,
           }).catch(() => {});
         });
       }
@@ -8455,3 +9607,200 @@ async function toggleStatusReaction(msgId, emoji, currentlyReacted, btnEl) {
 
 </body>
 </html>
+
+<!-- ════════════════════════════════════════════════════════════════
+     RÈGLES FIRESTORE — à copier intégralement dans la console Firebase
+     (Firestore Database → Règles). Ce bloc est un commentaire HTML,
+     il n'a aucun effet sur le rendu de la page.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ════════════════════════════════════════════════
+    // FONCTIONS UTILITAIRES (évitent les erreurs sur champs absents)
+    // ════════════════════════════════════════════════
+    function myData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isCoordinator() {
+      return request.auth != null
+        && 'role' in myData()
+        && myData().role in ['coordinator', 'admin'];
+    }
+    function isCoordinatorOfTenant(tid) {
+      return isCoordinator() && 'tenantId' in myData() && myData().tenantId == tid;
+    }
+
+    // ════════════════════════════════════════════════
+    // USERS
+    // ════════════════════════════════════════════════
+    match /users/{uid} {
+      // Lecture : tout utilisateur connecté. Couvre l'usage social normal (recherche par email/pseudo)
+      // et la lecture par un coordinateur des membres de son tenant.
+      allow read: if request.auth != null;
+
+      // Écriture : son propre document, OU un coordinateur créant/complétant un compte patient
+      // "en attente" (accountPending == true) pour SON tenant uniquement. Un coordinateur ne peut
+      // JAMAIS modifier le profil d'un patient dont le compte est déjà activé (accountPending absent
+      // ou false). Le nouvel utilisateur peut aussi supprimer son ancien placeholder "pending_xxx"
+      // lors de la migration de compte, à condition que l'email Auth corresponde exactement.
+      allow write: if request.auth != null && (
+        request.auth.uid == uid
+        || (
+          resource == null
+          && 'tenantId' in request.resource.data
+          && isCoordinatorOfTenant(request.resource.data.tenantId)
+        )
+        || (
+          resource != null
+          && resource.data.accountPending == true
+          && 'tenantId' in resource.data
+          && isCoordinatorOfTenant(resource.data.tenantId)
+        )
+        || (
+          resource != null
+          && resource.data.accountPending == true
+          && resource.data.email == request.auth.token.email
+        )
+      );
+    }
+
+    // ════════════════════════════════════════════════
+    // STATUSES
+    // ════════════════════════════════════════════════
+    match /statuses/{id} {
+      allow read: if request.auth != null;
+
+      // Création : l'utilisateur publie pour lui-même, OU un aidant autorisé publie pour son patient
+      // (vérifié via caregiverUids sur le doc du patient), OU un coordinateur publie pour un patient
+      // de SON tenant. Chaque accès à un champ potentiellement absent est protégé par 'in'.
+      allow create: if request.auth != null && (
+        request.resource.data.uid == request.auth.uid
+        || (
+          'caregiverUids' in get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data
+          && request.auth.uid in get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data.caregiverUids
+        )
+        || (
+          'tenantId' in get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data
+          && isCoordinatorOfTenant(get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data.tenantId)
+        )
+      );
+
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ════════════════════════════════════════════════
+    // GROUPS
+    // ════════════════════════════════════════════════
+    match /groups/{gid} {
+      // Lecture : réservée aux membres du groupe, OU au coordinateur du tenant si c'est le groupe
+      // institutionnel officiel de ce tenant, OU au nouvel utilisateur dont l'email Auth correspond
+      // à pendingEmail (jonction lors de l'inscription). Un coordinateur ne peut PAS lire les groupes
+      // familiaux d'un patient (il n'y est pas membre), ni les groupes institutionnels d'un autre tenant.
+      allow read: if request.auth != null && (
+        request.auth.uid in resource.data.members
+        || (
+          resource.data.isInstitutional == true
+          && 'tenantId' in resource.data
+          && isCoordinatorOfTenant(resource.data.tenantId)
+        )
+        || (
+          resource.data.isInstitutional == true
+          && resource.data.pendingEmail == request.auth.token.email
+        )
+      );
+
+      allow create: if request.auth != null;
+
+      // Mise à jour : un membre du groupe, OU le coordinateur du tenant institutionnel propriétaire
+      // de ce groupe, OU le nouvel utilisateur en cours de jonction (uniquement pour remplacer son
+      // propre placeholder par son vrai UID — il doit obligatoirement apparaître dans le nouveau members).
+      allow update: if request.auth != null && (
+        request.auth.uid in resource.data.members
+        || (
+          resource.data.isInstitutional == true
+          && 'tenantId' in resource.data
+          && isCoordinatorOfTenant(resource.data.tenantId)
+        )
+        || (
+          resource.data.isInstitutional == true
+          && resource.data.pendingEmail == request.auth.token.email
+          && request.auth.uid in request.resource.data.members
+        )
+      );
+
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+
+      match /messages/{mid} {
+        // Lecture/écriture réservées aux membres du groupe. Un coordinateur n'a PAS d'accès implicite
+        // ici : il doit être listé dans members (ce qui est le cas uniquement pour le groupe
+        // institutionnel qu'il gère, jamais pour les groupes familiaux d'un patient).
+        allow read, write: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(gid)).data.members;
+      }
+
+      match /typing/{uid} {
+        allow read: if request.auth != null
+          && request.auth.uid in get(/databases/$(database)/documents/groups/$(gid)).data.members;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // ════════════════════════════════════════════════
+    // SUPPORT MESSAGES
+    // ════════════════════════════════════════════════
+    match /support_messages/{id} {
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow read, update, delete: if false; // consultation uniquement via la console Firebase
+    }
+
+    // ════════════════════════════════════════════════
+    // SCHEDULED STATUSES
+    // ════════════════════════════════════════════════
+    match /scheduled_statuses/{id} {
+      allow read, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // ════════════════════════════════════════════════
+    // TENANTS (institutions)
+    // ════════════════════════════════════════════════
+    match /tenants/{tenantId} {
+      // Lecture : tout utilisateur connecté peut lire les infos publiques d'un tenant
+      // (nom, logo, couleur, message de bienvenue) — nécessaire pour afficher la banderole
+      // institutionnelle et l'encart de confidentialité dans le profil patient.
+      allow read: if request.auth != null;
+
+      // Écriture (mise à jour) : réservée au coordinateur déjà référencé comme propriétaire de ce tenant.
+      allow update: if request.auth != null && resource.data.coordinatorUid == request.auth.uid;
+
+      // Création : un coordinateur peut créer/initialiser le document de SON propre tenant
+      // (celui référencé sur son propre profil utilisateur), via la console de personnalisation.
+      // Il ne peut pas créer ou s'attribuer un tenant arbitraire.
+      allow create: if request.auth != null
+        && 'tenantId' in myData()
+        && myData().tenantId == tenantId
+        && isCoordinator()
+        && request.resource.data.coordinatorUid == request.auth.uid;
+
+      allow delete: if false;
+    }
+
+    // ════════════════════════════════════════════════
+    // INSTITUTION REQUESTS (formulaire public "Vous êtes une institution ?")
+    // ════════════════════════════════════════════════
+    match /institutionRequests/{id} {
+      // Création ouverte à tous, y compris les visiteurs non connectés — c'est un formulaire public
+      // accessible depuis le footer de la landing page, sans inscription requise.
+      allow create: if true;
+      // Aucune lecture côté client : consultation des demandes uniquement via la console Firebase.
+      allow read, update, delete: if false;
+    }
+
+  }
+}
+
+════════════════════════════════════════════════════════════════ -->
