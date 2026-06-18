@@ -6841,16 +6841,31 @@ function stopNotifPrompt() {
 /* ════════════════════════════════════════════════
    STATUS RECIPIENTS (cercles de proches)
 ════════════════════════════════════════════════ */
+// Retourne les groupes éligibles comme destinataires d'un statut, selon le contexte :
+// - Mode normal (soi-même) : tous mes groupes.
+// - Mode "Publier pour [patient]" : uniquement les groupes que MOI et le PATIENT partageons.
+//   Cela empêche un aidant de publier accidentellement dans ses propres groupes personnels
+//   à la place de ceux du patient (ex: famille de l'aidant au lieu de famille du patient).
+function getEligibleRecipientGroups() {
+  const groups = State.groups || [];
+  if (!_publishAsUid) return groups;
+  return groups.filter(g => Array.isArray(g.members) && g.members.includes(_publishAsUid));
+}
+
 function renderRecipientChips() {
   const el = document.getElementById('recipient-chips');
   const hint = document.getElementById('recipient-hint');
   if (!el) return;
 
-  const groups = State.groups || [];
+  const groups = getEligibleRecipientGroups();
 
   if (groups.length === 0) {
     el.innerHTML = '';
-    if (hint) hint.textContent = 'Créez un groupe pour partager votre état.';
+    if (hint) {
+      hint.textContent = _publishAsUid
+        ? 'Aucun groupe commun avec cette personne. Rejoignez un de ses groupes pour pouvoir y publier en son nom.'
+        : 'Créez un groupe pour partager votre état.';
+    }
     return;
   }
 
@@ -6876,8 +6891,8 @@ function renderRecipientChips() {
 }
 
 function toggleRecipient(gid) {
-  const groups = State.groups || [];
-  // Initialiser le set avec tous les groupes si c'était null (sélection implicite "tous")
+  const groups = getEligibleRecipientGroups();
+  // Initialiser le set avec tous les groupes éligibles si c'était null (sélection implicite "tous")
   if (State.statusRecipients === null) {
     State.statusRecipients = new Set(groups.map(g => g.id));
   }
@@ -6888,7 +6903,7 @@ function toggleRecipient(gid) {
     State.statusRecipients.add(gid);
   }
 
-  // Si tous sont sélectionnés à nouveau → revenir à null (sélection implicite "tous")
+  // Si tous les groupes éligibles sont sélectionnés à nouveau → revenir à null (sélection implicite "tous")
   if (State.statusRecipients.size === groups.length) {
     State.statusRecipients = null;
   }
@@ -6899,7 +6914,7 @@ function toggleRecipient(gid) {
 function updateRecipientHint() {
   const hint = document.getElementById('recipient-hint');
   if (!hint) return;
-  const groups = State.groups || [];
+  const groups = getEligibleRecipientGroups();
   const selected = State.statusRecipients;
 
   if (selected === null || selected.size === groups.length) {
@@ -6912,8 +6927,9 @@ function updateRecipientHint() {
 }
 
 // Retourne la liste des groupes destinataires selon la sélection actuelle
+// (déjà restreinte aux groupes éligibles selon le contexte "Publier pour")
 function getRecipientGroups() {
-  const groups = State.groups || [];
+  const groups = getEligibleRecipientGroups();
   if (State.statusRecipients === null) return groups;
   return groups.filter(g => State.statusRecipients.has(g.id));
 }
@@ -7101,6 +7117,10 @@ function renderPublishAsSelector() {
 
 function onPublishAsChange(uid) {
   _publishAsUid = uid || null;
+  // Réinitialiser la sélection de destinataires : les groupes éligibles changent
+  // selon qu'on publie pour soi-même ou pour un patient (jamais les mêmes groupes).
+  State.statusRecipients = null;
+  renderRecipientChips();
 }
 
 /* ════════════════════════════════════════════════
@@ -7194,23 +7214,34 @@ async function scheduleStatus() {
   const tags = [...State.selectedStatus];
   const message = document.getElementById('status-msg')?.value.trim() || '';
   const scheduledAt = _pendingScheduleTime;
+  const eligibleGroups = getEligibleRecipientGroups();
   const recipientGroupIds = State.statusRecipients === null
-    ? (State.groups || []).map(g => g.id)
-    : [...State.statusRecipients];
+    ? eligibleGroups.map(g => g.id)
+    : eligibleGroups.filter(g => State.statusRecipients.has(g.id)).map(g => g.id);
+
+  // Délégation : si un patient est sélectionné via "Publier pour", le statut programmé
+  // doit cibler son uid, pas celui de l'aidant, avec une trace de qui l'a réellement programmé.
+  const targetUid = _publishAsUid || State.user.uid;
+  const patient = _publishAsUid ? (State.patients || []).find(p => p.uid === _publishAsUid) : null;
+  const targetName = patient ? (patient.displayName || 'Utilisateur') : (State.profile.displayName || 'Anonyme');
+  const targetAvatar = patient ? (patient.avatar || '') : (State.profile.avatar || '');
+  const publishedBy = _publishAsUid ? { uid: State.user.uid, name: State.profile.displayName || 'Quelqu\'un' } : null;
 
   const { db, collection, addDoc } = window._fb;
   try {
-    await addDoc(collection(db, 'scheduled_statuses'), {
-      uid: State.user.uid,
-      displayName: State.profile.displayName || 'Anonyme',
-      avatar: State.profile.avatar || '',
+    const scheduledDoc = {
+      uid: targetUid,
+      displayName: targetName,
+      avatar: targetAvatar,
       tags, message, scheduledAt, recipientGroupIds,
       status: 'pending'
-    });
+    };
+    if (publishedBy) scheduledDoc.publishedBy = publishedBy;
+    await addDoc(collection(db, 'scheduled_statuses'), scheduledDoc);
 
     const d = new Date(scheduledAt);
     const label = d.toLocaleString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
-    toast(`⏰ Statut programmé pour ${label}`, 'success');
+    toast(publishedBy ? `⏰ Statut programmé pour ${targetName} (${label})` : `⏰ Statut programmé pour ${label}`, 'success');
 
     // Reset
     _pendingScheduleTime = null;
@@ -7273,51 +7304,69 @@ async function cancelScheduled(docId) {
 // Vérification toutes les minutes des statuts à publier
 async function checkScheduledStatuses() {
   if (!State.user || !window._fb) return;
-  const { db, collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp, orderBy } = window._fb;
+  const { db, collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp } = window._fb;
   const now = Date.now();
 
   try {
-    const q = query(
+    // Deux requêtes séparées : mes propres statuts programmés (uid == moi), ET ceux que
+    // j'ai programmés en tant qu'aidant pour quelqu'un d'autre (publishedBy.uid == moi).
+    // Firestore ne permet pas un OR entre deux champs différents, donc on fusionne côté client.
+    const qOwn = query(
       collection(db, 'scheduled_statuses'),
       where('uid', '==', State.user.uid),
       where('status', '==', 'pending')
     );
-    const snap = await getDocs(q);
-    snap.forEach(async d => {
+    const qDelegated = query(
+      collection(db, 'scheduled_statuses'),
+      where('publishedBy.uid', '==', State.user.uid),
+      where('status', '==', 'pending')
+    );
+    const [snapOwn, snapDelegated] = await Promise.all([getDocs(qOwn), getDocs(qDelegated)]);
+    const allDocs = [...snapOwn.docs, ...snapDelegated.docs];
+
+    allDocs.forEach(async d => {
       const data = d.data();
       if (data.scheduledAt > now) return;
 
       // Marquer comme publié d'abord
       await updateDoc(doc(db, 'scheduled_statuses', d.id), { status: 'published' });
 
-      // Publier le statut
-      await addDoc(collection(db, 'statuses'), {
+      // Publier le statut sur le bon profil (patient si délégué, sinon l'utilisateur lui-même)
+      const statusDoc = {
         uid: data.uid,
         displayName: data.displayName,
         avatar: data.avatar,
         tags: data.tags,
         message: data.message,
         createdAt: serverTimestamp()
-      });
+      };
+      if (data.publishedBy) statusDoc.publishedBy = data.publishedBy;
+      await addDoc(collection(db, 'statuses'), statusDoc);
 
-      // Message dans les groupes destinataires (rétrocompat : si absent, tous les groupes)
-      const targetGroupIds = data.recipientGroupIds || (State.groups || []).map(g => g.id);
-      const targetGroups = (State.groups || []).filter(g => targetGroupIds.includes(g.id));
-      if (targetGroups.length) {
+      // Message dans les groupes destinataires — on utilise exclusivement recipientGroupIds,
+      // calculé au moment de la programmation par rapport aux groupes éligibles du bon contexte
+      // (groupes du patient si délégué, jamais ceux de l'aidant). Pas de fallback sur State.groups
+      // ici : ce serait à nouveau les groupes de l'utilisateur CONNECTÉ, pas ceux du patient cible.
+      const targetGroupIds = data.recipientGroupIds || [];
+      if (targetGroupIds.length) {
         const avatar = data.avatar || '';
         const name = data.displayName || 'Quelqu\'un';
         const tagStr = data.tags.join(' · ');
-        const txt = data.message
-          ? `${avatar} ${name} : ${tagStr} — "${data.message}"`
-          : `${avatar} ${name} a mis à jour son état : ${tagStr}`;
-        await Promise.all(targetGroups.map(g =>
-          addDoc(collection(db, 'groups', g.id, 'messages'), {
+        const txt = data.publishedBy
+          ? (data.message
+              ? `${avatar} ${name} : ${tagStr} — "${data.message}" (mis à jour par ${data.publishedBy.name})`
+              : `${avatar} ${name} a mis à jour son état : ${tagStr} (mis à jour par ${data.publishedBy.name})`)
+          : (data.message
+              ? `${avatar} ${name} : ${tagStr} — "${data.message}"`
+              : `${avatar} ${name} a mis à jour son état : ${tagStr}`);
+        await Promise.all(targetGroupIds.map(gid =>
+          addDoc(collection(db, 'groups', gid, 'messages'), {
             type: 'status_update', text: txt, uid: data.uid, createdAt: serverTimestamp()
-          })
+          }).catch(() => {})
         ));
       }
 
-      toast('⏰ Statut programmé publié !', 'success');
+      toast(data.publishedBy ? `⏰ Statut programmé publié pour ${data.displayName} !` : '⏰ Statut programmé publié !', 'success');
       renderScheduledList();
     });
   } catch(e) { /* silencieux */ }
@@ -9760,9 +9809,32 @@ service cloud.firestore {
     // SCHEDULED STATUSES
     // ════════════════════════════════════════════════
     match /scheduled_statuses/{id} {
-      allow read, delete: if request.auth != null && resource.data.uid == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
-      allow update: if request.auth != null && resource.data.uid == request.auth.uid;
+      // Lecture/suppression : le propriétaire du statut (uid), OU l'aidant qui l'a programmé
+      // pour quelqu'un d'autre (publishedBy.uid) — nécessaire pour qu'un aidant puisse voir
+      // et annuler ses propres programmations déléguées.
+      allow read, delete: if request.auth != null && (
+        resource.data.uid == request.auth.uid
+        || ('publishedBy' in resource.data && resource.data.publishedBy.uid == request.auth.uid)
+      );
+
+      // Création : l'utilisateur programme pour lui-même, OU un aidant programme pour son
+      // patient (vérifié via caregiverUids), avec publishedBy.uid correspondant à l'aidant lui-même.
+      allow create: if request.auth != null && (
+        request.resource.data.uid == request.auth.uid
+        || (
+          'publishedBy' in request.resource.data
+          && request.resource.data.publishedBy.uid == request.auth.uid
+          && 'caregiverUids' in get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data
+          && request.auth.uid in get(/databases/$(database)/documents/users/$(request.resource.data.uid)).data.caregiverUids
+        )
+      );
+
+      // Mise à jour (ex: passage en status "published" par checkScheduledStatuses) : même règle
+      // que la lecture — le propriétaire ou l'aidant qui l'a programmé.
+      allow update: if request.auth != null && (
+        resource.data.uid == request.auth.uid
+        || ('publishedBy' in resource.data && resource.data.publishedBy.uid == request.auth.uid)
+      );
     }
 
     // ════════════════════════════════════════════════
