@@ -5251,9 +5251,13 @@ async function goToPublishStatusFor(uid) {
   UI.show('dashboard');
   // S'assurer que State.patients est à jour (cas d'un patient tout juste créé dans cette session)
   await loadPatientsList();
-  onPublishAsChange(uid);
+  _publishAsUid = uid || null;
+  renderPublishAsSelector();
+  renderRecipientChips();
   switchTab('status');
-  document.getElementById('nav-status')?.focus?.();
+  // #app-content est le vrai conteneur scrollable (overflow-y:auto), pas window —
+  // sans ce scroll explicite, la page atterrissait en bas (focus involontaire sur la nav).
+  document.getElementById('app-content')?.scrollTo?.({ top: 0, behavior: 'instant' });
 }
 
 // Délégation d'événement : un seul listener pour tous les boutons "+ statut" générés dynamiquement
@@ -5270,8 +5274,11 @@ async function goToPublishStatusForGlobal() {
   }
   UI.show('dashboard');
   await loadPatientsList();
-  onPublishAsChange(null); // laisse "Moi-même" par défaut, le coordinateur choisit dans le menu
+  _publishAsUid = null; // "Moi-même" par défaut, le coordinateur choisit dans le menu
+  renderPublishAsSelector();
+  renderRecipientChips();
   switchTab('status');
+  document.getElementById('app-content')?.scrollTo?.({ top: 0, behavior: 'instant' });
   toast('Sélectionnez un patient dans "Publier pour" 👆', 'success');
 }
 
