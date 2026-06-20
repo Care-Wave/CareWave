@@ -1409,6 +1409,15 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 .coord-patient-status.pending { background: rgba(234,179,8,.1); color: #facc15; }
 .coord-patient-status.isolated { background: rgba(244,63,94,.1); color: var(--rose); }
 
+.coord-patient-add-status {
+  flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(99,102,241,.1); border: 1px solid rgba(129,140,248,.25);
+  color: var(--accent2); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s, transform .15s;
+}
+.coord-patient-add-status:hover { background: rgba(99,102,241,.18); }
+.coord-patient-add-status:active { transform: scale(.92); }
+
 .coord-empty { text-align: center; padding: 32px 20px; color: var(--text3); font-size: .85rem; }
 
 .coord-consent-row {
@@ -1439,6 +1448,18 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px;
 }
 .coord-header-name { font-family: 'Clash Display', sans-serif; font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; }
+
+.coord-header-add-status-btn {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 16px; border-radius: 100px; font-size: .8rem; font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #7c3aed); color: #fff;
+  border: none; cursor: pointer; font-family: 'Cabinet Grotesk', sans-serif;
+  box-shadow: 0 6px 18px rgba(99,102,241,.3);
+  transition: transform .15s, box-shadow .15s;
+}
+.coord-header-add-status-btn:hover { box-shadow: 0 8px 22px rgba(99,102,241,.4); }
+.coord-header-add-status-btn:active { transform: scale(.96); }
+@media (max-width: 560px) { .coord-header-add-status-btn span { display: none; } .coord-header-add-status-btn { padding: 10px; } }
 
 /* ── Onglets avec icônes ── */
 .coord-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -3024,6 +3045,10 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         <div class="coord-header-eyebrow"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mode entreprise actif</div>
         <div class="coord-header-name" id="coord-tenant-name">Chargement…</div>
       </div>
+      <button class="coord-header-add-status-btn" onclick="goToPublishStatusForGlobal()" title="Ajouter un statut">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Ajouter un statut</span>
+      </button>
     </div>
 
     <div class="coord-tabs">
@@ -5214,8 +5239,46 @@ function _coordPatientRowHtml(p) {
       <div class="coord-patient-sub">${escapeHtml(p.email || '')}</div>
     </div>
     <div class="coord-patient-status ${statusClass}">${statusLabel}</div>
+    <button class="coord-patient-add-status" data-uid="${p.uid}" title="Ajouter un statut pour cette personne" aria-label="Ajouter un statut pour ${escapeHtml(p.displayName || 'cette personne')}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
   </div>`;
 }
+
+// Navigue depuis le portail coordinateur vers l'écran Statut, avec le patient
+// donné déjà sélectionné dans "Publier pour" — évite à l'utilisateur de re-sélectionner manuellement.
+async function goToPublishStatusFor(uid) {
+  UI.show('dashboard');
+  // S'assurer que State.patients est à jour (cas d'un patient tout juste créé dans cette session)
+  await loadPatientsList();
+  onPublishAsChange(uid);
+  switchTab('status');
+  document.getElementById('nav-status')?.focus?.();
+}
+
+// Délégation d'événement : un seul listener pour tous les boutons "+ statut" générés dynamiquement
+// (vue d'ensemble ET liste patients), peu importe le nombre de re-rendus de la liste.
+// Bouton global du portail : si un seul patient existe, y aller directement.
+// S'il y en a plusieurs, ouvrir l'écran Statut avec le sélecteur "Publier pour" visible
+// pour que le coordinateur choisisse lui-même. Si aucun patient, prévenir.
+async function goToPublishStatusForGlobal() {
+  const patients = State._coordPatients || [];
+  if (!patients.length) { toast('Aucun patient pour le moment — créez-en un d\'abord', 'error'); return; }
+  if (patients.length === 1) {
+    await goToPublishStatusFor(patients[0].uid);
+    return;
+  }
+  UI.show('dashboard');
+  await loadPatientsList();
+  onPublishAsChange(null); // laisse "Moi-même" par défaut, le coordinateur choisit dans le menu
+  switchTab('status');
+  toast('Sélectionnez un patient dans "Publier pour" 👆', 'success');
+}
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.coord-patient-add-status');
+  if (btn && btn.dataset.uid) goToPublishStatusFor(btn.dataset.uid);
+});
 
 function renderCoordPatientsList() {
   const el = document.getElementById('coord-patients-list');
@@ -5313,6 +5376,7 @@ async function coordCreatePatient() {
     // sinon l'app affiche le groupe comme vide même si les UIDs sont bien présents dans members.
     const groupRef = await addDoc(collection(db, 'groups'), {
       name: `${tenantName} — Suivi`,
+      emoji: '🏥',
       members: [patientUid, State.user.uid],
       memberNames: [displayName, State.profile.displayName || tenantName],
       memberAvatars: ['👤', State.profile.avatar || '🏥'],
@@ -6864,15 +6928,19 @@ function syncTitleBadge() {
 ════════════════════════════════════════════════ */
 (function initOfflineDetection() {
   const banner = () => document.getElementById('offline-banner');
+  let isCurrentlyOffline = false;
 
   function setOffline() {
+    if (isCurrentlyOffline) return; // déjà affiché, rien à refaire
+    isCurrentlyOffline = true;
     const b = banner();
     if (b) b.classList.add('visible');
-    // Désactiver les actions Firestore-dépendantes visuellement
     document.body.setAttribute('data-offline', '1');
   }
 
   function setOnline() {
+    if (!isCurrentlyOffline) return; // déjà masqué, rien à refaire
+    isCurrentlyOffline = false;
     const b = banner();
     if (b) {
       b.classList.remove('visible');
@@ -6897,30 +6965,33 @@ function syncTitleBadge() {
     document.body.removeAttribute('data-offline');
   }
 
-  // navigator.onLine peut donner de faux positifs sur certains navigateurs/réseaux
-  // (VPN, portail captif, bug d'implémentation) — avant d'afficher le bandeau, on vérifie
-  // par une vraie requête réseau légère pour confirmer qu'on est vraiment hors ligne.
-  async function confirmOffline() {
-    if (navigator.onLine) return; // le navigateur dit qu'on est en ligne, pas la peine de vérifier
+  // navigator.onLine peut donner de faux positifs/négatifs sur certains navigateurs/réseaux
+  // (VPN, portail captif, mode économie de batterie, bug d'implémentation). On ne se fie
+  // jamais à lui seul : une vraie requête réseau légère confirme l'état réel à chaque vérification.
+  async function checkRealConnectivity() {
     try {
-      // Requête minimale vers Google (toujours disponible) avec timeout court
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
       await fetch('https://www.gstatic.com/generate_204', { mode: 'no-cors', cache: 'no-store', signal: controller.signal });
       clearTimeout(timeoutId);
-      // La requête a réussi → on est en fait en ligne, navigator.onLine mentait
-      setOnline();
+      setOnline(); // la requête a réussi → on est bien en ligne
     } catch(e) {
-      // La requête a vraiment échoué → on est réellement hors ligne
-      setOffline();
+      // Si navigator.onLine dit qu'on est en ligne mais que la requête échoue,
+      // c'est probablement un bloqueur (extension, firewall) plutôt qu'une vraie coupure —
+      // dans le doute on n'affiche le bandeau que si le navigateur confirme aussi être hors ligne.
+      if (!navigator.onLine) setOffline();
     }
   }
 
-  // État initial
-  if (!navigator.onLine) confirmOffline();
+  // Vérification initiale au chargement
+  checkRealConnectivity();
 
-  window.addEventListener('offline', confirmOffline);
-  window.addEventListener('online', setOnline);
+  // Re-vérification périodique (toutes les 30s) — couvre les cas où les événements
+  // online/offline du navigateur ne se déclenchent pas correctement (observé sur certains OS).
+  setInterval(checkRealConnectivity, 30_000);
+
+  window.addEventListener('offline', checkRealConnectivity);
+  window.addEventListener('online', checkRealConnectivity);
 })();
 
 // Utilitaire : vérifier si hors-ligne avant une action critique
