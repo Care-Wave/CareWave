@@ -7566,6 +7566,9 @@ function onPublishAsChange(uid) {
   // Réinitialiser la sélection de destinataires : les groupes éligibles changent
   // selon qu'on publie pour soi-même ou pour un patient (jamais les mêmes groupes).
   State.statusRecipients = null;
+  // Rafraîchir le label du trigger ET les coches du menu — sans cet appel, le clic
+  // change bien la sélection en interne mais rien ne le confirme visuellement.
+  renderPublishAsSelector();
   renderRecipientChips();
   updatePublishBtn();
 }
