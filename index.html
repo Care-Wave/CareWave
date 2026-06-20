@@ -2986,7 +2986,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
       </div>
       <div class="form-group">
         <label class="form-label" for="inst-phone">Téléphone</label>
-        <input class="form-input" type="tel" id="inst-phone" placeholder="+32 4xx xx xx xx" maxlength="30" />
+        <input class="form-input" type="tel" id="inst-phone" placeholder="+32 xxx xx xx xx" maxlength="30" />
       </div>
       <div class="form-group">
         <label class="form-label" for="inst-message">Message (optionnel)</label>
@@ -5202,7 +5202,7 @@ function renderCoordOverview() {
 
 function _coordPatientRowHtml(p) {
   const days = _daysSinceLastStatus(p);
-  let statusClass = 'pending', statusLabel = 'En attente';
+  let statusClass = 'pending', statusLabel = 'Aucun statut publié';
   if (days !== null) {
     if (days <= 7) { statusClass = 'active'; statusLabel = `Actif · ${days}j`; }
     else { statusClass = 'isolated'; statusLabel = `${days}j sans nouvelles`; }
@@ -5309,9 +5309,13 @@ async function coordCreatePatient() {
     });
 
     // Créer le groupe institutionnel avec le vrai UID patient directement
+    // members/memberNames/memberAvatars doivent être strictement parallèles (même index = même personne),
+    // sinon l'app affiche le groupe comme vide même si les UIDs sont bien présents dans members.
     const groupRef = await addDoc(collection(db, 'groups'), {
       name: `${tenantName} — Suivi`,
       members: [patientUid, State.user.uid],
+      memberNames: [displayName, State.profile.displayName || tenantName],
+      memberAvatars: ['👤', State.profile.avatar || '🏥'],
       tenantId: State.profile.tenantId,
       isInstitutional: true,
       createdBy: State.user.uid,
@@ -6893,10 +6897,29 @@ function syncTitleBadge() {
     document.body.removeAttribute('data-offline');
   }
 
-  // État initial
-  if (!navigator.onLine) setOffline();
+  // navigator.onLine peut donner de faux positifs sur certains navigateurs/réseaux
+  // (VPN, portail captif, bug d'implémentation) — avant d'afficher le bandeau, on vérifie
+  // par une vraie requête réseau légère pour confirmer qu'on est vraiment hors ligne.
+  async function confirmOffline() {
+    if (navigator.onLine) return; // le navigateur dit qu'on est en ligne, pas la peine de vérifier
+    try {
+      // Requête minimale vers Google (toujours disponible) avec timeout court
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      await fetch('https://www.gstatic.com/generate_204', { mode: 'no-cors', cache: 'no-store', signal: controller.signal });
+      clearTimeout(timeoutId);
+      // La requête a réussi → on est en fait en ligne, navigator.onLine mentait
+      setOnline();
+    } catch(e) {
+      // La requête a vraiment échoué → on est réellement hors ligne
+      setOffline();
+    }
+  }
 
-  window.addEventListener('offline', setOffline);
+  // État initial
+  if (!navigator.onLine) confirmOffline();
+
+  window.addEventListener('offline', confirmOffline);
   window.addEventListener('online', setOnline);
 })();
 
@@ -7163,6 +7186,19 @@ async function submitPasswordChange() {
     const credential = EmailAuthProvider.credential(State.user.email, current);
     await reauthenticateWithCredential(auth.currentUser, credential);
     await updatePassword(auth.currentUser, next);
+
+    // Email de confirmation — alerte de sécurité si ce changement n'était pas voulu par l'utilisateur
+    if (EMAILJS_PUBLIC_KEY_2 && typeof _sendInstitutionEmail === 'function') {
+      const now = new Date().toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+      _sendInstitutionEmail({
+        from_name: 'CareWave',
+        to_name: State.profile.displayName || 'Utilisateur',
+        to_email: State.user.email,
+        subject: 'Votre mot de passe CareWave a été modifié',
+        message: `Le mot de passe de votre compte CareWave (${State.user.email}) vient d'être changé avec succès, le ${now}.\n\nSi vous êtes à l'origine de cette modification, vous n'avez rien à faire.\n\nSi ce n'est pas vous, contactez-nous immédiatement et changez votre mot de passe dès que possible.`,
+        app_url: 'https://care-wave.github.io/CareWave/',
+      }).catch(() => {});
+    }
 
     // Lever le flag "doit changer son mot de passe" si présent (compte créé par un coordinateur)
     if (State.profile.mustChangePassword) {
