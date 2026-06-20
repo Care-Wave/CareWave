@@ -3746,26 +3746,49 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 <div class="centered-modal" id="password-modal" onclick="closePasswordModalOutside(event)" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
   <div class="modal-card">
     <div class="modal-title" id="password-modal-title" style="display:flex;align-items:center;gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Changer mon mot de passe</div>
-    <p style="font-size:.82rem;color:var(--text2);line-height:1.5;margin:-8px 0 14px;">Pour votre sécurité, confirmez votre mot de passe actuel avant de le changer.</p>
 
-    <div class="form-group">
-      <label class="form-label" for="pwd-current">Mot de passe actuel</label>
-      <input class="form-input" type="password" id="pwd-current" placeholder="••••••••" autocomplete="current-password" />
+    <!-- Message pour les comptes connectés via Google — pas de mot de passe Firebase à changer -->
+    <div id="pwd-google-notice" style="display:none;">
+      <div style="display:flex;align-items:flex-start;gap:10px;background:var(--glass);border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin:4px 0 16px;">
+        <svg width="32" height="32" viewBox="0 0 48 48" style="flex-shrink:0;">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.5-.4-3.5Z"/>
+          <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.6 15.1 18.9 12 24 12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7Z"/>
+          <path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.4 35.2 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44Z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.2 4.2-4 5.5l6.5 5.5C40.8 36.1 44 30.5 44 24c0-1.3-.1-2.5-.4-3.5Z"/>
+        </svg>
+        <div style="font-size:.82rem;color:var(--text2);line-height:1.55;">
+          Vous êtes connecté(e) avec votre compte <strong style="color:var(--text);">Google</strong>. Votre mot de passe est géré directement par Google, pas par CareWave — il n'y a donc rien à changer ici.<br/><br/>
+          Pour modifier votre mot de passe, rendez-vous dans les paramètres de votre compte Google.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-full" onclick="closePasswordModal()">Compris</button>
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label" for="pwd-new">Nouveau mot de passe</label>
-      <input class="form-input" type="password" id="pwd-new" placeholder="Minimum 6 caractères" autocomplete="new-password" oninput="updatePwModalStrength(this.value)" />
-      <div class="pw-strength" style="margin-top:6px;"><div class="pw-strength-bar" id="pwd-modal-bar"></div></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="pwd-confirm">Confirmer le nouveau mot de passe</label>
-      <input class="form-input" type="password" id="pwd-confirm" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();submitPasswordChange();}" />
-    </div>
-    <div id="pwd-error" style="display:none;font-size:.76rem;color:var(--rose);margin-top:2px;padding:7px 11px;background:rgba(244,63,94,.08);border-radius:var(--r);border:1px solid rgba(244,63,94,.18);" role="alert"></div>
 
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closePasswordModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="submitPasswordChange()" id="pwd-submit-btn">Changer le mot de passe</button>
+    <!-- Formulaire normal — uniquement pour les comptes email/mot de passe -->
+    <div id="pwd-form-wrap">
+      <p style="font-size:.82rem;color:var(--text2);line-height:1.5;margin:-8px 0 14px;">Pour votre sécurité, confirmez votre mot de passe actuel avant de le changer.</p>
+
+      <div class="form-group">
+        <label class="form-label" for="pwd-current">Mot de passe actuel</label>
+        <input class="form-input" type="password" id="pwd-current" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pwd-new">Nouveau mot de passe</label>
+        <input class="form-input" type="password" id="pwd-new" placeholder="Minimum 6 caractères" autocomplete="new-password" oninput="updatePwModalStrength(this.value)" />
+        <div class="pw-strength" style="margin-top:6px;"><div class="pw-strength-bar" id="pwd-modal-bar"></div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pwd-confirm">Confirmer le nouveau mot de passe</label>
+        <input class="form-input" type="password" id="pwd-confirm" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();submitPasswordChange();}" />
+      </div>
+      <div id="pwd-error" style="display:none;font-size:.76rem;color:var(--rose);margin-top:2px;padding:7px 11px;background:rgba(244,63,94,.08);border-radius:var(--r);border:1px solid rgba(244,63,94,.18);" role="alert"></div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closePasswordModal()">Annuler</button>
+        <button class="btn btn-primary" onclick="submitPasswordChange()" id="pwd-submit-btn">Changer le mot de passe</button>
+      </div>
     </div>
   </div>
 </div>
@@ -7210,6 +7233,23 @@ function closeCaregiversOutside(e) {
 function openPasswordModal() {
   const modal = document.getElementById('password-modal');
   if (!modal) return;
+
+  // Les comptes connectés via Google n'ont jamais eu de mot de passe Firebase —
+  // la notion de "changer le mot de passe" n'a pas de sens pour eux, leur mot de passe
+  // est géré entièrement par Google, pas par CareWave.
+  const isGoogle = State.user?.providerData?.some(p => p.providerId === 'google.com');
+  const googleNotice = document.getElementById('pwd-google-notice');
+  const formWrap = document.getElementById('pwd-form-wrap');
+  if (isGoogle) {
+    if (googleNotice) googleNotice.style.display = 'block';
+    if (formWrap) formWrap.style.display = 'none';
+    modal.classList.add('open');
+    trapFocusOpen(modal);
+    return;
+  }
+  if (googleNotice) googleNotice.style.display = 'none';
+  if (formWrap) formWrap.style.display = 'block';
+
   document.getElementById('pwd-current').value = '';
   document.getElementById('pwd-new').value = '';
   document.getElementById('pwd-confirm').value = '';
