@@ -1581,7 +1581,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   display: flex; align-items: center; gap: 11px;
   padding: 16px 18px; border-bottom: 1px solid var(--border);
   flex-shrink: 0; max-width: 860px; width: 100%; margin: 0 auto;
-  box-sizing: border-box;
+  box-sizing: border-box; position: relative;
 }
 .chat-messages-wrap {
   flex: 1; overflow: hidden; display: flex; flex-direction: column;
@@ -2250,6 +2250,21 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   border: 1.5px solid transparent; cursor: pointer; transition: all var(--t); line-height: 1;
 }
 .emoji-opt.selected { background: rgba(129,140,248,.15); border-color: rgba(129,140,248,.5); transform: scale(1.08); }
+
+/* ══ ÉDITION ICÔNE GROUPE (depuis l'en-tête du chat) ══ */
+#chat-emoji.editable { cursor: pointer; border-radius: 10px; transition: background .15s, transform .15s; padding: 3px; }
+#chat-emoji.editable:active { transform: scale(.9); }
+#chat-emoji.editable:hover { background: var(--glass); }
+.chat-emoji-popover {
+  position: absolute; top: calc(100% + 8px); left: 14px; z-index: 85;
+  background: var(--c2); border: 1px solid var(--border2); border-radius: var(--r2);
+  box-shadow: 0 16px 40px rgba(0,0,0,.35); padding: 12px;
+  width: 220px; max-width: calc(100vw - 28px);
+  opacity: 0; transform: translateY(-6px) scale(.97); pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+.chat-emoji-popover.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.chat-emoji-popover-title { font-size: .68rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
 
 /* ══ PENDING MEMBERS LIST ══ */
 .pending-member { display: flex; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--border); }
@@ -3529,7 +3544,11 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 <div class="modal-overlay" id="chat-overlay" onclick="closeChatOutside(event)" role="dialog" aria-modal="true" aria-labelledby="chat-group-name-label">
   <div class="chat-modal" id="chat-modal">
     <div class="chat-header">
-      <span id="chat-emoji" aria-hidden="true" style="display:flex;align-items:center;color:var(--accent2);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <span id="chat-emoji" class="editable" role="button" tabindex="0" aria-label="Changer l'icône du groupe" onclick="toggleChatEmojiPopover(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleChatEmojiPopover(event);}" style="display:flex;align-items:center;color:var(--accent2);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      <div class="chat-emoji-popover" id="chat-emoji-popover" role="dialog" aria-label="Choisir une icône pour le groupe">
+        <div class="chat-emoji-popover-title">Icône du groupe</div>
+        <div class="emoji-picker" id="chat-emoji-picker"></div>
+      </div>
       <div class="chat-header-info">
         <div class="chat-group-name" id="chat-group-name-label">Groupe</div>
         <div class="chat-members-count" id="chat-members-count">membres</div>
@@ -6285,6 +6304,77 @@ async function _deleteGroupById(groupId, groupName) {
 /* ════════════════════════════════════════════════
    CHAT — IMPROVED WITH GROUPING + LIKES
 ════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════
+   ÉDITION ICÔNE GROUPE (depuis l'en-tête du chat)
+   Accessible à TOUT membre du groupe, pas seulement l'admin —
+   cohérent avec les règles Firestore (allow update si membre).
+════════════════════════════════════════════════ */
+function toggleChatEmojiPopover(e) {
+  e?.stopPropagation();
+  const pop = document.getElementById('chat-emoji-popover');
+  if (!pop) return;
+  const isOpen = pop.classList.contains('open');
+  if (isOpen) { closeChatEmojiPopover(); return; }
+
+  renderChatEmojiPicker();
+  pop.classList.add('open');
+  document.addEventListener('click', _chatEmojiOutsideHandler, { capture: true });
+  document.addEventListener('keydown', _chatEmojiEscHandler);
+}
+
+function closeChatEmojiPopover() {
+  const pop = document.getElementById('chat-emoji-popover');
+  if (pop) pop.classList.remove('open');
+  document.removeEventListener('click', _chatEmojiOutsideHandler, { capture: true });
+  document.removeEventListener('keydown', _chatEmojiEscHandler);
+}
+
+function _chatEmojiOutsideHandler(e) {
+  const pop = document.getElementById('chat-emoji-popover');
+  const trigger = document.getElementById('chat-emoji');
+  if (pop && !pop.contains(e.target) && trigger && !trigger.contains(e.target)) closeChatEmojiPopover();
+}
+
+function _chatEmojiEscHandler(e) {
+  if (e.key === 'Escape') closeChatEmojiPopover();
+}
+
+function renderChatEmojiPicker() {
+  const el = document.getElementById('chat-emoji-picker');
+  if (!el || !State.currentGroup) return;
+  const current = State.currentGroup.emoji || '👥';
+  el.innerHTML = GROUP_EMOJIS.map(em =>
+    `<div class="emoji-opt ${em === current ? 'selected' : ''}" data-emoji="${em}" role="radio" tabindex="0" aria-checked="${em === current}">${em}</div>`
+  ).join('');
+  el.querySelectorAll('.emoji-opt').forEach(opt => {
+    opt.addEventListener('click', () => updateGroupEmoji(opt.dataset.emoji));
+    opt.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); updateGroupEmoji(opt.dataset.emoji); }
+    });
+  });
+}
+
+async function updateGroupEmoji(emoji) {
+  if (!State.currentGroup || isOffline()) { if (isOffline()) toast('Hors ligne', 'error'); return; }
+  const groupId = State.currentGroup.id;
+  closeChatEmojiPopover();
+
+  // Mise à jour optimiste de l'affichage avant confirmation serveur
+  document.getElementById('chat-emoji').textContent = emoji;
+  State.currentGroup.emoji = emoji;
+  const localGroup = State.groups.find(g => g.id === groupId);
+  if (localGroup) localGroup.emoji = emoji;
+  renderGroups();
+
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'groups', groupId), { emoji });
+  } catch(e) {
+    console.error('updateGroupEmoji:', e);
+    toast('Erreur lors de la mise à jour de l\'icône', 'error');
+  }
+}
+
 function openChat(group) {
   const freshGroup = State.groups.find(g => g.id === group.id) || group;
   State.currentGroup = freshGroup;
@@ -6296,6 +6386,7 @@ function openChat(group) {
   initMemberColors(freshGroup.members || []);
 
   renderGroups(); updateGroupsBadge();
+  closeChatEmojiPopover();
   document.getElementById('chat-emoji').textContent = freshGroup.emoji || '👥';
   document.getElementById('chat-group-name-label').textContent = freshGroup.name;
   document.getElementById('chat-members-count').textContent = `${freshGroup.members?.length||1} membre(s)`;
@@ -6333,6 +6424,7 @@ function openChat(group) {
 
 function closeChat() {
   document.getElementById('chat-overlay').classList.remove('open');
+  closeChatEmojiPopover();
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
   stopGroupDocListener();
   stopTypingListener();
