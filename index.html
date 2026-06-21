@@ -1714,6 +1714,26 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
   font-size: .72rem; text-align: center;
   border: none; padding: 3px 8px; max-width: 90%;
 }
+
+/* ══ WELCOME CARD (message de bienvenue institutionnel) ══ */
+.welcome-group { display: flex; justify-content: center; margin: 14px 0; padding: 0 8px; }
+.welcome-card {
+  max-width: 420px; width: 100%;
+  background: linear-gradient(135deg, rgba(99,102,241,.14), rgba(45,212,191,.08));
+  border: 1px solid rgba(129,140,248,.3);
+  border-radius: var(--r2); padding: 18px 20px;
+  text-align: center; box-shadow: 0 8px 28px rgba(99,102,241,.12);
+}
+.welcome-card-icon {
+  width: 38px; height: 38px; border-radius: 11px; margin: 0 auto 10px;
+  background: linear-gradient(135deg, var(--accent2), var(--teal));
+  display: flex; align-items: center; justify-content: center; color: #fff;
+}
+.welcome-card-eyebrow {
+  font-size: .66rem; font-weight: 800; color: var(--accent2);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
+}
+.welcome-card-text { font-size: .87rem; color: var(--text); line-height: 1.55; font-weight: 600; }
 .chat-bubble.status-update {
   background: rgba(129,140,248,.1); color: var(--accent2);
   font-size: .75rem; font-weight: 700; text-align: center;
@@ -5477,12 +5497,14 @@ async function coordCreatePatient() {
       createdAt: serverTimestamp()
     });
 
-    // Message de bienvenue
+    // Message de bienvenue — type dédié 'welcome' pour un rendu visuel mis en avant
+    // dans le chat, distinct des messages système discrets (renommages, ajouts de membres…)
     const welcomeMsg = State.tenant?.welcomeMessage ||
       `Bienvenue sur CareWave. ${tenantName} peut désormais partager des nouvelles avec votre famille.`;
     await addDoc(collection(db, 'groups', groupRef.id, 'messages'), {
-      type: 'system',
+      type: 'welcome',
       text: welcomeMsg,
+      institutionName: tenantName,
       authorTenantId: State.profile.tenantId,
       postedByInstitution: true,
       createdAt: serverTimestamp()
@@ -6399,7 +6421,9 @@ function renderChatEmojiPicker() {
 async function updateGroupEmoji(emoji) {
   if (!State.currentGroup || isOffline()) { if (isOffline()) toast('Hors ligne', 'error'); return; }
   const groupId = State.currentGroup.id;
+  const oldEmoji = State.currentGroup.emoji || '👥';
   closeChatEmojiPopover();
+  if (emoji === oldEmoji) return; // rien n'a changé, pas la peine d'écrire ni d'annoncer
 
   // Mise à jour optimiste de l'affichage avant confirmation serveur
   document.getElementById('chat-emoji').textContent = emoji;
@@ -6409,8 +6433,13 @@ async function updateGroupEmoji(emoji) {
   renderGroups();
 
   try {
-    const { db, doc, updateDoc } = window._fb;
+    const { db, doc, updateDoc, collection, addDoc, serverTimestamp } = window._fb;
     await updateDoc(doc(db, 'groups', groupId), { emoji });
+
+    const authorName = State.profile.displayName || 'Quelqu\'un';
+    addDoc(collection(db, 'groups', groupId, 'messages'), {
+      type: 'system', text: `Icône du groupe modifiée par ${authorName}`, uid: State.user.uid, createdAt: serverTimestamp()
+    }).catch(() => {});
   } catch(e) {
     console.error('updateGroupEmoji:', e);
     toast('Erreur lors de la mise à jour de l\'icône', 'error');
@@ -6466,12 +6495,29 @@ async function saveGroupSettings() {
   if (isOffline()) { toast('Hors ligne', 'error'); return; }
 
   const groupId = State.currentGroup.id;
+  const oldEmoji = State.currentGroup.emoji || '👥';
+  const oldName = State.currentGroup.name || '';
+  const emojiChanged = _gsSelectedEmoji !== oldEmoji;
+  const nameChanged = name !== oldName;
+
+  if (!emojiChanged && !nameChanged) { closeGroupSettingsModal(); return; }
+
   const btn = document.getElementById('gs-save-btn');
   btn.disabled = true; btn.textContent = '⏳ Enregistrement…';
 
   try {
-    const { db, doc, updateDoc } = window._fb;
+    const { db, doc, updateDoc, collection, addDoc, serverTimestamp } = window._fb;
     await updateDoc(doc(db, 'groups', groupId), { emoji: _gsSelectedEmoji, name });
+
+    // Message système annonçant le changement, visible par tous les membres
+    const authorName = State.profile.displayName || 'Quelqu\'un';
+    let changeText;
+    if (emojiChanged && nameChanged) changeText = `Icône et nom du groupe modifiés par ${authorName}`;
+    else if (emojiChanged) changeText = `Icône du groupe modifiée par ${authorName}`;
+    else changeText = `Nom du groupe modifié par ${authorName}`;
+    addDoc(collection(db, 'groups', groupId, 'messages'), {
+      type: 'system', text: changeText, uid: State.user.uid, createdAt: serverTimestamp()
+    }).catch(() => {});
 
     // Mise à jour locale immédiate (cohérent avec le reste de l'app)
     State.currentGroup.emoji = _gsSelectedEmoji;
@@ -6567,10 +6613,11 @@ function buildMessageGroups(messages) {
     const mine = m.uid === State.user?.uid;
     const isSystem = m.type === 'system';
     const isStatus = m.type === 'status_update';
+    const isWelcome = m.type === 'welcome';
 
-    // System/status messages always go alone
-    if (isSystem || isStatus) {
-      groups.push({ type: isStatus ? 'status' : 'system', messages: [{ id, data: m }] });
+    // System/status/welcome messages always go alone
+    if (isSystem || isStatus || isWelcome) {
+      groups.push({ type: isStatus ? 'status' : (isWelcome ? 'welcome' : 'system'), messages: [{ id, data: m }] });
       currentGroup = null;
       return;
     }
@@ -6843,6 +6890,20 @@ async function loadMoreMessages(groupId) {
 }
 
 function renderMessageGroup(group, container) {
+  if (group.type === 'welcome') {
+    const [{ data: m }] = group.messages;
+    const el = document.createElement('div');
+    el.className = 'msg-group welcome-group';
+    el.innerHTML = `
+      <div class="welcome-card">
+        <div class="welcome-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="welcome-card-eyebrow">${escapeHtml(m.institutionName || 'Votre établissement')}</div>
+        <div class="welcome-card-text">${escapeHtml(m.text)}</div>
+      </div>`;
+    container.appendChild(el);
+    return;
+  }
+
   if (group.type === 'system') {
     const [{ data: m }] = group.messages;
     const el = document.createElement('div');
