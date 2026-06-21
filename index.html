@@ -2266,6 +2266,14 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
 .chat-emoji-popover.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
 .chat-emoji-popover-title { font-size: .68rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
 
+/* ══ GROUP SETTINGS MODAL ══ */
+.gs-emoji-current {
+  width: 64px; height: 64px; border-radius: 16px; margin: 6px auto 0;
+  background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(45,212,191,.08));
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+}
+
 /* ══ PENDING MEMBERS LIST ══ */
 .pending-member { display: flex; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--border); }
 .pending-member:last-child { border-bottom: none; }
@@ -3554,6 +3562,7 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
         <div class="chat-members-count" id="chat-members-count">membres</div>
       </div>
       <div class="chat-header-actions">
+        <button class="icon-btn" onclick="openGroupSettingsModal()" aria-label="Réglages du groupe" title="Réglages du groupe"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
         <button class="btn btn-sm btn-outline" onclick="openMembersModal()" aria-label="Membres" style="font-size:.75rem;padding:6px 11px;display:inline-flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Membres</button>
         <button class="icon-btn" onclick="closeChat()" aria-label="Fermer"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
@@ -3669,6 +3678,39 @@ html, body { overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--b
           <div id="ms-profile-status-content"><div style="color:var(--text3);font-size:.82rem;">Chargement…</div></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ GROUP SETTINGS MODAL ════ -->
+<div class="members-modal" id="group-settings-modal" onclick="closeGroupSettingsOutside(event)" role="dialog" aria-modal="true">
+  <div class="members-sheet">
+    <div class="sheet-header">
+      <div class="sheet-title" style="display:flex;align-items:center;gap:7px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Réglages du groupe</div>
+      <button class="sheet-close" onclick="closeGroupSettingsModal()" aria-label="Fermer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="sheet-body">
+
+      <div class="form-group">
+        <label class="form-label">Icône du groupe</label>
+        <div class="gs-emoji-current" id="gs-emoji-current">👥</div>
+        <div class="emoji-picker" id="gs-emoji-picker" style="margin-top:10px;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="gs-name">Nom du groupe</label>
+        <input class="form-input" type="text" id="gs-name" maxlength="40" placeholder="Nom du groupe" />
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="saveGroupSettings()" id="gs-save-btn" style="margin-top:6px;">Enregistrer</button>
+
+      <div style="border-top:1px solid var(--border);margin:20px 0 16px;"></div>
+
+      <button class="settings-row clickable" onclick="closeGroupSettingsModal();openMembersModal();" style="width:100%;border:none;background:var(--glass);border-radius:var(--r);">
+        <div><div class="settings-label" style="display:flex;align-items:center;gap:7px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Membres &amp; invitations</div></div>
+        <div class="settings-right"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </button>
+
     </div>
   </div>
 </div>
@@ -6375,6 +6417,81 @@ async function updateGroupEmoji(emoji) {
   }
 }
 
+/* ════════════════════════════════════════════════
+   RÉGLAGES DU GROUPE (icône, nom) — accessible à tout membre
+════════════════════════════════════════════════ */
+let _gsSelectedEmoji = '👥';
+
+function openGroupSettingsModal() {
+  if (!State.currentGroup) return;
+  closeChatEmojiPopover();
+  _gsSelectedEmoji = State.currentGroup.emoji || '👥';
+  document.getElementById('gs-emoji-current').textContent = _gsSelectedEmoji;
+  document.getElementById('gs-name').value = State.currentGroup.name || '';
+  renderGsEmojiPicker();
+  document.getElementById('group-settings-modal').classList.add('open');
+  trapFocusOpen(document.getElementById('group-settings-modal'));
+}
+
+function closeGroupSettingsModal() {
+  document.getElementById('group-settings-modal')?.classList.remove('open');
+  trapFocusClose();
+}
+
+function closeGroupSettingsOutside(e) {
+  if (e.target.id === 'group-settings-modal') closeGroupSettingsModal();
+}
+
+function renderGsEmojiPicker() {
+  const el = document.getElementById('gs-emoji-picker');
+  if (!el) return;
+  el.innerHTML = GROUP_EMOJIS.map(em =>
+    `<div class="emoji-opt ${em === _gsSelectedEmoji ? 'selected' : ''}" data-emoji="${em}" role="radio" tabindex="0" aria-checked="${em === _gsSelectedEmoji}">${em}</div>`
+  ).join('');
+  el.querySelectorAll('.emoji-opt').forEach(opt => {
+    const pick = () => {
+      _gsSelectedEmoji = opt.dataset.emoji;
+      document.getElementById('gs-emoji-current').textContent = _gsSelectedEmoji;
+      renderGsEmojiPicker();
+    };
+    opt.addEventListener('click', pick);
+    opt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+  });
+}
+
+async function saveGroupSettings() {
+  if (!State.currentGroup) return;
+  const name = document.getElementById('gs-name').value.trim();
+  if (!name) { toast('Le nom du groupe ne peut pas être vide', 'error'); return; }
+  if (isOffline()) { toast('Hors ligne', 'error'); return; }
+
+  const groupId = State.currentGroup.id;
+  const btn = document.getElementById('gs-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ Enregistrement…';
+
+  try {
+    const { db, doc, updateDoc } = window._fb;
+    await updateDoc(doc(db, 'groups', groupId), { emoji: _gsSelectedEmoji, name });
+
+    // Mise à jour locale immédiate (cohérent avec le reste de l'app)
+    State.currentGroup.emoji = _gsSelectedEmoji;
+    State.currentGroup.name = name;
+    const localGroup = State.groups.find(g => g.id === groupId);
+    if (localGroup) { localGroup.emoji = _gsSelectedEmoji; localGroup.name = name; }
+    document.getElementById('chat-emoji').textContent = _gsSelectedEmoji;
+    document.getElementById('chat-group-name-label').textContent = name;
+    renderGroups();
+
+    toast('✅ Réglages du groupe enregistrés', 'success');
+    closeGroupSettingsModal();
+  } catch(e) {
+    console.error('saveGroupSettings:', e);
+    toast('Erreur lors de l\'enregistrement', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Enregistrer';
+  }
+}
+
 function openChat(group) {
   const freshGroup = State.groups.find(g => g.id === group.id) || group;
   State.currentGroup = freshGroup;
@@ -6425,6 +6542,7 @@ function openChat(group) {
 function closeChat() {
   document.getElementById('chat-overlay').classList.remove('open');
   closeChatEmojiPopover();
+  closeGroupSettingsModal();
   if (State.chatUnsub) { try { State.chatUnsub(); } catch(e){} State.chatUnsub = null; }
   stopGroupDocListener();
   stopTypingListener();
